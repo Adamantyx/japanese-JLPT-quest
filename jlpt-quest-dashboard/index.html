@@ -9,11 +9,15 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>JLPT Quest | Le chemin vers le N5</title>
   <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/icon-192.png" sizes="192x192">
   <link rel="apple-touch-icon" href="assets/icon-192.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Shippori+Mincho:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preload" href="fonts/dm-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/shippori-mincho-700-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/campaign-path.webp" as="image" type="image/webp" fetchpriority="high">
   <style>
+    @font-face { font-family: "DM Sans"; src: url("fonts/dm-sans-latin.woff2") format("woff2"); font-style: normal; font-weight: 400 700; font-display: swap; }
+    @font-face { font-family: "Shippori Mincho"; src: url("fonts/shippori-mincho-700-latin.woff2") format("woff2"); font-style: normal; font-weight: 500 700; font-display: swap; }
+    @font-face { font-family: "Shippori Mincho"; src: url("fonts/shippori-mincho-800-latin.woff2") format("woff2"); font-style: normal; font-weight: 800; font-display: swap; }
     :root {
       --ink: #071522;
       --ink-soft: #0c2130;
@@ -61,8 +65,13 @@
     }
     a { color: inherit; text-decoration: none; }
     button { font: inherit; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    :focus-visible { outline: 3px solid var(--gold-bright); outline-offset: 3px; }
     h1, h2, h3, p { margin: 0; }
     h1, h2, h3 { font-family: "Shippori Mincho", serif; }
+
+    .skip-link { position: fixed; z-index: 50; top: 10px; left: 10px; padding: 10px 14px; border-radius: 12px; color: var(--ink); background: var(--gold-bright); transform: translateY(-180%); }
+    .skip-link:focus { transform: translateY(0); }
 
     .shell { position: relative; width: min(1240px, calc(100% - 32px)); margin: 0 auto; padding: 14px 0 54px; }
     .topbar { position: sticky; z-index: 15; top: 10px; display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 14px; padding: 9px 10px 9px 12px; border: 1px solid rgba(225,236,229,.1); border-radius: 999px; background: rgba(5,18,28,.72); box-shadow: 0 14px 45px rgba(0,7,13,.22); backdrop-filter: blur(20px) saturate(125%); }
@@ -80,9 +89,11 @@
       box-shadow: 0 0 30px rgba(231, 189, 104, .12);
     }
     .brand strong { display: block; font: 700 18px/1.1 "Shippori Mincho", serif; letter-spacing: .03em; }
-    .brand small { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; }
+    .brand small { display: block; margin-top: 3px; color: var(--muted); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; }
     .sync { display: inline-flex; align-items: center; gap: 9px; color: var(--mist); font-size: 12px; }
     .sync-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 14px rgba(94, 183, 170, .8); }
+    .sync.is-preview .sync-dot, .sync.is-syncing .sync-dot, .sync.is-pending .sync-dot { background: var(--gold); box-shadow: 0 0 14px rgba(231,189,104,.55); }
+    .sync.is-syncing .sync-dot { animation: pulse 1.4s ease-in-out infinite; }
     .sync.is-offline .sync-dot { background: var(--danger); box-shadow: none; }
 
     .hero {
@@ -94,7 +105,7 @@
       background-image:
         linear-gradient(90deg, rgba(4, 14, 24, .98) 0%, rgba(4, 14, 24, .82) 34%, rgba(4, 14, 24, .12) 71%),
         linear-gradient(0deg, rgba(4, 14, 24, .92), transparent 42%),
-        url("assets/campaign-path.jpg");
+        url("assets/campaign-path.webp");
       background-position: center;
       background-size: cover;
       box-shadow: var(--shadow), 0 0 0 1px rgba(231,189,104,.035);
@@ -109,7 +120,7 @@
       pointer-events: none;
     }
     .hero-copy { position: relative; z-index: 2; width: min(610px, 61%); padding: 68px 0 150px 64px; }
-    .eyebrow { color: var(--gold); font-size: 11px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; }
+    .eyebrow { color: var(--gold); font-size: 12px; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; }
     .hero h1 { margin-top: 17px; font-size: clamp(44px, 6.3vw, 82px); line-height: .99; letter-spacing: -.045em; text-wrap: balance; }
     .hero h1 span { color: var(--gold-bright); }
     .lead { max-width: 53ch; margin-top: 20px; color: #c7d2d0; font-size: 16px; }
@@ -170,6 +181,10 @@
     .hero-stat strong { display: block; overflow: hidden; margin-top: 5px; font-size: 18px; text-overflow: ellipsis; white-space: nowrap; }
 
     .status-deck { position: relative; z-index: 5; display: grid; grid-template-columns: 1.25fr .9fr 1fr; gap: 1px; margin: 14px 0 0; overflow: hidden; border: 1px solid rgba(244,237,220,.13); border-radius: 24px; background: rgba(225,236,229,.12); box-shadow: 0 20px 55px rgba(0,7,13,.25); }
+    .preview-banner { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 15px; margin-top: 14px; padding: 15px 17px; border: 1px solid rgba(231,189,104,.27); border-radius: 20px; background: linear-gradient(110deg, rgba(231,189,104,.12), rgba(10,29,43,.9)); box-shadow: 0 16px 40px rgba(0,7,13,.18); }
+    .preview-banner .mon { width: 38px; height: 38px; font-size: 12px; }
+    .preview-banner strong { display: block; font-size: 14px; }
+    .preview-banner p { margin-top: 2px; color: var(--mist); font-size: 12px; }
     .status-card { position: relative; min-width: 0; min-height: 124px; padding: 21px 22px; overflow: hidden; background: linear-gradient(145deg, rgba(19,43,58,.96), rgba(8,25,38,.96)); }
     .status-card::after { content: ""; position: absolute; width: 150px; height: 150px; right: -75px; bottom: -100px; border: 1px solid rgba(231,189,104,.11); border-radius: 50%; box-shadow: 0 0 0 18px rgba(231,189,104,.018), 0 0 0 36px rgba(231,189,104,.012); pointer-events: none; }
     .level-card { display: grid; grid-template-columns: 70px 1fr; align-items: center; gap: 16px; }
@@ -211,6 +226,10 @@
       border-radius: 18px;
       background: linear-gradient(90deg, rgba(255,255,255,.045), rgba(255,255,255,.02));
       transition: border-color .2s ease, transform .2s ease, background .2s ease;
+      width: 100%;
+      color: var(--paper);
+      text-align: left;
+      cursor: pointer;
     }
     .quest-card::before { content: ""; position: absolute; left: -1px; top: 18px; bottom: 18px; width: 3px; border-radius: 0 6px 6px 0; background: var(--gold); opacity: .45; }
     .quest-card:hover { border-color: rgba(231,189,104,.28); background: linear-gradient(90deg, rgba(231,189,104,.075), rgba(255,255,255,.025)); transform: translateX(3px); }
@@ -270,14 +289,17 @@
     .day.confirmed .day-stars { color: var(--gold); }
 
     .logs { display: grid; gap: 2px; }
-    .log { display: grid; grid-template-columns: 76px 1fr auto; align-items: center; gap: 12px; padding: 13px 0; border-bottom: 1px solid var(--line); }
+    .log { display: grid; grid-template-columns: 76px minmax(90px, .55fr) minmax(0, 1.45fr); align-items: center; gap: 12px; padding: 13px 0; border-bottom: 1px solid var(--line); }
     .log:last-child { border-bottom: 0; }
-    .log-date { color: var(--muted); font-size: 10px; }
+    .log-date { color: var(--muted); font-size: 12px; }
     .log strong { font-size: 12px; }
-    .log span:last-child { color: var(--mist); font-size: 11px; text-align: right; }
+    .log-detail { display: flex; align-items: center; justify-content: flex-end; gap: 10px; min-width: 0; color: var(--mist); font-size: 12px; text-align: right; }
+    .log-detail span { overflow: hidden; text-overflow: ellipsis; }
+    .log-delete { flex: 0 0 auto; width: 32px; height: 32px; border: 1px solid var(--line); border-radius: 50%; color: var(--muted); background: transparent; cursor: pointer; }
+    .log-delete:hover { color: #ffd1c8; border-color: rgba(214,108,95,.45); background: rgba(214,108,95,.08); }
 
     .footer { display: flex; justify-content: space-between; gap: 14px; margin-top: 20px; padding: 0 8px; color: #61787c; font-size: 10px; }
-    .offline-notice { display: none; margin: 0 0 18px; padding: 11px 14px; border: 1px solid rgba(214,108,95,.3); border-radius: 14px; color: #efb7ae; background: rgba(214,108,95,.08); font-size: 11px; }
+    .offline-notice { display: none; margin: 0 0 18px; padding: 11px 14px; border: 1px solid rgba(214,108,95,.3); border-radius: 14px; color: #efb7ae; background: rgba(214,108,95,.08); font-size: 12px; }
     .offline-notice.visible { display: block; }
     .top-actions { display: flex; align-items: center; gap: 10px; }
     .top-action { min-height: 38px; padding: 0 13px; border: 1px solid var(--line); border-radius: 999px; color: var(--mist); background: rgba(8,24,36,.66); cursor: pointer; }
@@ -302,8 +324,12 @@
     .check input { accent-color: var(--gold); }
     .form-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; }
     .form-actions .button { cursor: pointer; }
-    .form-hint { margin-top: 13px; color: var(--muted); font-size: 11px; }
+    .form-hint { margin-top: 13px; color: var(--muted); font-size: 12px; }
     .auth-switch { display: grid; gap: 12px; }
+    .auth-modes { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-bottom: 16px; padding: 4px; border: 1px solid var(--line); border-radius: 15px; background: rgba(4,14,24,.38); }
+    .auth-mode { min-height: 40px; border: 0; border-radius: 11px; color: var(--muted); background: transparent; cursor: pointer; }
+    .auth-mode.active { color: #1b1b17; background: var(--gold-bright); font-weight: 800; }
+    .text-button { justify-self: start; padding: 0; border: 0; color: var(--gold); background: transparent; font-size: 12px; cursor: pointer; }
     .auth-status { min-height: 20px; margin-top: 12px; color: var(--gold-bright); font-size: 12px; }
     .account-card { display: none; padding: 16px; border: 1px solid var(--line); border-radius: 17px; background: rgba(255,255,255,.035); }
     .account-card.visible { display: block; }
@@ -312,7 +338,6 @@
     .toast { position: fixed; z-index: 30; left: 50%; bottom: max(88px, calc(env(safe-area-inset-bottom) + 88px)); width: max-content; max-width: calc(100% - 28px); padding: 12px 16px; border: 1px solid rgba(94,183,170,.34); border-radius: 999px; color: #d9f2e8; background: rgba(5,18,28,.94); box-shadow: 0 18px 45px rgba(0,0,0,.4); opacity: 0; pointer-events: none; transform: translate(-50%, 12px); transition: opacity .2s ease, transform .2s ease; }
     .toast.visible { opacity: 1; transform: translate(-50%, 0); }
     .category-only[hidden] { display: none; }
-    .hero { animation: riseIn .65s ease both; }
     .status-deck { animation: riseIn .65s .08s ease both; }
     .layout .panel { animation: riseIn .65s .14s ease both; }
     @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.18); } }
@@ -349,6 +374,8 @@
       .hero-stat { padding: 13px 14px; }
       .hero-stat strong { font-size: 15px; }
       .status-deck { grid-template-columns: 1fr; border-radius: 22px; }
+      .preview-banner { grid-template-columns: auto 1fr; }
+      .preview-banner .button { grid-column: 1 / -1; }
       .status-card { min-height: 108px; padding: 18px; }
       .level-card { grid-template-columns: 58px 1fr; }
       .level-sigil { width: 56px; height: 56px; border-radius: 18px; font-size: 22px; }
@@ -376,11 +403,12 @@
       .week-days { gap: 4px; }
       .day { min-height: 67px; border-radius: 12px; }
       .log { grid-template-columns: 62px 1fr; }
-      .log span:last-child { grid-column: 2; text-align: left; }
+      .log-detail { grid-column: 2; justify-content: space-between; text-align: left; }
       .footer { flex-direction: column; }
       .top-actions .sync { display: none; }
       .top-action { padding: 0 11px; font-size: 12px; }
-      .fab { right: 14px; bottom: max(14px, env(safe-area-inset-bottom)); width: 52px; min-height: 52px; padding: 0; font-size: 0; }
+      .fab { right: 14px; bottom: max(14px, env(safe-area-inset-bottom)); width: 52px; min-height: 52px; padding: 0; }
+      .fab-label { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
       .fab::before { content: "+"; font-size: 23px; line-height: 1; }
       dialog { width: calc(100% - 12px); max-height: calc(100vh - 12px); border-radius: 23px; }
       .dialog-inner { padding: 22px 17px; }
@@ -390,9 +418,10 @@
   </style>
 </head>
 <body>
-  <main class="shell">
+  <a class="skip-link" href="#quests">Aller aux quêtes</a>
+  <main class="shell" id="mainContent">
     <header class="topbar">
-      <a class="brand" href="#top" aria-label="JLPT Quest, retour en haut">
+      <a class="brand" href="#top">
         <span class="mon">N5</span>
         <span><strong>JLPT Quest</strong><small>Campagne personnelle</small></span>
       </a>
@@ -403,7 +432,7 @@
       </div>
     </header>
 
-    <div class="offline-notice" id="offlineNotice">Aperçu hors ligne. Pour lire la progression réelle, ouvre le dashboard via son URL locale ou GitHub Pages.</div>
+    <div class="offline-notice" id="offlineNotice">Pas de réseau. Tu peux quand même noter une session, elle sera envoyée dès le retour de la connexion.</div>
 
     <section class="hero" id="top">
       <div class="hero-copy">
@@ -424,13 +453,13 @@
         <div class="level-sigil" id="levelSigil">01</div>
         <div>
           <div class="status-title">Progression du niveau <span id="xpText">0 / 100 XP</span></div>
-          <div class="xp-track"><i id="xpBar"></i></div>
+          <div class="xp-track" id="xpProgress" role="progressbar" aria-label="Progression du niveau" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="xpBar"></i></div>
           <div class="xp-foot"><span>Chaque étoile vaut 40 XP</span><strong id="xpRemaining">100 XP restants</strong></div>
         </div>
       </article>
       <article class="status-card lantern-card">
         <div class="eyebrow">Rituel du jour</div>
-        <div class="lantern-row" id="todayLanterns" aria-label="Étoiles du jour"></div>
+        <div class="lantern-row" id="todayLanterns" role="img" aria-label="0 étoile sur 4 aujourd'hui"></div>
         <p class="status-caption" id="lanternCaption">Une lanterne suffit pour sauver la journée.</p>
       </article>
       <article class="status-card next-card">
@@ -438,6 +467,12 @@
         <strong id="nextMilestone">Camp de base</strong>
         <p id="nextMilestoneText">Installer une routine stable et réaliste.</p>
       </article>
+    </section>
+
+    <section class="preview-banner" id="previewBanner">
+      <span class="mon" aria-hidden="true">旅</span>
+      <div><strong>Ton campement n'est pas encore relié</strong><p>Tu vois une démo. Connecte-toi pour retrouver, enregistrer et corriger ta progression sur tous tes appareils.</p></div>
+      <button class="button primary" id="previewLoginButton" type="button">Relier mon compte</button>
     </section>
 
     <div class="layout">
@@ -492,7 +527,7 @@
             <div class="companion-stage" id="companionStage">Éclaireur</div>
             <h2>Mimir, gardien du chemin</h2>
           </div>
-          <img src="assets/kitsune-guide.png" alt="Kitsune érudit portant le livre du voyageur N5">
+          <img src="assets/kitsune-guide.webp" alt="Kitsune érudit portant le livre du voyageur N5" loading="lazy" decoding="async">
           <p class="speech" id="companionSpeech"></p>
         </section>
 
@@ -522,7 +557,7 @@
       <span id="lastUpdate">Dernière mise à jour...</span>
     </footer>
   </main>
-  <button class="fab" id="quickAddButton" type="button">+ Enregistrer</button>
+  <button class="fab" id="quickAddButton" type="button"><span class="fab-label">Enregistrer une session</span></button>
 
   <dialog id="entryDialog">
     <div class="dialog-inner">
@@ -562,15 +597,20 @@
   <dialog id="authDialog">
     <div class="dialog-inner">
       <div class="dialog-head">
-        <div><div class="eyebrow">Compte voyageur</div><h2>Synchroniser le chemin</h2></div>
+        <div><div class="eyebrow">Compte voyageur</div><h2 id="authTitle">Synchroniser le chemin</h2></div>
         <button class="icon-button" type="button" data-close-dialog="authDialog" aria-label="Fermer">×</button>
       </div>
       <div class="account-card" id="accountCard"><strong id="accountName"></strong><span id="accountEmail"></span></div>
+      <div class="auth-modes" id="authModes">
+        <button class="auth-mode active" type="button" data-auth-mode="login">Se connecter</button>
+        <button class="auth-mode" type="button" data-auth-mode="signup">Créer un compte</button>
+      </div>
       <form class="auth-switch" id="authForm">
-        <label class="field">Prénom<input id="authName" type="text" value="Juliann" autocomplete="name"></label>
-        <label class="field">Email<input id="authEmail" type="email" required autocomplete="email"></label>
+        <label class="field" id="authNameField" hidden>Prénom<input id="authName" type="text" value="Juliann" autocomplete="name"></label>
+        <label class="field" id="authEmailField">Email<input id="authEmail" type="email" required autocomplete="email"></label>
         <label class="field">Mot de passe<input id="authPassword" type="password" minlength="8" required autocomplete="current-password"></label>
-        <div class="form-actions"><button class="button" id="signUpButton" type="button">Créer le compte</button><button class="button primary" type="submit">Se connecter</button></div>
+        <button class="text-button" id="forgotPasswordButton" type="button">Mot de passe oublié ?</button>
+        <div class="form-actions"><button class="button primary" id="authSubmitButton" type="submit">Se connecter</button></div>
       </form>
       <div class="form-actions" id="signedInActions" hidden><button class="button primary" id="importHistoryButton" type="button" hidden>Importer mon départ du 15 juillet</button><button class="button" id="signOutButton" type="button">Se déconnecter</button></div>
       <p class="auth-status" id="authStatus"></p>

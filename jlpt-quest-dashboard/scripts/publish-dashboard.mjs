@@ -13,6 +13,7 @@ const publishDashboardDir = path.join(publishDir, 'jlpt-quest-dashboard');
 async function main() {
   await assertPublishRepo();
   await fs.mkdir(path.join(publishDashboardDir, 'assets'), { recursive: true });
+  await fs.mkdir(path.join(publishDashboardDir, 'fonts'), { recursive: true });
   await fs.mkdir(path.join(publishDashboardDir, 'scripts'), { recursive: true });
   await fs.mkdir(path.join(publishDashboardDir, 'supabase'), { recursive: true });
   await fs.mkdir(path.join(publishDashboardDir, 'vendor'), { recursive: true });
@@ -23,8 +24,14 @@ async function main() {
   for (const name of ['index.html', 'app.js', 'supabase-config.js', 'manifest.webmanifest', 'service-worker.js', 'README.md', 'DEPLOYMENT.md', 'PROGRESSION_FORMAT.md']) {
     await copy(path.join(dashboardDir, name), path.join(publishDashboardDir, name));
   }
-  for (const name of ['campaign-path.jpg', 'kitsune-guide.png', 'icon-192.png', 'icon-512.png']) {
+  for (const name of ['campaign-path.webp', 'kitsune-guide.webp', 'icon-192.png', 'icon-512.png']) {
     await copy(path.join(dashboardDir, 'assets', name), path.join(publishDashboardDir, 'assets', name));
+  }
+  for (const name of ['campaign-path.jpg', 'kitsune-guide.png']) {
+    await fs.rm(path.join(publishDashboardDir, 'assets', name), { force: true });
+  }
+  for (const name of ['dm-sans-latin.woff2', 'shippori-mincho-700-latin.woff2', 'shippori-mincho-800-latin.woff2']) {
+    await copy(path.join(dashboardDir, 'fonts', name), path.join(publishDashboardDir, 'fonts', name));
   }
   for (const name of ['schema.sql', 'README.md']) {
     await copy(path.join(dashboardDir, 'supabase', name), path.join(publishDashboardDir, 'supabase', name));

@@ -30,6 +30,7 @@ let client = null;
 let session = null;
 let installPrompt = null;
 let toastTimer = null;
+let authMode = "login";
 
 function render(data, live, syncText = "Progression synchronisée") {
   const days = daysUntil(data.campaign.countdownDate);
@@ -39,10 +40,10 @@ function render(data, live, syncText = "Progression synchronisée") {
   document.getElementById("chapterLabel").textContent = `Chapitre ${String(data.profile.level).padStart(2, "0")} · ${data.campaign.currentChapter}`;
   document.getElementById("todaySummary").textContent = data.today.confirmedSummary || "Le matin propose. Le réel confirme.";
 
-  const sync = document.getElementById("syncState");
-  sync.classList.toggle("is-offline", !live);
-  document.getElementById("syncLabel").textContent = syncText;
-  document.getElementById("offlineNotice").classList.toggle("visible", !live && location.protocol === "file:");
+  const mode = live ? "live" : navigator.onLine ? "preview" : "offline";
+  setSync(mode, syncText);
+  document.getElementById("offlineNotice").classList.toggle("visible", !navigator.onLine);
+  document.getElementById("previewBanner").hidden = Boolean(session);
 
   document.getElementById("heroStats").innerHTML = [
     ["Rang", data.profile.rank],
@@ -56,8 +57,10 @@ function render(data, live, syncText = "Progression synchronisée") {
   document.getElementById("levelSigil").textContent = String(data.profile.level).padStart(2, "0");
   document.getElementById("xpText").textContent = `${data.profile.xp} / ${data.profile.xpNext} XP`;
   document.getElementById("xpBar").style.setProperty("--w", `${xpProgress}%`);
+  document.getElementById("xpProgress").setAttribute("aria-valuenow", String(xpProgress));
   document.getElementById("xpRemaining").textContent = `${xpRemaining} XP restant${xpRemaining > 1 ? "s" : ""}`;
   document.getElementById("todayLanterns").innerHTML = Array.from({ length: 4 }, (_, index) => `<span class="lantern ${index < Number(data.today.stars) ? "lit" : ""}"></span>`).join("");
+  document.getElementById("todayLanterns").setAttribute("aria-label", `${data.today.stars} étoile${Number(data.today.stars) > 1 ? "s" : ""} sur 4 aujourd'hui`);
   document.getElementById("lanternCaption").textContent = data.today.stars >= 2
     ? "Journée solide. Le feu est entretenu, inutile d'en faire un examen blanc."
     : data.today.stars === 1 ? "Journée sauvée. Le chemin reste visible." : "Une lanterne suffit pour sauver la journée.";
@@ -66,21 +69,22 @@ function render(data, live, syncText = "Progression synchronisée") {
   document.getElementById("nextMilestoneText").textContent = nextMilestone?.text || "Continuer un pas après l'autre.";
 
   const quests = [
-    { icon: "復", title: "Anki, la mémoire", body: data.today.morningQuest, done: data.anki.doneToday, state: data.anki.doneToday ? `${data.anki.minutes} min faites` : "À faire" },
-    { icon: "文", title: `Obi ${data.obi.currentLesson}, la structure`, body: data.today.eveningQuest, done: data.obi.doneToday, state: data.obi.doneToday ? "Reprise active" : "En attente" },
-    { icon: "聴", title: "Écoute, le monde vivant", body: `${data.listening.title}, objectif 10 minutes attentives`, done: data.listening.doneToday, state: data.listening.doneToday ? "Étoile gagnée" : "Optionnelle" }
+    { category: "anki", icon: "復", title: "Anki, la mémoire", body: data.today.morningQuest, done: data.anki.doneToday, state: data.anki.doneToday ? `${data.anki.minutes} min faites` : "À faire" },
+    { category: "obi", icon: "文", title: `Obi ${data.obi.currentLesson}, la structure`, body: data.today.eveningQuest, done: data.obi.doneToday, state: data.obi.doneToday ? "Reprise active" : "En attente" },
+    { category: "listening", icon: "聴", title: "Écoute, le monde vivant", body: `${data.listening.title}, objectif 10 minutes attentives`, done: data.listening.doneToday, state: data.listening.doneToday ? "Étoile gagnée" : "Optionnelle" }
   ];
   document.getElementById("questList").innerHTML = quests.map(item => `
-    <article class="quest-card ${item.done ? "is-done" : ""}">
-      <div class="quest-icon">${esc(item.done ? "✓" : item.icon)}</div>
-      <div class="quest-copy"><strong>${esc(item.title)}</strong><span>${esc(item.body)}</span></div>
-          <div class="quest-meta"><span class="reward">${item.done ? "40 XP acquis" : "+40 XP"}</span><div class="quest-state">${esc(item.state)}</div></div>
-        </article>`).join("");
+    <button class="quest-card ${item.done ? "is-done" : ""}" type="button" data-entry-category="${item.category}">
+      <span class="quest-icon">${esc(item.done ? "✓" : item.icon)}</span>
+      <span class="quest-copy"><strong>${esc(item.title)}</strong><span>${esc(item.body)}</span></span>
+      <span class="quest-meta"><span class="reward">${item.done ? "40 XP acquis" : "+40 XP"}</span><span class="quest-state">${esc(item.state)}</span></span>
+        </button>`).join("");
 
-  const backlog = Number(data.anki.backlog) || 0;
-  const reviewsToUnlock = Math.max(0, backlog - data.anki.newCardsUnlockAt);
+  const hasBacklog = data.anki.backlog !== null && data.anki.backlog !== undefined && data.anki.backlog !== "";
+  const backlog = hasBacklog ? Number(data.anki.backlog) : null;
+  const reviewsToUnlock = hasBacklog ? Math.max(0, backlog - data.anki.newCardsUnlockAt) : null;
   const dojos = [
-    { mark: "復", name: "Anki", value: `${backlog}`, meta: `${reviewsToUnlock} reviews avant le retour des nouvelles cartes`, progress: data.anki.newCardsEnabled ? 100 : clamp(100 - (reviewsToUnlock / 1.6)), foot: [`${data.anki.reviewsToday} aujourd'hui`, `${data.anki.minutes} min`] },
+    { mark: "復", name: "Anki", value: hasBacklog ? `${backlog}` : "—", meta: hasBacklog ? `${reviewsToUnlock} reviews avant le retour des nouvelles cartes` : "Backlog à renseigner lors de la prochaine session", progress: hasBacklog ? data.anki.newCardsEnabled ? 100 : clamp(100 - (reviewsToUnlock / 1.6)) : 0, foot: [`${data.anki.reviewsToday} aujourd'hui`, `${data.anki.minutes} min`] },
     { mark: "文", name: "Obi Senpai", value: `${data.obi.currentLesson}/${data.obi.totalLessons}`, meta: data.obi.lessonTitle, progress: pct(data.obi.currentLesson, data.obi.totalLessons), foot: [`${data.obi.lessonsThisWeek}/${data.obi.weeklyTarget} cette semaine`, `${pct(data.obi.currentLesson, data.obi.totalLessons)}%`] },
     { mark: "聴", name: "Écoute", value: `${data.listening.weeklyMinutes} min`, meta: data.listening.title, progress: pct(data.listening.weeklyMinutes, data.listening.weeklyTargetMinutes), foot: ["Cap hebdo", `${data.listening.weeklyTargetMinutes} min`] }
   ];
@@ -88,7 +92,7 @@ function render(data, live, syncText = "Progression synchronisée") {
     <article class="dojo" data-mark="${esc(item.mark)}">
       <div class="dojo-top"><span class="dojo-name">${esc(item.name)}</span><span class="quest-state">${Math.round(item.progress)}%</span></div>
       <div class="dojo-value">${esc(item.value)}</div><p class="dojo-meta">${esc(item.meta)}</p>
-      <div class="bar"><i style="--w:${item.progress}%"></i></div>
+      <div class="bar" role="progressbar" aria-label="Progression ${esc(item.name)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(item.progress)}"><i style="--w:${item.progress}%"></i></div>
       <div class="dojo-foot"><span>${esc(item.foot[0])}</span><span>${esc(item.foot[1])}</span></div>
     </article>`).join("");
 
@@ -108,10 +112,12 @@ function render(data, live, syncText = "Progression synchronisée") {
 
   renderWeek(data.week);
   document.getElementById("logs").innerHTML = data.recentLogs.length
-    ? data.recentLogs.map(item => `<div class="log"><span class="log-date">${formatShortDate(item.date)}</span><strong>${esc(item.label)}</strong><span>${esc(item.value)}</span></div>`).join("")
+    ? data.recentLogs.map(item => `<div class="log"><span class="log-date">${formatShortDate(item.date)}</span><strong>${esc(item.label)}</strong><div class="log-detail"><span>${esc(item.value)}</span>${live && item.id ? `<button class="log-delete" type="button" data-delete-event="${esc(item.id)}" aria-label="Supprimer la session ${esc(item.label)} du ${esc(item.date)}">×</button>` : ""}</div></div>`).join("")
     : '<p class="dojo-meta">Le carnet attend sa première session confirmée.</p>';
 
-  document.getElementById("ankiRule").textContent = data.anki.newCardsEnabled
+  document.getElementById("ankiRule").textContent = !hasBacklog
+    ? "Renseigne le backlog lors de ta prochaine session Anki. Tant qu'il est inconnu, aucune nouvelle carte par défaut."
+    : data.anki.newCardsEnabled
     ? "Le backlog est sous le seuil. Les nouvelles cartes peuvent revenir doucement, 3 à 5 maximum."
     : `Nouvelles cartes gelées jusqu'à ${data.anki.newCardsUnlockAt} reviews de retard. Il en reste ${reviewsToUnlock} à résorber, sans mode punition.`;
   document.getElementById("lastUpdate").textContent = `Mis à jour ${formatDateTime(data.updatedAt)}`;
@@ -129,7 +135,13 @@ function renderWeek(week) {
   }).join("");
   document.getElementById("weekScore").textContent = week.stars;
   document.getElementById("weekTarget").textContent = ` / ${week.target} étoiles`;
-  document.getElementById("weekBar").style.setProperty("--w", `${pct(week.stars, week.target)}%`);
+  const progress = pct(week.stars, week.target);
+  document.getElementById("weekBar").style.setProperty("--w", `${progress}%`);
+  document.getElementById("weekBar").parentElement.setAttribute("role", "progressbar");
+  document.getElementById("weekBar").parentElement.setAttribute("aria-label", "Objectif hebdomadaire d'étoiles");
+  document.getElementById("weekBar").parentElement.setAttribute("aria-valuemin", "0");
+  document.getElementById("weekBar").parentElement.setAttribute("aria-valuemax", "100");
+  document.getElementById("weekBar").parentElement.setAttribute("aria-valuenow", String(progress));
 }
 
 function companionLine(starCount, energy) {
@@ -148,6 +160,7 @@ function deriveProgression(profile, events, scores, quests) {
   const todayScore = scoreMap.get(today) || { total_stars: 0 };
   const quest = quests.find(item => item.quest_date === today);
   const latestBacklogEvent = events.find(event => event.backlog !== null && event.backlog !== undefined);
+  const backlogValue = latestBacklogEvent?.backlog ?? quest?.backlog ?? profile.backlog_seed ?? null;
   const latestObi = events.find(event => event.category === "obi" && event.lesson_number);
   const starsFromEvents = scores.reduce((total, score) => total + Number(score.total_stars || 0), 0);
   const lifetimeStars = Number(profile.lifetime_stars_seed || 0) + starsFromEvents;
@@ -193,8 +206,8 @@ function deriveProgression(profile, events, scores, quests) {
     minutes: ankiToday.reduce((sum, event) => sum + Number(event.minutes), 0),
     reviewsToday: ankiToday.reduce((sum, event) => sum + Number(event.reviews || 0), 0),
     due: 0,
-    backlog: Number(latestBacklogEvent?.backlog ?? quest?.backlog ?? profile.backlog_seed ?? 0),
-    newCardsEnabled: Number(latestBacklogEvent?.backlog ?? quest?.backlog ?? profile.backlog_seed ?? 999) <= 150,
+    backlog: backlogValue === null ? null : Number(backlogValue),
+    newCardsEnabled: backlogValue !== null && Number(backlogValue) <= 150,
     newCardsUnlockAt: 150
   };
   data.obi = {
@@ -226,10 +239,11 @@ function deriveProgression(profile, events, scores, quests) {
 }
 
 function eventToLog(event) {
-  if (event.category === "anki") return { date: event.occurred_on, label: "Anki", value: `${event.reviews || 0} reviews en ${event.minutes} min`, confirmed: true };
-  if (event.category === "obi") return { date: event.occurred_on, label: `Obi ${event.lesson_number || ""}`.trim(), value: `${event.minutes} min${event.active_recall ? " avec rappel actif" : ""}`, confirmed: true };
-  if (event.category === "listening") return { date: event.occurred_on, label: "Écoute", value: `${event.minutes} min${event.phrase ? `, ${event.phrase}` : ""}`, confirmed: true };
-  return { date: event.occurred_on, label: "Bonus", value: event.note || "Immersion plaisir", confirmed: true };
+  const common = { id: event.id, date: event.occurred_on, confirmed: true };
+  if (event.category === "anki") return { ...common, label: "Anki", value: `${event.reviews || 0} reviews en ${event.minutes} min` };
+  if (event.category === "obi") return { ...common, label: `Obi ${event.lesson_number || ""}`.trim(), value: `${event.minutes} min${event.active_recall ? " avec rappel actif" : ""}` };
+  if (event.category === "listening") return { ...common, label: "Écoute", value: `${event.minutes} min${event.phrase ? `, ${event.phrase}` : ""}` };
+  return { ...common, label: "Bonus", value: event.note || "Immersion plaisir" };
 }
 
 function summaryFor(events) {
@@ -257,7 +271,7 @@ function calculateStreak(scores) {
 
 async function loadCloud() {
   if (!session) return;
-  setSync(false, "Synchronisation...");
+  setSync("syncing", "Synchronisation...");
   const [profileResult, eventsResult, scoresResult, questsResult] = await Promise.all([
     client.from("profiles").select("*").eq("user_id", session.user.id).maybeSingle(),
     client.from("study_events").select("*").order("occurred_on", { ascending: false }).order("created_at", { ascending: false }).limit(500),
@@ -345,12 +359,18 @@ async function submitEntry(event) {
       showToast("Session gardée hors ligne. Elle partira au retour du réseau.");
     } else {
       const { error } = await client.from("study_events").insert(payload);
-      if (error) throw error;
-      showToast("Lanterne allumée. Session confirmée.");
+      if (error && isNetworkError(error)) {
+        queueEvent(payload);
+        showToast("Le réseau a décroché. Session gardée sur cet appareil.");
+      } else if (error) {
+        throw error;
+      } else {
+        showToast("Lanterne allumée. Session confirmée.");
+        await loadCloud();
+      }
     }
     document.getElementById("entryDialog").close();
     document.getElementById("entryNote").value = "";
-    await loadCloud();
   } catch (error) {
     showToast(readableError(error));
   } finally {
@@ -362,17 +382,22 @@ function queueEvent(payload) {
   const queued = JSON.parse(localStorage.getItem(pendingKey) || "[]");
   queued.push(payload);
   localStorage.setItem(pendingKey, JSON.stringify(queued));
+  setSync("pending", `${queued.length} session${queued.length > 1 ? "s" : ""} en attente`);
 }
 
 async function flushQueue() {
-  if (!session || !navigator.onLine) return;
+  if (!session || !navigator.onLine) return 0;
   const queued = JSON.parse(localStorage.getItem(pendingKey) || "[]");
-  if (!queued.length) return;
+  if (!queued.length) return 0;
+  setSync("syncing", `Envoi de ${queued.length} session${queued.length > 1 ? "s" : ""}...`);
   const { error } = await client.from("study_events").upsert(queued, { onConflict: "id", ignoreDuplicates: true });
-  if (error) return;
+  if (error) {
+    setSync("pending", `${queued.length} session${queued.length > 1 ? "s" : ""} en attente`);
+    return 0;
+  }
   localStorage.removeItem(pendingKey);
   showToast(`${queued.length} session${queued.length > 1 ? "s" : ""} hors ligne synchronisée${queued.length > 1 ? "s" : ""}.`);
-  await loadCloud();
+  return queued.length;
 }
 
 function updateCategoryFields() {
@@ -391,8 +416,10 @@ function updateCategoryFields() {
   document.getElementById("entryHint").textContent = hints[category];
 }
 
-async function signIn(event) {
+async function submitAuth(event) {
   event.preventDefault();
+  if (authMode === "signup") return signUp();
+  if (authMode === "recovery") return updatePassword();
   setAuthStatus("Connexion...");
   const { error } = await client.auth.signInWithPassword({ email: textValue("authEmail"), password: document.getElementById("authPassword").value });
   setAuthStatus(error ? readableError(error) : "Connecté. Le chemin se synchronise.");
@@ -408,10 +435,55 @@ async function signUp() {
   else setAuthStatus("Compte créé et connecté.");
 }
 
+async function requestPasswordReset() {
+  const email = textValue("authEmail");
+  if (!email) return setAuthStatus("Entre ton email, puis relance la récupération.");
+  setAuthStatus("Envoi du lien de récupération...");
+  const redirectTo = location.protocol.startsWith("http") ? `${location.origin}${location.pathname}` : undefined;
+  const { error } = await client.auth.resetPasswordForEmail(email, redirectTo ? { redirectTo } : undefined);
+  setAuthStatus(error ? readableError(error) : "Lien envoyé. Ouvre l'email sur cet appareil pour choisir un nouveau mot de passe.");
+}
+
+async function updatePassword() {
+  setAuthStatus("Mise à jour du mot de passe...");
+  const { error } = await client.auth.updateUser({ password: document.getElementById("authPassword").value });
+  if (error) return setAuthStatus(readableError(error));
+  setAuthStatus("Mot de passe mis à jour. Tu es connecté.");
+  setAuthMode("login");
+}
+
+function setAuthMode(mode) {
+  authMode = mode;
+  const signup = mode === "signup";
+  const recovery = mode === "recovery";
+  document.getElementById("authModes").hidden = recovery || Boolean(session);
+  document.getElementById("authNameField").hidden = !signup;
+  document.getElementById("authEmailField").hidden = recovery;
+  document.getElementById("forgotPasswordButton").hidden = mode !== "login";
+  document.getElementById("authTitle").textContent = recovery ? "Choisir un nouveau mot de passe" : signup ? "Créer ton compte voyageur" : "Synchroniser le chemin";
+  document.getElementById("authSubmitButton").textContent = recovery ? "Mettre à jour" : signup ? "Créer mon compte" : "Se connecter";
+  document.getElementById("authPassword").autocomplete = recovery || signup ? "new-password" : "current-password";
+  document.querySelectorAll("[data-auth-mode]").forEach(button => button.classList.toggle("active", button.dataset.authMode === mode));
+  setAuthStatus("");
+}
+
+async function deleteStudyEvent(id) {
+  if (!session || !id) return;
+  if (!window.confirm("Supprimer cette session du carnet ? Les étoiles seront recalculées.")) return;
+  setSync("syncing", "Correction du carnet...");
+  const { error } = await client.from("study_events").delete().eq("id", id);
+  if (error) {
+    showToast(readableError(error));
+    return loadCloud();
+  }
+  showToast("Session supprimée. Le carnet est à jour.");
+  await loadCloud();
+}
+
 async function signOut() {
   await client.auth.signOut();
   document.getElementById("authDialog").close();
-  render(baseData, false, "Mode lecture locale");
+  render(baseData, false, "Aperçu non connecté");
 }
 
 async function handleSession(nextSession) {
@@ -419,18 +491,24 @@ async function handleSession(nextSession) {
   const signedIn = Boolean(session);
   document.getElementById("accountButton").textContent = signedIn ? session.user.user_metadata?.display_name || "Mon compte" : "Connexion";
   document.getElementById("authForm").hidden = signedIn;
+  document.getElementById("authModes").hidden = signedIn || authMode === "recovery";
   document.getElementById("signedInActions").hidden = !signedIn;
   document.getElementById("accountCard").classList.toggle("visible", signedIn);
+  document.getElementById("previewBanner").hidden = signedIn;
   if (signedIn) {
     document.getElementById("accountName").textContent = session.user.user_metadata?.display_name || "Voyageur N5";
     document.getElementById("accountEmail").textContent = session.user.email;
     await flushQueue();
     await loadCloud();
+  } else {
+    setAuthMode("login");
   }
 }
 
-function openEntry() {
+function openEntry(category = null) {
   if (!session) return openAuth("Connecte-toi une fois pour enregistrer ta progression depuis tous tes appareils.");
+  if (category) document.getElementById("entryCategory").value = category;
+  updateCategoryFields();
   document.getElementById("entryDate").value = toIsoDate();
   document.getElementById("entryDialog").showModal();
 }
@@ -441,17 +519,35 @@ function openAuth(message = "") {
 }
 
 function bindUi() {
-  document.getElementById("quickAddButton").addEventListener("click", openEntry);
-  document.getElementById("heroRecordButton").addEventListener("click", openEntry);
+  document.getElementById("quickAddButton").addEventListener("click", () => openEntry());
+  document.getElementById("heroRecordButton").addEventListener("click", () => openEntry());
+  document.getElementById("previewLoginButton").addEventListener("click", () => openAuth());
   document.getElementById("accountButton").addEventListener("click", () => openAuth());
+  document.getElementById("questList").addEventListener("click", event => {
+    const quest = event.target.closest("[data-entry-category]");
+    if (quest) openEntry(quest.dataset.entryCategory);
+  });
+  document.getElementById("logs").addEventListener("click", event => {
+    const button = event.target.closest("[data-delete-event]");
+    if (button) deleteStudyEvent(button.dataset.deleteEvent);
+  });
   document.getElementById("entryCategory").addEventListener("change", updateCategoryFields);
   document.getElementById("entryForm").addEventListener("submit", submitEntry);
-  document.getElementById("authForm").addEventListener("submit", signIn);
-  document.getElementById("signUpButton").addEventListener("click", signUp);
+  document.getElementById("authForm").addEventListener("submit", submitAuth);
+  document.querySelectorAll("[data-auth-mode]").forEach(button => button.addEventListener("click", () => setAuthMode(button.dataset.authMode)));
+  document.getElementById("forgotPasswordButton").addEventListener("click", requestPasswordReset);
   document.getElementById("signOutButton").addEventListener("click", signOut);
   document.getElementById("importHistoryButton").addEventListener("click", importStarterHistory);
   document.querySelectorAll("[data-close-dialog]").forEach(button => button.addEventListener("click", () => document.getElementById(button.dataset.closeDialog).close()));
-  window.addEventListener("online", flushQueue);
+  window.addEventListener("online", async () => {
+    document.getElementById("offlineNotice").classList.remove("visible");
+    await flushQueue();
+    if (session) await loadCloud();
+  });
+  window.addEventListener("offline", () => {
+    document.getElementById("offlineNotice").classList.add("visible");
+    setSync("offline", "Hors ligne");
+  });
   window.addEventListener("beforeinstallprompt", event => {
     event.preventDefault();
     installPrompt = event;
@@ -480,7 +576,7 @@ async function boot() {
   updateCategoryFields();
   document.getElementById("entryDate").value = toIsoDate();
   baseData = await loadBaseData();
-  render(baseData, false, location.protocol === "file:" ? "Aperçu local" : "Mode lecture locale");
+  render(baseData, false, location.protocol === "file:" ? "Aperçu local" : "Aperçu non connecté");
 
   if (!window.supabase || !window.JLPT_SUPABASE) {
     showToast("La synchronisation Supabase n'a pas pu démarrer.");
@@ -491,15 +587,25 @@ async function boot() {
   });
   const { data } = await client.auth.getSession();
   await handleSession(data.session);
-  client.auth.onAuthStateChange((_event, nextSession) => setTimeout(() => handleSession(nextSession), 0));
+  client.auth.onAuthStateChange((event, nextSession) => setTimeout(async () => {
+    if (event === "PASSWORD_RECOVERY") {
+      session = nextSession;
+      setAuthMode("recovery");
+      openAuth("Choisis maintenant un nouveau mot de passe.");
+      return;
+    }
+    await handleSession(nextSession);
+  }, 0));
 
   if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
     navigator.serviceWorker.register("service-worker.js").catch(() => {});
   }
 }
 
-function setSync(live, label) {
-  document.getElementById("syncState").classList.toggle("is-offline", !live);
+function setSync(state, label) {
+  const sync = document.getElementById("syncState");
+  sync.classList.remove("is-offline", "is-preview", "is-syncing", "is-pending");
+  if (state !== "live") sync.classList.add(`is-${state}`);
   document.getElementById("syncLabel").textContent = label;
 }
 
@@ -515,6 +621,7 @@ function startOfWeek(date) { const copy = new Date(date); const day = (copy.getD
 function formatShortDate(date) { return new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "short" }).format(parseDate(date)); }
 function formatDateTime(date) { return new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium", timeStyle: "short" }).format(new Date(date)); }
 function readableError(error) { return error?.message ? `Impossible pour l'instant : ${error.message}` : "Impossible pour l'instant. Réessaie dans un instant."; }
+function isNetworkError(error) { return !navigator.onLine || /fetch|network|connexion|réseau/i.test(error?.message || ""); }
 
 function showToast(message) {
   const toast = document.getElementById("toast");
@@ -525,6 +632,6 @@ function showToast(message) {
 }
 
 boot().catch(error => {
-  render(baseData, false, "Mode lecture locale");
+  render(baseData, false, "Aperçu non connecté");
   showToast(readableError(error));
 });

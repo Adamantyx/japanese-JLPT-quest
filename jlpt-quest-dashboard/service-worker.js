@@ -1,4 +1,4 @@
-const CACHE = "jlpt-quest-v5";
+const CACHE = "jlpt-quest-v6";
 const SHELL = [
   "./",
   "./index.html",
@@ -6,8 +6,11 @@ const SHELL = [
   "./vendor/supabase.min.js",
   "./supabase-config.js",
   "./manifest.webmanifest",
-  "./assets/campaign-path.jpg",
-  "./assets/kitsune-guide.png",
+  "./fonts/dm-sans-latin.woff2",
+  "./fonts/shippori-mincho-700-latin.woff2",
+  "./fonts/shippori-mincho-800-latin.woff2",
+  "./assets/campaign-path.webp",
+  "./assets/kitsune-guide.webp",
   "./assets/icon-192.png",
   "./assets/icon-512.png"
 ];
@@ -27,13 +30,12 @@ self.addEventListener("activate", event => {
 
 self.addEventListener("fetch", event => {
   if (event.request.method !== "GET" || !event.request.url.startsWith(self.location.origin)) return;
-  event.respondWith(
-    fetch(event.request)
-      .then(response => {
-        const copy = response.clone();
-        caches.open(CACHE).then(cache => cache.put(event.request, copy));
-        return response;
-      })
-      .catch(() => caches.match(event.request).then(cached => cached || caches.match("./index.html")))
-  );
+  if (event.request.mode === "navigate") {
+    event.respondWith(fetch(event.request).catch(() => caches.match("./index.html")));
+    return;
+  }
+  event.respondWith(caches.match(event.request).then(cached => cached || fetch(event.request).then(response => {
+    if (response.ok) caches.open(CACHE).then(cache => cache.put(event.request, response.clone()));
+    return response;
+  })));
 });
