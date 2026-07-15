@@ -2,9 +2,25 @@
 
 Dashboard gamifié de Juliann pour le JLPT N5 de décembre 2026.
 
-## Source unique
+## Source de vérité
 
-`../progression.json` est la seule source éditable. Le fichier présent dans le dépôt GitHub est une copie de déploiement générée par le script de publication.
+Supabase est la source de vérité des sessions confirmées et des quêtes. `../progression.json` reste un export local lisible par les automations et le mode de secours hors connexion.
+
+L'application permet de créer un compte, puis d'enregistrer directement une session Anki, Obi, écoute ou bonus. Les étoiles sont calculées depuis le journal `study_events`.
+
+## PWA
+
+Le dashboard est installable depuis le navigateur. Le service worker garde l'interface en cache et les sessions saisies hors ligne sont mises en attente jusqu'au retour du réseau.
+
+## Supabase
+
+- Projet : `https://ocwstlvorpfwwpxdfdvu.supabase.co`
+- Schéma versionné : `supabase/schema.sql`
+- Configuration frontend : `supabase-config.js`, clé publishable uniquement
+- Client navigateur : Supabase JS 2.110.5, version locale pour le mode PWA
+- Sécurité : RLS par `auth.uid()` sur toutes les tables
+
+La clé `service_role` ne doit jamais être ajoutée au dépôt ou au frontend.
 
 ## Boucle quotidienne
 

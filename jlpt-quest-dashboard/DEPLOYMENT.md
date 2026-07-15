@@ -18,7 +18,7 @@ Le script copie uniquement :
 
 - `Japonais/index.html`
 - `Japonais/progression.json`
-- l'interface, les assets finaux, la documentation et les scripts du dashboard
+- l'interface PWA, les assets finaux, la configuration publique Supabase, le schéma, la documentation et les scripts du dashboard
 
 Il crée un commit uniquement en présence de changements puis pousse `main`. GitHub Pages republie alors automatiquement la branche.
 

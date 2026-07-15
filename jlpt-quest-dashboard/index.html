@@ -5,7 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#071522">
   <meta name="description" content="La campagne gamifiée de Juliann vers le JLPT N5 de décembre 2026.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>JLPT Quest | Le chemin vers le N5</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="assets/icon-192.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Shippori+Mincho:wght@500;600;700;800&display=swap" rel="stylesheet">
@@ -32,6 +36,7 @@
     }
 
     * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
     html { scroll-behavior: smooth; }
     body {
       margin: 0;
@@ -244,6 +249,39 @@
     .footer { display: flex; justify-content: space-between; gap: 14px; margin-top: 20px; padding: 0 8px; color: #61787c; font-size: 10px; }
     .offline-notice { display: none; margin: 0 0 18px; padding: 11px 14px; border: 1px solid rgba(214,108,95,.3); border-radius: 14px; color: #efb7ae; background: rgba(214,108,95,.08); font-size: 11px; }
     .offline-notice.visible { display: block; }
+    .top-actions { display: flex; align-items: center; gap: 10px; }
+    .top-action { min-height: 38px; padding: 0 13px; border: 1px solid var(--line); border-radius: 999px; color: var(--mist); background: rgba(8,24,36,.66); cursor: pointer; }
+    .top-action:hover { color: var(--paper); border-color: rgba(231,189,104,.38); }
+    .top-action[hidden] { display: none; }
+    .fab { position: fixed; z-index: 16; right: 24px; bottom: max(24px, env(safe-area-inset-bottom)); min-height: 54px; padding: 0 22px; border: 1px solid #f1ca7c; border-radius: 999px; color: #1b1b17; background: linear-gradient(135deg, var(--gold-bright), #dfa653); box-shadow: 0 18px 46px rgba(0,0,0,.42), 0 0 25px rgba(231,189,104,.18); font-weight: 800; cursor: pointer; }
+    .fab:hover { transform: translateY(-2px); }
+    dialog { width: min(560px, calc(100% - 24px)); max-height: min(760px, calc(100vh - 32px)); padding: 0; overflow: auto; border: 1px solid rgba(244,237,220,.15); border-radius: 28px; color: var(--paper); background: linear-gradient(145deg, #153142, #081a27 72%); box-shadow: 0 32px 90px rgba(0,0,0,.58); }
+    dialog::backdrop { background: rgba(2,10,17,.78); backdrop-filter: blur(8px); }
+    .dialog-inner { padding: 28px; }
+    .dialog-head { display: flex; align-items: start; justify-content: space-between; gap: 18px; margin-bottom: 24px; }
+    .dialog-head h2 { margin-top: 5px; font-size: 30px; }
+    .icon-button { width: 38px; height: 38px; border: 1px solid var(--line); border-radius: 50%; color: var(--mist); background: rgba(255,255,255,.04); cursor: pointer; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .field { display: grid; gap: 7px; color: var(--mist); font-size: 11px; font-weight: 700; letter-spacing: .04em; }
+    .field.full { grid-column: 1 / -1; }
+    .field input, .field select, .field textarea { width: 100%; min-height: 46px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 13px; outline: 0; color: var(--paper); background: rgba(4,14,24,.58); font: 500 14px/1.4 "DM Sans", sans-serif; }
+    .field textarea { min-height: 82px; resize: vertical; }
+    .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(231,189,104,.1); }
+    .check-row { display: flex; flex-wrap: wrap; gap: 10px; grid-column: 1 / -1; }
+    .check { display: inline-flex; align-items: center; gap: 9px; min-height: 42px; padding: 0 12px; border: 1px solid var(--line); border-radius: 13px; color: var(--mist); font-size: 12px; }
+    .check input { accent-color: var(--gold); }
+    .form-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; }
+    .form-actions .button { cursor: pointer; }
+    .form-hint { margin-top: 13px; color: var(--muted); font-size: 11px; }
+    .auth-switch { display: grid; gap: 12px; }
+    .auth-status { min-height: 20px; margin-top: 12px; color: var(--gold-bright); font-size: 12px; }
+    .account-card { display: none; padding: 16px; border: 1px solid var(--line); border-radius: 17px; background: rgba(255,255,255,.035); }
+    .account-card.visible { display: block; }
+    .account-card strong, .account-card span { display: block; }
+    .account-card span { margin-top: 4px; color: var(--muted); font-size: 11px; }
+    .toast { position: fixed; z-index: 30; left: 50%; bottom: max(88px, calc(env(safe-area-inset-bottom) + 88px)); width: max-content; max-width: calc(100% - 28px); padding: 12px 16px; border: 1px solid rgba(94,183,170,.34); border-radius: 999px; color: #d9f2e8; background: rgba(5,18,28,.94); box-shadow: 0 18px 45px rgba(0,0,0,.4); opacity: 0; pointer-events: none; transform: translate(-50%, 12px); transition: opacity .2s ease, transform .2s ease; }
+    .toast.visible { opacity: 1; transform: translate(-50%, 0); }
+    .category-only[hidden] { display: none; }
     @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.18); } }
     @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .milestone.next .milestone-node { animation: none; } }
 
@@ -265,6 +303,7 @@
       .hero { min-height: 720px; border-radius: 27px; background-position: 64% center; }
       .hero::before { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(4,14,24,.88) 0%, rgba(4,14,24,.46) 46%, rgba(4,14,24,.95) 74%); }
       .hero-copy { width: 100%; padding: 46px 24px 280px; }
+      .hero-copy .eyebrow { max-width: 205px; line-height: 1.55; }
       .hero h1 { max-width: 8ch; font-size: clamp(42px, 14vw, 62px); }
       .lead { font-size: 14px; }
       .countdown { top: 24px; right: 20px; width: 90px; }
@@ -296,6 +335,13 @@
       .log { grid-template-columns: 62px 1fr; }
       .log span:last-child { grid-column: 2; text-align: left; }
       .footer { flex-direction: column; }
+      .top-actions .sync { display: none; }
+      .top-action { padding: 0 11px; font-size: 12px; }
+      .fab { right: 14px; bottom: max(14px, env(safe-area-inset-bottom)); min-height: 50px; padding: 0 18px; }
+      dialog { width: calc(100% - 12px); max-height: calc(100vh - 12px); border-radius: 23px; }
+      .dialog-inner { padding: 22px 17px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .field.full { grid-column: 1; }
     }
   </style>
 </head>
@@ -306,7 +352,11 @@
         <span class="mon">N5</span>
         <span><strong>JLPT Quest</strong><small>Campagne personnelle</small></span>
       </a>
-      <div class="sync" id="syncState"><span class="sync-dot"></span><span id="syncLabel">Synchronisation...</span></div>
+      <div class="top-actions">
+        <button class="top-action" id="installButton" type="button" hidden>Installer</button>
+        <div class="sync" id="syncState"><span class="sync-dot"></span><span id="syncLabel">Synchronisation...</span></div>
+        <button class="top-action" id="accountButton" type="button">Connexion</button>
+      </div>
     </header>
 
     <div class="offline-notice" id="offlineNotice">Aperçu hors ligne. Pour lire la progression réelle, ouvre le dashboard via son URL locale ou GitHub Pages.</div>
@@ -317,7 +367,7 @@
         <h1>Le sanctuaire <span>N5</span> attend.</h1>
         <p class="lead">Chaque session allume une lanterne sur le chemin. Une étoile sauve la journée, deux font une journée solide. Pas de dette, juste le prochain pas.</p>
         <div class="hero-actions">
-          <a class="button primary" href="#quests">Voir la quête du jour</a>
+          <button class="button primary" id="heroRecordButton" type="button">Enregistrer une session</button>
           <a class="button" href="#campaign">Explorer le chemin</a>
         </div>
       </div>
@@ -407,145 +457,66 @@
       <span id="lastUpdate">Dernière mise à jour...</span>
     </footer>
   </main>
+  <button class="fab" id="quickAddButton" type="button">+ Enregistrer</button>
 
-  <script>
-    const fallback = {
-      schemaVersion: 2,
-      updatedAt: "2026-07-15T13:30:00+02:00",
-      profile: { name: "Juliann", rank: "Voyageur N5", level: 3, xp: 182, xpNext: 250, streakDays: 2, lifetimeStars: 5 },
-      campaign: { target: "JLPT N5", targetMonth: "Décembre 2026", countdownDate: "2026-12-01", currentChapter: "Fondations retrouvées", tagline: "一歩一歩" },
-      today: { date: "2026-07-15", status: "solid", stars: 2, morningQuest: "12 à 15 min d'Anki, reviews uniquement.", eveningQuest: "Continuer la leçon Obi 45 sans pression de la finir.", confirmedSummary: "16 reviews en 12 min, puis 10 min actives sur Obi 45.", energy: "Relancé" },
-      anki: { doneToday: true, minutes: 12, reviewsToday: 16, due: 326, backlog: 310, newCardsEnabled: false, newCardsUnlockAt: 150 },
-      obi: { doneToday: true, activeRecall: true, currentLesson: 45, totalLessons: 82, lessonTitle: "Aimer, détester et préférer", minutes: 10, lessonsThisWeek: 1, weeklyTarget: 3 },
-      listening: { doneToday: false, title: "Japanese with Shun", minutes: 0, weeklyMinutes: 0, weeklyTargetMinutes: 30 },
-      week: { start: "2026-07-13", stars: 2, target: 8, bonusStars: 0, days: [{ date: "2026-07-15", label: "Mer", stars: 2, confirmed: true }] },
-      milestones: [
-        { date: "2026-07-15", title: "Le feu est rallumé", text: "Anki et Obi ont repris sans nouvelles cartes.", state: "complete" },
-        { date: "2026-08", title: "Camp de base", text: "Anki quotidien, Obi trois fois par semaine.", state: "next" },
-        { date: "2026-10", title: "Premier mock N5", text: "Un test complet révèle les trous réels.", state: "locked" },
-        { date: "2026-12", title: "Le sanctuaire N5", text: "Passage du JLPT avec une base consolidée.", state: "locked" }
-      ],
-      recentLogs: [
-        { date: "2026-07-15", label: "Anki", value: "16 reviews en 12 min", confirmed: true },
-        { date: "2026-07-15", label: "Obi 45", value: "10 min actives", confirmed: true }
-      ]
-    };
+  <dialog id="entryDialog">
+    <div class="dialog-inner">
+      <div class="dialog-head">
+        <div><div class="eyebrow">Journal factuel</div><h2>Allumer une lanterne</h2></div>
+        <button class="icon-button" type="button" data-close-dialog="entryDialog" aria-label="Fermer">×</button>
+      </div>
+      <form id="entryForm">
+        <div class="form-grid">
+          <label class="field full">Discipline
+            <select id="entryCategory" name="category">
+              <option value="anki">Anki</option>
+              <option value="obi">Obi Senpai</option>
+              <option value="listening">Écoute</option>
+              <option value="bonus">Bonus plaisir</option>
+            </select>
+          </label>
+          <label class="field">Date<input id="entryDate" name="date" type="date" required></label>
+          <label class="field category-only" data-categories="anki obi listening">Minutes<input id="entryMinutes" name="minutes" type="number" min="0" max="600" value="10" required></label>
+          <label class="field category-only" data-categories="anki">Reviews<input id="entryReviews" name="reviews" type="number" min="0" max="5000" placeholder="16"></label>
+          <label class="field category-only" data-categories="anki">Backlog restant<input id="entryBacklog" name="backlog" type="number" min="0" max="10000" placeholder="310"></label>
+          <label class="field category-only" data-categories="obi">Leçon<input id="entryLesson" name="lesson" type="number" min="1" max="82" value="45"></label>
+          <label class="field category-only" data-categories="obi">Sujet<input id="entryLessonTitle" name="lessonTitle" type="text" placeholder="Aimer, détester et préférer"></label>
+          <div class="check-row category-only" data-categories="obi">
+            <label class="check"><input id="entryRecall" name="activeRecall" type="checkbox" checked> Rappel actif</label>
+            <label class="check"><input id="entryCompleted" name="lessonCompleted" type="checkbox"> Leçon terminée</label>
+          </div>
+          <label class="field full category-only" data-categories="listening">Phrase repérée<input id="entryPhrase" name="phrase" type="text" placeholder="Une seule phrase suffit"></label>
+          <label class="field full">Note courte<textarea id="entryNote" name="note" placeholder="Ce que tu veux retenir, pas un rapport de mission"></textarea></label>
+        </div>
+        <p class="form-hint" id="entryHint">10 minutes d'Anki donnent une étoile. Pas besoin de finir la montagne aujourd'hui.</p>
+        <div class="form-actions"><button class="button" type="button" data-close-dialog="entryDialog">Annuler</button><button class="button primary" type="submit">Confirmer la session</button></div>
+      </form>
+    </div>
+  </dialog>
 
-    const clamp = (value, min = 0, max = 100) => Math.min(max, Math.max(min, Number(value) || 0));
-    const pct = (value, max) => max > 0 ? clamp(Math.round((Number(value) / Number(max)) * 100)) : 0;
-    const esc = (value) => String(value ?? "").replace(/[&<>'"]/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[char]);
+  <dialog id="authDialog">
+    <div class="dialog-inner">
+      <div class="dialog-head">
+        <div><div class="eyebrow">Compte voyageur</div><h2>Synchroniser le chemin</h2></div>
+        <button class="icon-button" type="button" data-close-dialog="authDialog" aria-label="Fermer">×</button>
+      </div>
+      <div class="account-card" id="accountCard"><strong id="accountName"></strong><span id="accountEmail"></span></div>
+      <form class="auth-switch" id="authForm">
+        <label class="field">Prénom<input id="authName" type="text" value="Juliann" autocomplete="name"></label>
+        <label class="field">Email<input id="authEmail" type="email" required autocomplete="email"></label>
+        <label class="field">Mot de passe<input id="authPassword" type="password" minlength="8" required autocomplete="current-password"></label>
+        <div class="form-actions"><button class="button" id="signUpButton" type="button">Créer le compte</button><button class="button primary" type="submit">Se connecter</button></div>
+      </form>
+      <div class="form-actions" id="signedInActions" hidden><button class="button" id="signOutButton" type="button">Se déconnecter</button></div>
+      <p class="auth-status" id="authStatus"></p>
+      <p class="form-hint">Le mot de passe reste chez Supabase. Le dashboard ne contient que la clé publique protégée par RLS.</p>
+    </div>
+  </dialog>
 
-    function render(data, live) {
-      const days = daysUntil(data.campaign.countdownDate);
-      const elapsed = clamp(100 - Math.round((days / 139) * 100));
-      document.getElementById("daysLeft").textContent = days;
-      document.getElementById("countdown").style.setProperty("--countdown", `${elapsed}%`);
-      document.getElementById("chapterLabel").textContent = `Chapitre ${String(data.profile.level).padStart(2, "0")} · ${data.campaign.currentChapter}`;
-      document.getElementById("todaySummary").textContent = data.today.confirmedSummary || "Le matin propose. Le réel confirme.";
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-      const sync = document.getElementById("syncState");
-      sync.classList.toggle("is-offline", !live);
-      document.getElementById("syncLabel").textContent = live ? "Progression synchronisée" : "Aperçu hors ligne";
-      document.getElementById("offlineNotice").classList.toggle("visible", !live && location.protocol === "file:");
-
-      document.getElementById("heroStats").innerHTML = [
-        ["Rang", data.profile.rank],
-        ["Niveau", `Niveau ${data.profile.level}`],
-        ["Série", `${data.profile.streakDays} jours`],
-        ["Aujourd'hui", `${stars(data.today.stars)} ${data.today.stars}/4`]
-      ].map(([label, value]) => `<div class="hero-stat"><span>${esc(label)}</span><strong>${esc(value)}</strong></div>`).join("");
-
-      const quests = [
-        { icon: "復", title: "Anki, la mémoire", body: data.today.morningQuest, done: data.anki.doneToday, state: data.anki.doneToday ? `${data.anki.minutes} min faites` : "À faire" },
-        { icon: "文", title: `Obi ${data.obi.currentLesson}, la structure`, body: data.today.eveningQuest, done: data.obi.doneToday, state: data.obi.doneToday ? "Reprise active" : "En attente" },
-        { icon: "聴", title: "Écoute, le monde vivant", body: `${data.listening.title}, objectif 10 minutes attentives`, done: data.listening.doneToday, state: data.listening.doneToday ? "Étoile gagnée" : "Optionnelle" }
-      ];
-      document.getElementById("questList").innerHTML = quests.map(item => `
-        <article class="quest-card ${item.done ? "is-done" : ""}">
-          <div class="quest-icon">${esc(item.done ? "✓" : item.icon)}</div>
-          <div class="quest-copy"><strong>${esc(item.title)}</strong><span>${esc(item.body)}</span></div>
-          <div class="quest-state">${esc(item.state)}</div>
-        </article>`).join("");
-
-      const reviewsToUnlock = Math.max(0, data.anki.backlog - data.anki.newCardsUnlockAt);
-      const dojos = [
-        { mark: "復", name: "Anki", value: `${data.anki.backlog}`, meta: `${reviewsToUnlock} reviews avant le retour des nouvelles cartes`, progress: data.anki.newCardsEnabled ? 100 : clamp(100 - (reviewsToUnlock / 1.6)), foot: [`${data.anki.reviewsToday} aujourd'hui`, `${data.anki.minutes} min`] },
-        { mark: "文", name: "Obi Senpai", value: `${data.obi.currentLesson}/${data.obi.totalLessons}`, meta: data.obi.lessonTitle, progress: pct(data.obi.currentLesson, data.obi.totalLessons), foot: [`${data.obi.lessonsThisWeek}/${data.obi.weeklyTarget} cette semaine`, `${pct(data.obi.currentLesson, data.obi.totalLessons)}%`] },
-        { mark: "聴", name: "Écoute", value: `${data.listening.weeklyMinutes} min`, meta: data.listening.title, progress: pct(data.listening.weeklyMinutes, data.listening.weeklyTargetMinutes), foot: ["Cap hebdo", `${data.listening.weeklyTargetMinutes} min`] }
-      ];
-      document.getElementById("dojoGrid").innerHTML = dojos.map(item => `
-        <article class="dojo" data-mark="${esc(item.mark)}">
-          <div class="dojo-top"><span class="dojo-name">${esc(item.name)}</span><span class="quest-state">${Math.round(item.progress)}%</span></div>
-          <div class="dojo-value">${esc(item.value)}</div><p class="dojo-meta">${esc(item.meta)}</p>
-          <div class="bar"><i style="--w:${item.progress}%"></i></div>
-          <div class="dojo-foot"><span>${esc(item.foot[0])}</span><span>${esc(item.foot[1])}</span></div>
-        </article>`).join("");
-
-      const completeCount = data.milestones.filter(item => item.state === "complete").length;
-      const pathPct = pct(Math.max(0, completeCount - 1), Math.max(1, data.milestones.length - 1));
-      document.getElementById("pathProgress").style.setProperty("--w", `${pathPct}%`);
-      document.getElementById("milestones").innerHTML = data.milestones.map(item => `
-        <article class="milestone ${esc(item.state)}">
-          <div class="milestone-date">${esc(item.date)}</div><div class="milestone-node"></div>
-          <strong>${esc(item.title)}</strong><p>${esc(item.text)}</p>
-        </article>`).join("");
-
-      const stage = data.profile.lifetimeStars >= 16 ? "Messager du sanctuaire" : data.profile.lifetimeStars >= 8 ? "Gardien des lanternes" : "Éclaireur du chemin";
-      const companionState = data.today.stars >= 2 ? "active" : "rest";
-      document.getElementById("companionStage").textContent = `${stage} · ${data.profile.lifetimeStars} étoiles`;
-      document.getElementById("companionCard").dataset.state = companionState;
-      document.getElementById("companionSpeech").textContent = companionLine(data.today.stars, data.today.energy);
-
-      renderWeek(data.week);
-      document.getElementById("logs").innerHTML = data.recentLogs.map(item => `
-        <div class="log"><span class="log-date">${formatShortDate(item.date)}</span><strong>${esc(item.label)}</strong><span>${esc(item.value)}</span></div>`).join("");
-
-      document.getElementById("ankiRule").textContent = data.anki.newCardsEnabled
-        ? "Le backlog est sous le seuil. Les nouvelles cartes peuvent revenir doucement, 3 à 5 maximum."
-        : `Nouvelles cartes gelées jusqu'à ${data.anki.newCardsUnlockAt} reviews de retard. Il en reste ${reviewsToUnlock} à résorber, sans mode punition.`;
-      document.getElementById("lastUpdate").textContent = `Mis à jour ${formatDateTime(data.updatedAt)}`;
-    }
-
-    function renderWeek(week) {
-      const labels = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
-      const start = new Date(`${week.start}T12:00:00+02:00`);
-      const byDate = new Map(week.days.map(day => [day.date, day]));
-      const cells = labels.map((label, index) => {
-        const date = new Date(start);
-        date.setDate(start.getDate() + index);
-        const iso = date.toISOString().slice(0, 10);
-        const day = byDate.get(iso) || { stars: 0, confirmed: false };
-        return `<div class="day ${day.confirmed ? "confirmed" : ""}"><span>${label}</span><span class="day-stars">${day.stars ? "★".repeat(day.stars) : "·"}</span></div>`;
-      });
-      document.getElementById("weekDays").innerHTML = cells.join("");
-      document.getElementById("weekScore").textContent = week.stars;
-      document.getElementById("weekTarget").textContent = ` / ${week.target} étoiles`;
-      document.getElementById("weekBar").style.setProperty("--w", `${pct(week.stars, week.target)}%`);
-    }
-
-    function companionLine(starCount, energy) {
-      if (starCount >= 3) return `Trois lanternes. Très belle journée, ${energy ? energy.toLowerCase() : "capitaine"}. On garde le feu, pas besoin d'en rajouter.`;
-      if (starCount >= 2) return "Deux étoiles, journée solide. Anki et Obi ont repris leur place, exactement sans séance héroïque.";
-      if (starCount === 1) return "Une étoile suffit pour que le chemin reste visible. La journée est sauvée.";
-      return "Le chemin n'a pas disparu. Une session de dix minutes suffit pour rallumer la première lanterne.";
-    }
-
-    function stars(count) { return Number(count) > 0 ? "★".repeat(Number(count)) : "☆"; }
-    function daysUntil(date) { return Math.max(0, Math.ceil((new Date(`${date}T00:00:00+01:00`) - new Date()) / 86400000)); }
-    function formatShortDate(date) { return new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "short" }).format(new Date(`${date}T12:00:00+02:00`)); }
-    function formatDateTime(date) { return new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium", timeStyle: "short" }).format(new Date(date)); }
-
-    async function boot() {
-      try {
-        const response = await fetch(`../progression.json?ts=${Date.now()}`, { cache: "no-store" });
-        if (!response.ok) throw new Error("progression.json unavailable");
-        render(await response.json(), true);
-      } catch {
-        render(fallback, false);
-      }
-    }
-
-    boot();
-  </script>
+  <script src="vendor/supabase.min.js"></script>
+  <script src="supabase-config.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>

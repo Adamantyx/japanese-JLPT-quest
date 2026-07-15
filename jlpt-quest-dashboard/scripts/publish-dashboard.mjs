@@ -14,16 +14,22 @@ async function main() {
   await assertPublishRepo();
   await fs.mkdir(path.join(publishDashboardDir, 'assets'), { recursive: true });
   await fs.mkdir(path.join(publishDashboardDir, 'scripts'), { recursive: true });
+  await fs.mkdir(path.join(publishDashboardDir, 'supabase'), { recursive: true });
+  await fs.mkdir(path.join(publishDashboardDir, 'vendor'), { recursive: true });
 
   await copy(path.join(japaneseDir, 'index.html'), path.join(publishDir, 'index.html'));
   await copy(path.join(japaneseDir, 'progression.json'), path.join(publishDir, 'progression.json'));
 
-  for (const name of ['index.html', 'README.md', 'DEPLOYMENT.md', 'PROGRESSION_FORMAT.md']) {
+  for (const name of ['index.html', 'app.js', 'supabase-config.js', 'manifest.webmanifest', 'service-worker.js', 'README.md', 'DEPLOYMENT.md', 'PROGRESSION_FORMAT.md']) {
     await copy(path.join(dashboardDir, name), path.join(publishDashboardDir, name));
   }
-  for (const name of ['campaign-path.jpg', 'kitsune-guide.png']) {
+  for (const name of ['campaign-path.jpg', 'kitsune-guide.png', 'icon-192.png', 'icon-512.png']) {
     await copy(path.join(dashboardDir, 'assets', name), path.join(publishDashboardDir, 'assets', name));
   }
+  for (const name of ['schema.sql', 'README.md']) {
+    await copy(path.join(dashboardDir, 'supabase', name), path.join(publishDashboardDir, 'supabase', name));
+  }
+  await copy(path.join(dashboardDir, 'vendor', 'supabase.min.js'), path.join(publishDashboardDir, 'vendor', 'supabase.min.js'));
   for (const name of ['record-japanese-session.mjs', 'update-progression.mjs', 'publish-dashboard.mjs']) {
     await copy(path.join(scriptDir, name), path.join(publishDashboardDir, 'scripts', name));
   }
