@@ -51,6 +51,20 @@ function render(data, live, syncText = "Progression synchronisée") {
     ["Aujourd'hui", `${stars(data.today.stars)} ${data.today.stars}/4`]
   ].map(([label, value]) => `<div class="hero-stat"><span>${esc(label)}</span><strong>${esc(value)}</strong></div>`).join("");
 
+  const xpProgress = pct(data.profile.xp, data.profile.xpNext);
+  const xpRemaining = Math.max(0, Number(data.profile.xpNext) - Number(data.profile.xp));
+  document.getElementById("levelSigil").textContent = String(data.profile.level).padStart(2, "0");
+  document.getElementById("xpText").textContent = `${data.profile.xp} / ${data.profile.xpNext} XP`;
+  document.getElementById("xpBar").style.setProperty("--w", `${xpProgress}%`);
+  document.getElementById("xpRemaining").textContent = `${xpRemaining} XP restant${xpRemaining > 1 ? "s" : ""}`;
+  document.getElementById("todayLanterns").innerHTML = Array.from({ length: 4 }, (_, index) => `<span class="lantern ${index < Number(data.today.stars) ? "lit" : ""}"></span>`).join("");
+  document.getElementById("lanternCaption").textContent = data.today.stars >= 2
+    ? "Journée solide. Le feu est entretenu, inutile d'en faire un examen blanc."
+    : data.today.stars === 1 ? "Journée sauvée. Le chemin reste visible." : "Une lanterne suffit pour sauver la journée.";
+  const nextMilestone = data.milestones.find(item => item.state === "next") || data.milestones.find(item => item.state === "locked") || data.milestones.at(-1);
+  document.getElementById("nextMilestone").textContent = nextMilestone?.title || "Le sanctuaire N5";
+  document.getElementById("nextMilestoneText").textContent = nextMilestone?.text || "Continuer un pas après l'autre.";
+
   const quests = [
     { icon: "復", title: "Anki, la mémoire", body: data.today.morningQuest, done: data.anki.doneToday, state: data.anki.doneToday ? `${data.anki.minutes} min faites` : "À faire" },
     { icon: "文", title: `Obi ${data.obi.currentLesson}, la structure`, body: data.today.eveningQuest, done: data.obi.doneToday, state: data.obi.doneToday ? "Reprise active" : "En attente" },
@@ -60,8 +74,8 @@ function render(data, live, syncText = "Progression synchronisée") {
     <article class="quest-card ${item.done ? "is-done" : ""}">
       <div class="quest-icon">${esc(item.done ? "✓" : item.icon)}</div>
       <div class="quest-copy"><strong>${esc(item.title)}</strong><span>${esc(item.body)}</span></div>
-      <div class="quest-state">${esc(item.state)}</div>
-    </article>`).join("");
+          <div class="quest-meta"><span class="reward">${item.done ? "40 XP acquis" : "+40 XP"}</span><div class="quest-state">${esc(item.state)}</div></div>
+        </article>`).join("");
 
   const backlog = Number(data.anki.backlog) || 0;
   const reviewsToUnlock = Math.max(0, backlog - data.anki.newCardsUnlockAt);
