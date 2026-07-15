@@ -94,6 +94,12 @@ drop policy if exists "events_insert_own" on public.study_events;
 create policy "events_insert_own" on public.study_events
   for insert to authenticated with check ((select auth.uid()) = user_id);
 
+drop policy if exists "events_update_own" on public.study_events;
+create policy "events_update_own" on public.study_events
+  for update to authenticated
+  using ((select auth.uid()) = user_id)
+  with check ((select auth.uid()) = user_id);
+
 drop policy if exists "events_delete_own" on public.study_events;
 create policy "events_delete_own" on public.study_events
   for delete to authenticated using ((select auth.uid()) = user_id);
@@ -180,7 +186,7 @@ revoke all on public.profiles, public.daily_quests, public.study_events from ano
 revoke all on public.daily_scores from anon;
 grant select, update on public.profiles to authenticated;
 grant select, insert, update on public.daily_quests to authenticated;
-grant select, insert, delete on public.study_events to authenticated;
+grant select, insert, update, delete on public.study_events to authenticated;
 grant select on public.daily_scores to authenticated;
 
 commit;

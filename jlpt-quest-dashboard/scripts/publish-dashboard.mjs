@@ -30,7 +30,7 @@ async function main() {
     await copy(path.join(dashboardDir, 'supabase', name), path.join(publishDashboardDir, 'supabase', name));
   }
   await copy(path.join(dashboardDir, 'vendor', 'supabase.min.js'), path.join(publishDashboardDir, 'vendor', 'supabase.min.js'));
-  for (const name of ['record-japanese-session.mjs', 'update-progression.mjs', 'publish-dashboard.mjs']) {
+  for (const name of ['record-japanese-session.mjs', 'update-progression.mjs', 'publish-dashboard.mjs', 'supabase-sync.mjs']) {
     await copy(path.join(scriptDir, name), path.join(publishDashboardDir, 'scripts', name));
   }
 

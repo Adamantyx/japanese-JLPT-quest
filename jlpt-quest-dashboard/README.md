@@ -22,6 +22,8 @@ Le dashboard est installable depuis le navigateur. Le service worker garde l'int
 
 La clé `service_role` ne doit jamais être ajoutée au dépôt ou au frontend.
 
+Le pont des automations utilise `scripts/supabase-sync.mjs`. Son refresh token utilisateur est stocké dans le Trousseau macOS sous `jlpt-quest-supabase-session`, jamais dans un fichier.
+
 ## Boucle quotidienne
 
 1. La quête du matin enregistre uniquement le plan du jour avec l'événement `quest`.

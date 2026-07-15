@@ -253,7 +253,50 @@ async function loadCloud() {
   const failure = [profileResult, eventsResult, scoresResult, questsResult].find(result => result.error);
   if (failure) throw failure.error;
   if (!profileResult.data) throw new Error("Profil Supabase introuvable.");
+  document.getElementById("importHistoryButton").hidden = eventsResult.data.length > 0;
   render(deriveProgression(profileResult.data, eventsResult.data, scoresResult.data, questsResult.data), true);
+}
+
+async function importStarterHistory() {
+  if (!session) return;
+  const button = document.getElementById("importHistoryButton");
+  button.disabled = true;
+  const profileUpdate = {
+    display_name: "Juliann",
+    level_seed: 3,
+    xp_seed: 102,
+    xp_next_seed: 250,
+    lifetime_stars_seed: 3,
+    backlog_seed: 310,
+    current_lesson_seed: 45
+  };
+  const starterEvents = [
+    { id: "71520260-0000-5000-8000-000000000001", occurred_on: "2026-07-15", category: "anki", minutes: 12, reviews: 16, backlog: 310, note: "Reprise confirmée", source: "migration" },
+    { id: "71520260-0000-5000-8000-000000000002", occurred_on: "2026-07-15", category: "obi", minutes: 10, lesson_number: 45, lesson_title: "Aimer, détester et préférer", active_recall: true, note: "Reprise active confirmée", source: "migration" }
+  ];
+  const starterQuest = {
+    quest_date: "2026-07-15",
+    morning_quest: "12 à 15 min d'Anki, reviews uniquement.",
+    evening_quest: "Continuer la leçon Obi 45 sans pression de la finir.",
+    backlog: 310,
+    source: "migration"
+  };
+  try {
+    const results = await Promise.all([
+      client.from("profiles").update(profileUpdate).eq("user_id", session.user.id),
+      client.from("study_events").upsert(starterEvents, { onConflict: "id" }),
+      client.from("daily_quests").upsert(starterQuest, { onConflict: "user_id,quest_date" })
+    ]);
+    const failure = results.find(result => result.error);
+    if (failure) throw failure.error;
+    button.hidden = true;
+    showToast("Le départ du 15 juillet est importé. Tes 2 étoiles sont là.");
+    await loadCloud();
+  } catch (error) {
+    showToast(readableError(error));
+  } finally {
+    button.disabled = false;
+  }
 }
 
 async function submitEntry(event) {
@@ -392,6 +435,7 @@ function bindUi() {
   document.getElementById("authForm").addEventListener("submit", signIn);
   document.getElementById("signUpButton").addEventListener("click", signUp);
   document.getElementById("signOutButton").addEventListener("click", signOut);
+  document.getElementById("importHistoryButton").addEventListener("click", importStarterHistory);
   document.querySelectorAll("[data-close-dialog]").forEach(button => button.addEventListener("click", () => document.getElementById(button.dataset.closeDialog).close()));
   window.addEventListener("online", flushQueue);
   window.addEventListener("beforeinstallprompt", event => {
