@@ -3,547 +3,549 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>JLPT Quest - Juliann</title>
+  <meta name="theme-color" content="#071522">
+  <meta name="description" content="La campagne gamifiée de Juliann vers le JLPT N5 de décembre 2026.">
+  <title>JLPT Quest | Le chemin vers le N5</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Shippori+Mincho:wght@500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #07111d;
-      --bg-2: #0c1b2f;
-      --panel: rgba(14, 28, 49, 0.86);
-      --panel-2: rgba(18, 40, 67, 0.94);
-      --line: rgba(255,255,255,0.12);
-      --text: #f7f2ea;
-      --muted: #aec0d5;
-      --cyan: #77d8d1;
-      --gold: #f7c66b;
-      --orange: #ff9861;
-      --violet: #9d8cff;
-      --green: #92e28f;
-      --red: #ff8a8a;
-      --shadow: 0 20px 50px rgba(0,0,0,.32);
+      --ink: #071522;
+      --ink-soft: #0c2130;
+      --panel: rgba(10, 29, 43, .9);
+      --panel-light: rgba(19, 43, 58, .88);
+      --paper: #f4eddc;
+      --mist: #b7c7c7;
+      --muted: #8da2a5;
+      --line: rgba(225, 236, 229, .12);
+      --gold: #e7bd68;
+      --gold-bright: #f8d98e;
+      --persimmon: #e66f43;
+      --teal: #5eb7aa;
+      --moss: #7e9f77;
+      --danger: #d66c5f;
+      --radius-lg: 30px;
       --radius: 22px;
-      --radius-sm: 14px;
+      --radius-sm: 15px;
+      --shadow: 0 24px 70px rgba(0, 7, 13, .35);
     }
+
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
     body {
       margin: 0;
-      color: var(--text);
-      font: 16px/1.5 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background:
-        radial-gradient(circle at 20% 10%, rgba(119, 216, 209, .20), transparent 28%),
-        radial-gradient(circle at 84% 0%, rgba(247, 198, 107, .18), transparent 24%),
-        radial-gradient(circle at 78% 55%, rgba(157, 140, 255, .14), transparent 30%),
-        linear-gradient(180deg, #050b14 0%, var(--bg) 36%, #081a2b 100%);
+      min-width: 320px;
       min-height: 100vh;
+      color: var(--paper);
+      font: 500 15px/1.55 "DM Sans", sans-serif;
+      background:
+        radial-gradient(circle at 10% 15%, rgba(94, 183, 170, .12), transparent 25rem),
+        radial-gradient(circle at 88% 42%, rgba(230, 111, 67, .1), transparent 30rem),
+        linear-gradient(180deg, #06111b 0%, #091a26 45%, #07141e 100%);
     }
-    a { color: inherit; }
-    .wrap { width: min(1280px, calc(100vw - 28px)); margin: 0 auto; padding: 22px 0 40px; }
-    .topbar, .hero, .grid, .bottom { display: grid; gap: 16px; }
-    .topbar {
-      grid-template-columns: 1.1fr auto;
-      align-items: center;
-      margin-bottom: 18px;
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .18;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='110' height='110' viewBox='0 0 110 110'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.17'/%3E%3C/svg%3E");
+      mix-blend-mode: soft-light;
+      z-index: 20;
     }
-    .brand {
-      display: flex; gap: 14px; align-items: center;
-      padding: 18px 0;
-    }
-    .sigil {
-      width: 56px; height: 56px; border-radius: 18px;
-      display: grid; place-items: center;
-      background: linear-gradient(135deg, rgba(247,198,107,.98), rgba(255,152,97,.96));
-      color: #111; font-weight: 900; font-size: 1.2rem;
-      box-shadow: 0 18px 30px rgba(247, 198, 107, .18);
-      flex: 0 0 auto;
-    }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; }
     h1, h2, h3, p { margin: 0; }
-    h1 { font-size: clamp(1.5rem, 3vw, 2.4rem); line-height: 1.05; }
-    .sub { color: var(--muted); margin-top: 6px; max-width: 62ch; }
-    .chip-row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: end; }
-    .chip {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 10px 12px; border-radius: 999px; border: 1px solid var(--line);
-      background: rgba(255,255,255,.04); color: var(--muted); font-weight: 700;
+    h1, h2, h3 { font-family: "Shippori Mincho", serif; }
+
+    .shell { width: min(1240px, calc(100% - 32px)); margin: 0 auto; padding: 24px 0 54px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 18px; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .mon {
+      width: 46px;
+      height: 46px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(248, 217, 142, .52);
+      border-radius: 50%;
+      color: var(--gold-bright);
+      background: radial-gradient(circle, rgba(231, 189, 104, .18), rgba(7, 21, 34, .3));
+      font: 800 14px/1 "Shippori Mincho", serif;
+      box-shadow: 0 0 30px rgba(231, 189, 104, .12);
     }
-    .chip strong { color: var(--text); }
+    .brand strong { display: block; font: 700 18px/1.1 "Shippori Mincho", serif; letter-spacing: .03em; }
+    .brand small { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; }
+    .sync { display: inline-flex; align-items: center; gap: 9px; color: var(--mist); font-size: 12px; }
+    .sync-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 14px rgba(94, 183, 170, .8); }
+    .sync.is-offline .sync-dot { background: var(--danger); box-shadow: none; }
+
     .hero {
-      grid-template-columns: 1.25fr .75fr;
-      margin-bottom: 16px;
-    }
-    .panel {
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      background: var(--panel);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(16px);
-    }
-    .hero-main {
       position: relative;
+      min-height: 570px;
       overflow: hidden;
-      min-height: 340px;
-      padding: 28px;
-      background:
-        radial-gradient(circle at 15% 20%, rgba(119, 216, 209, .18), transparent 22%),
-        radial-gradient(circle at 85% 15%, rgba(247, 198, 107, .18), transparent 22%),
-        linear-gradient(145deg, rgba(20, 45, 74, .92), rgba(10, 18, 32, .92));
+      border: 1px solid rgba(235, 225, 196, .16);
+      border-radius: 38px;
+      background-image:
+        linear-gradient(90deg, rgba(4, 14, 24, .98) 0%, rgba(4, 14, 24, .82) 34%, rgba(4, 14, 24, .12) 71%),
+        linear-gradient(0deg, rgba(4, 14, 24, .92), transparent 42%),
+        url("assets/campaign-path.jpg");
+      background-position: center;
+      background-size: cover;
+      box-shadow: var(--shadow);
+      isolation: isolate;
     }
-    .hero-main::after {
-      content:"";
-      position:absolute; inset:auto -8% -36% -8%;
-      height: 220px;
-      background:
-        radial-gradient(circle at 15% 30%, rgba(255,255,255,.10), transparent 28%),
-        radial-gradient(circle at 35% 55%, rgba(255,255,255,.08), transparent 24%),
-        radial-gradient(circle at 66% 48%, rgba(255,255,255,.10), transparent 25%),
-        radial-gradient(circle at 84% 25%, rgba(255,255,255,.07), transparent 22%);
-      opacity: .8;
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.03), inset 0 -90px 120px rgba(2, 10, 17, .48);
       pointer-events: none;
     }
-    .kicker { color: var(--gold); text-transform: uppercase; letter-spacing: .09em; font-size: .76rem; font-weight: 900; }
-    .hero-title {
-      font-size: clamp(2.1rem, 5.3vw, 4.8rem);
-      line-height: .96;
-      margin-top: 14px;
-      max-width: 11ch;
-    }
-    .hero-title span { color: var(--cyan); }
-    .hero-copy { max-width: 65ch; color: var(--muted); margin-top: 16px; font-size: 1.04rem; }
-    .meta-row { display:flex; flex-wrap:wrap; gap:10px; margin-top: 22px; }
-    .meta {
-      padding: 12px 14px; border-radius: 16px; border: 1px solid var(--line);
-      background: rgba(255,255,255,.04); min-width: 160px;
-    }
-    .meta b { display:block; font-size: 1.25rem; }
-    .meta span { color: var(--muted); font-size: .88rem; }
-    .hero-side {
-      padding: 22px;
-      display:grid; gap: 14px;
-      grid-template-rows: auto auto auto 1fr;
-    }
-    .orb {
-      height: 144px;
-      border-radius: 24px;
-      position: relative;
-      overflow:hidden;
-      background:
-        radial-gradient(circle at 50% 36%, rgba(255,255,255,.20), transparent 16%),
-        radial-gradient(circle at 52% 52%, rgba(119,216,209,.36), rgba(119,216,209,.08) 28%, transparent 49%),
-        linear-gradient(180deg, rgba(18, 41, 67, .85), rgba(8, 20, 36, .9));
-      border: 1px solid rgba(255,255,255,.12);
-    }
-    .orb::before {
-      content:"";
-      position:absolute; inset: 18px 22px 36px;
-      border-radius: 999px;
-      border: 2px solid rgba(255,255,255,.12);
-      filter: drop-shadow(0 0 20px rgba(119, 216, 209, .20));
-    }
-    .orb::after {
-      content:"";
-      position:absolute; left: 50%; top: 50%;
-      width: 88px; height: 88px; transform: translate(-50%, -50%);
-      border-radius: 28px;
-      background: linear-gradient(180deg, rgba(247,198,107,.95), rgba(255,152,97,.72));
-      clip-path: polygon(50% 2%, 62% 34%, 98% 36%, 70% 58%, 79% 94%, 50% 72%, 21% 94%, 30% 58%, 2% 36%, 38% 34%);
-      box-shadow: 0 0 24px rgba(247,198,107,.42);
-      opacity: .92;
-    }
-    .side-card {
-      padding: 16px;
-      border-radius: 18px;
+    .hero-copy { position: relative; z-index: 2; width: min(610px, 61%); padding: 68px 0 150px 64px; }
+    .eyebrow { color: var(--gold); font-size: 11px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; }
+    .hero h1 { margin-top: 17px; font-size: clamp(44px, 6.3vw, 82px); line-height: .99; letter-spacing: -.045em; text-wrap: balance; }
+    .hero h1 span { color: var(--gold-bright); }
+    .lead { max-width: 53ch; margin-top: 20px; color: #c7d2d0; font-size: 16px; }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 30px; }
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 44px;
+      padding: 0 17px;
       border: 1px solid var(--line);
-      background: rgba(255,255,255,.035);
-    }
-    .side-card h3 { font-size: 1rem; margin-bottom: 8px; }
-    .side-card p, .side-card li { color: var(--muted); }
-    .side-list { margin: 10px 0 0; padding-left: 18px; display:grid; gap: 8px; }
-    .grid { grid-template-columns: repeat(12, 1fr); }
-    .card {
-      padding: 20px;
-      min-height: 100%;
-    }
-    .section {
-      grid-column: span 6;
-      background: var(--panel-2);
-    }
-    .section.full { grid-column: span 12; }
-    .section-head {
-      display:flex; justify-content:space-between; gap: 12px; align-items:end; margin-bottom: 14px;
-    }
-    .section-head p { color: var(--muted); max-width: 62ch; }
-    .big {
-      font-size: clamp(2rem, 4.8vw, 3.6rem);
-      line-height: .96;
-      margin-top: 8px;
-    }
-    .progress-shell {
-      display:grid; gap: 10px; margin-top: 18px;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-    .progress-box {
-      padding: 16px; border-radius: 18px; border: 1px solid var(--line);
-      background: rgba(255,255,255,.04);
-    }
-    .progress-box strong { display:block; font-size: 1.35rem; }
-    .bar {
-      margin-top: 10px; height: 12px; border-radius: 999px;
-      background: rgba(255,255,255,.08); overflow: hidden;
-    }
-    .bar i {
-      display:block; height:100%; border-radius: inherit;
-      background: linear-gradient(90deg, var(--orange), var(--gold), var(--cyan));
-      width: var(--w, 50%);
-    }
-    .quest-list { display:grid; gap: 10px; }
-    .quest {
-      display:grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items:center;
-      padding: 14px 16px; border-radius: 16px; border: 1px solid var(--line);
-      background: rgba(255,255,255,.035);
-    }
-    .quest .pill {
-      width: 38px; height: 38px; border-radius: 12px; display:grid; place-items:center;
-      background: rgba(119,216,209,.16); color: var(--cyan); font-weight: 900;
-    }
-    .quest small { color: var(--muted); display:block; }
-    .badge {
-      padding: 8px 11px; border-radius: 999px; border: 1px solid var(--line);
-      color: var(--text); background: rgba(255,255,255,.03); font-size: .84rem;
-      white-space: nowrap;
-    }
-    .timeline {
-      padding: 20px;
-    }
-    .milestones {
-      list-style: none; padding: 0; margin: 14px 0 0; display:grid; gap: 12px;
-    }
-    .milestone {
-      display:grid; grid-template-columns: 92px 1fr; gap: 12px; align-items:start;
-      padding: 14px 16px; border-radius: 16px; border: 1px solid var(--line); background: rgba(255,255,255,.035);
-    }
-    .milestone time { color: var(--gold); font-weight: 900; }
-    .milestone strong { display:block; margin-bottom: 4px; }
-    .milestone span { color: var(--muted); }
-    .avatar-box {
-      display:grid; gap: 12px;
-      grid-template-columns: 1fr 1fr;
-    }
-    .avatar, .logbook {
-      border-radius: 20px; border: 1px solid var(--line); background: rgba(255,255,255,.035); padding: 18px;
-    }
-    .avatar-figure {
-      height: 220px; border-radius: 20px; position: relative; overflow:hidden;
-      background:
-        radial-gradient(circle at 50% 20%, rgba(255,255,255,.16), transparent 18%),
-        radial-gradient(circle at 50% 58%, rgba(119,216,209,.22), rgba(119,216,209,.05) 28%, transparent 58%),
-        linear-gradient(180deg, rgba(17,35,58,.92), rgba(7,16,29,.92));
-    }
-    .avatar-figure::before {
-      content:""; position:absolute; inset: 30px 26px auto;
-      height: 130px; border-radius: 30px 30px 48px 48px;
-      background:
-        radial-gradient(circle at 50% 34%, rgba(255,255,255,.15), transparent 13%),
-        linear-gradient(180deg, rgba(255,152,97,.95), rgba(247,198,107,.76));
-      clip-path: polygon(50% 8%, 65% 17%, 74% 33%, 71% 57%, 58% 77%, 42% 77%, 29% 57%, 26% 33%, 35% 17%);
-      filter: drop-shadow(0 14px 30px rgba(255, 152, 97, .15));
-    }
-    .avatar-figure::after {
-      content:""; position:absolute; left: 50%; bottom: 28px; width: 124px; height: 56px;
-      transform: translateX(-50%);
       border-radius: 999px;
-      background: linear-gradient(90deg, rgba(119,216,209,.78), rgba(157,140,255,.70));
-      box-shadow: 0 0 34px rgba(119,216,209,.18);
+      color: var(--paper);
+      background: rgba(8, 24, 36, .72);
+      font-size: 13px;
+      font-weight: 700;
+      backdrop-filter: blur(10px);
     }
-    .avatar-figure[data-state="awake"]::before {
-      filter: saturate(1.15) brightness(1.05);
+    .button.primary { border-color: #f1ca7c; color: #1b1b17; background: linear-gradient(135deg, var(--gold-bright), #dfa653); }
+    .button:hover { transform: translateY(-1px); }
+
+    .countdown {
+      position: absolute;
+      z-index: 3;
+      top: 34px;
+      right: 34px;
+      width: 118px;
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: conic-gradient(var(--gold) var(--countdown), rgba(255,255,255,.12) 0);
+      box-shadow: 0 18px 45px rgba(0,0,0,.35);
     }
-    .avatar-figure[data-state="active"]::after {
-      background: linear-gradient(90deg, rgba(247,198,107,.96), rgba(119,216,209,.90));
-      box-shadow: 0 0 42px rgba(247,198,107,.26);
+    .countdown::before { content: ""; position: absolute; inset: 7px; border-radius: 50%; background: rgba(6, 20, 31, .91); border: 1px solid rgba(255,255,255,.08); }
+    .countdown div { position: relative; text-align: center; }
+    .countdown strong { display: block; font: 800 31px/.9 "Shippori Mincho", serif; }
+    .countdown span { display: block; margin-top: 7px; color: var(--mist); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; }
+
+    .hero-stats {
+      position: absolute;
+      z-index: 4;
+      left: 30px;
+      right: 30px;
+      bottom: 28px;
+      display: grid;
+      grid-template-columns: 1.15fr 1fr 1fr .8fr;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 20px;
+      background: rgba(5, 18, 28, .78);
+      backdrop-filter: blur(18px);
     }
-    .avatar p { color: var(--muted); margin-top: 12px; }
-    .log-lines { display:grid; gap: 10px; margin-top: 10px; }
-    .log-line {
-      display:flex; justify-content:space-between; gap: 10px; align-items:center;
-      padding: 12px 14px; border-radius: 14px; background: rgba(255,255,255,.04); border:1px solid var(--line);
+    .hero-stat { min-width: 0; padding: 17px 20px; border-right: 1px solid var(--line); }
+    .hero-stat:last-child { border-right: 0; }
+    .hero-stat span { display: block; color: var(--muted); font-size: 10px; letter-spacing: .11em; text-transform: uppercase; }
+    .hero-stat strong { display: block; overflow: hidden; margin-top: 5px; font-size: 18px; text-overflow: ellipsis; white-space: nowrap; }
+
+    .layout { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(300px, .75fr); gap: 18px; margin-top: 18px; }
+    .stack { display: grid; gap: 18px; align-content: start; }
+    .panel { border: 1px solid var(--line); border-radius: var(--radius-lg); background: linear-gradient(145deg, var(--panel-light), var(--panel)); box-shadow: var(--shadow); }
+    .panel-inner { padding: 28px; }
+    .section-head { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin-bottom: 22px; }
+    .section-head h2 { margin-top: 5px; font-size: clamp(25px, 3vw, 36px); line-height: 1.12; }
+    .section-note { max-width: 34ch; color: var(--muted); font-size: 12px; text-align: right; }
+
+    .quest-list { display: grid; gap: 10px; }
+    .quest-card {
+      display: grid;
+      grid-template-columns: 48px 1fr auto;
+      align-items: center;
+      gap: 14px;
+      min-height: 84px;
+      padding: 13px 15px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255,255,255,.035);
     }
-    .log-line strong { display:block; }
-    .muted { color: var(--muted); }
-    .footer {
-      margin-top: 16px; color: var(--muted); font-size: .94rem;
-      display:flex; justify-content:space-between; gap: 12px; flex-wrap: wrap;
+    .quest-icon { width: 48px; height: 48px; display: grid; place-items: center; border-radius: 16px; color: var(--gold-bright); background: rgba(231, 189, 104, .11); font-size: 20px; }
+    .quest-card.is-done .quest-icon { color: #c9f1df; background: rgba(94, 183, 170, .16); }
+    .quest-copy strong { display: block; font-size: 14px; }
+    .quest-copy span { display: block; margin-top: 3px; color: var(--muted); font-size: 12px; }
+    .quest-state { padding: 7px 10px; border: 1px solid var(--line); border-radius: 999px; color: var(--mist); font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+    .quest-card.is-done .quest-state { color: #bfe8dc; border-color: rgba(94,183,170,.3); background: rgba(94,183,170,.09); }
+
+    .dojo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 11px; }
+    .dojo { position: relative; overflow: hidden; min-height: 210px; padding: 18px; border: 1px solid var(--line); border-radius: 20px; background: rgba(255,255,255,.035); }
+    .dojo::after { content: attr(data-mark); position: absolute; right: -4px; bottom: -28px; color: rgba(244,237,220,.035); font: 800 110px/1 "Shippori Mincho", serif; }
+    .dojo-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .dojo-name { color: var(--gold-bright); font-size: 11px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+    .dojo-value { margin-top: 18px; font: 700 31px/1 "Shippori Mincho", serif; }
+    .dojo-meta { min-height: 38px; margin-top: 7px; color: var(--muted); font-size: 11px; }
+    .bar { height: 7px; margin-top: 20px; overflow: hidden; border-radius: 99px; background: rgba(255,255,255,.08); }
+    .bar i { display: block; width: var(--w); height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--persimmon), var(--gold), var(--teal)); box-shadow: 0 0 16px rgba(231,189,104,.24); }
+    .dojo-foot { display: flex; justify-content: space-between; gap: 8px; margin-top: 9px; color: var(--muted); font-size: 10px; }
+
+    .path-panel { overflow: hidden; }
+    .campaign-map { position: relative; min-height: 255px; padding: 34px 28px 26px; background: linear-gradient(180deg, rgba(255,255,255,.025), transparent); }
+    .path-line { position: absolute; top: 112px; left: 9%; right: 9%; height: 2px; background: rgba(255,255,255,.1); }
+    .path-line i { display: block; width: var(--w); height: 100%; background: linear-gradient(90deg, var(--persimmon), var(--gold)); box-shadow: 0 0 16px rgba(231,189,104,.48); }
+    .milestones { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .milestone { text-align: center; }
+    .milestone-date { color: var(--muted); font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+    .milestone-node { width: 24px; height: 24px; margin: 34px auto 14px; border: 5px solid #173143; border-radius: 50%; background: #4b6470; box-shadow: 0 0 0 1px rgba(255,255,255,.14); }
+    .milestone.complete .milestone-node { background: var(--gold); box-shadow: 0 0 0 1px rgba(248,217,142,.65), 0 0 25px rgba(231,189,104,.5); }
+    .milestone.next .milestone-node { background: var(--persimmon); box-shadow: 0 0 0 1px rgba(230,111,67,.6), 0 0 22px rgba(230,111,67,.34); animation: pulse 2.4s ease-in-out infinite; }
+    .milestone strong { display: block; font: 700 14px/1.3 "Shippori Mincho", serif; }
+    .milestone p { max-width: 22ch; margin: 6px auto 0; color: var(--muted); font-size: 10px; }
+
+    .companion { position: relative; min-height: 470px; overflow: hidden; background: radial-gradient(circle at 50% 42%, rgba(94,183,170,.15), transparent 48%), linear-gradient(160deg, #122d3c, #081a27 72%); }
+    .companion::before { content: ""; position: absolute; inset: 18px; border: 1px solid rgba(231,189,104,.15); border-radius: 23px; }
+    .companion-copy { position: relative; z-index: 3; padding: 25px 25px 0; }
+    .companion h2 { margin-top: 5px; font-size: 28px; }
+    .companion-stage { color: var(--gold); font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    .companion img { position: absolute; z-index: 1; right: -24px; bottom: -25px; width: min(96%, 380px); filter: drop-shadow(0 25px 28px rgba(0,0,0,.42)); transition: filter .4s ease, transform .4s ease; }
+    .companion[data-state="active"] img { filter: drop-shadow(0 25px 28px rgba(0,0,0,.42)) drop-shadow(0 0 22px rgba(231,189,104,.18)); transform: translateY(-4px); }
+    .speech { position: absolute; z-index: 4; left: 22px; right: 22px; bottom: 20px; max-width: 270px; padding: 14px 15px; border: 1px solid rgba(255,255,255,.15); border-radius: 17px 17px 17px 4px; background: rgba(5,18,28,.88); color: #d7dfda; font-size: 12px; backdrop-filter: blur(12px); }
+
+    .week-panel .panel-inner { padding-bottom: 24px; }
+    .week-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+    .week-score strong { font: 800 42px/1 "Shippori Mincho", serif; color: var(--gold-bright); }
+    .week-score span { color: var(--muted); font-size: 11px; }
+    .week-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 7px; margin-top: 20px; }
+    .day { display: grid; place-items: center; gap: 9px; min-height: 78px; padding: 10px 3px; border: 1px solid var(--line); border-radius: 14px; color: var(--muted); background: rgba(255,255,255,.025); font-size: 9px; text-transform: uppercase; }
+    .day-stars { min-height: 18px; color: #596c72; font-size: 13px; letter-spacing: -2px; }
+    .day.confirmed { color: var(--paper); border-color: rgba(231,189,104,.24); background: rgba(231,189,104,.06); }
+    .day.confirmed .day-stars { color: var(--gold); }
+
+    .logs { display: grid; gap: 2px; }
+    .log { display: grid; grid-template-columns: 76px 1fr auto; align-items: center; gap: 12px; padding: 13px 0; border-bottom: 1px solid var(--line); }
+    .log:last-child { border-bottom: 0; }
+    .log-date { color: var(--muted); font-size: 10px; }
+    .log strong { font-size: 12px; }
+    .log span:last-child { color: var(--mist); font-size: 11px; text-align: right; }
+
+    .footer { display: flex; justify-content: space-between; gap: 14px; margin-top: 20px; padding: 0 8px; color: #61787c; font-size: 10px; }
+    .offline-notice { display: none; margin: 0 0 18px; padding: 11px 14px; border: 1px solid rgba(214,108,95,.3); border-radius: 14px; color: #efb7ae; background: rgba(214,108,95,.08); font-size: 11px; }
+    .offline-notice.visible { display: block; }
+    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.18); } }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .milestone.next .milestone-node { animation: none; } }
+
+    @media (max-width: 960px) {
+      .hero { min-height: 620px; }
+      .hero-copy { width: 72%; padding-left: 38px; }
+      .hero-stats { grid-template-columns: repeat(2, 1fr); }
+      .hero-stat:nth-child(2) { border-right: 0; }
+      .hero-stat:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
+      .layout { grid-template-columns: 1fr; }
+      .side-stack { grid-template-columns: 1fr 1fr; }
+      .companion { min-height: 430px; }
     }
-    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
-    @media (max-width: 920px) {
-      .hero, .topbar, .avatar-box, .grid { grid-template-columns: 1fr; }
-      .chip-row { justify-content: start; }
-      .section { grid-column: span 12; }
-    }
-    @media (max-width: 640px) {
-      .wrap { width: min(100vw - 18px, 1280px); }
-      .hero-main, .hero-side, .card, .timeline { padding: 18px; }
-      .hero-main { min-height: 300px; }
-      .progress-shell { grid-template-columns: 1fr; }
-      .milestone { grid-template-columns: 1fr; }
-      .quest { grid-template-columns: auto 1fr; }
-      .quest .badge { grid-column: 2; justify-self: start; }
+
+    @media (max-width: 680px) {
+      .shell { width: min(100% - 18px, 1240px); padding-top: 12px; }
+      .topbar { padding: 0 5px; }
+      .sync span:last-child { display: none; }
+      .hero { min-height: 720px; border-radius: 27px; background-position: 64% center; }
+      .hero::before { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(4,14,24,.88) 0%, rgba(4,14,24,.46) 46%, rgba(4,14,24,.95) 74%); }
+      .hero-copy { width: 100%; padding: 46px 24px 280px; }
+      .hero h1 { max-width: 8ch; font-size: clamp(42px, 14vw, 62px); }
+      .lead { font-size: 14px; }
+      .countdown { top: 24px; right: 20px; width: 90px; }
+      .countdown strong { font-size: 24px; }
+      .hero-stats { left: 14px; right: 14px; bottom: 14px; }
+      .hero-stat { padding: 13px 14px; }
+      .hero-stat strong { font-size: 15px; }
+      .panel { border-radius: 24px; }
+      .panel-inner { padding: 21px 18px; }
+      .section-head { align-items: start; }
+      .section-note { display: none; }
+      .quest-card { grid-template-columns: 42px 1fr; }
+      .quest-icon { width: 42px; height: 42px; }
+      .quest-state { grid-column: 2; justify-self: start; }
+      .dojo-grid { grid-template-columns: 1fr; }
+      .dojo { min-height: 165px; }
+      .campaign-map { padding: 24px 16px; }
+      .path-line { display: none; }
+      .milestones { grid-template-columns: 1fr; gap: 0; }
+      .milestone { position: relative; display: grid; grid-template-columns: 42px 1fr; column-gap: 12px; min-height: 86px; text-align: left; }
+      .milestone::after { content: ""; position: absolute; left: 20px; top: 50px; bottom: -4px; width: 1px; background: var(--line); }
+      .milestone:last-child::after { display: none; }
+      .milestone-date { grid-column: 2; align-self: end; }
+      .milestone-node { grid-row: 1 / span 2; grid-column: 1; margin: 24px auto 0; }
+      .milestone strong, .milestone p { grid-column: 2; margin-left: 0; text-align: left; }
+      .side-stack { grid-template-columns: 1fr; }
+      .week-days { gap: 4px; }
+      .day { min-height: 67px; border-radius: 12px; }
+      .log { grid-template-columns: 62px 1fr; }
+      .log span:last-child { grid-column: 2; text-align: left; }
+      .footer { flex-direction: column; }
     }
   </style>
 </head>
 <body>
-  <main class="wrap">
+  <main class="shell">
     <header class="topbar">
-      <div class="brand">
-        <div class="sigil">N5</div>
-        <div>
-          <h1>JLPT Quest</h1>
-          <p class="sub">Un dashboard ludique, lisible sur ordi et téléphone, avec une seule source de vérité pour ta progression japonaise.</p>
-        </div>
-      </div>
-      <div class="chip-row" id="headerChips"></div>
+      <a class="brand" href="#top" aria-label="JLPT Quest, retour en haut">
+        <span class="mon">N5</span>
+        <span><strong>JLPT Quest</strong><small>Campagne personnelle</small></span>
+      </a>
+      <div class="sync" id="syncState"><span class="sync-dot"></span><span id="syncLabel">Synchronisation...</span></div>
     </header>
 
-    <section class="hero">
-      <article class="panel hero-main">
-        <div>
-          <div class="kicker">Campagne active</div>
-          <h2 class="hero-title">Le chemin vers le <span>N5</span></h2>
-          <p class="hero-copy">
-            Le principe est simple. Le matin et le soir alimentent une boucle unique.
-            Le site transforme les réponses réelles en XP, en jalons et en progression visuelle.
-            Pas de morale, juste un jeu utile.
-          </p>
-        </div>
-        <div class="meta-row" id="topStats"></div>
-      </article>
+    <div class="offline-notice" id="offlineNotice">Aperçu hors ligne. Pour lire la progression réelle, ouvre le dashboard via son URL locale ou GitHub Pages.</div>
 
-      <aside class="panel hero-side">
-        <div class="orb" aria-hidden="true"></div>
-        <div class="side-card">
-          <h3>Source de vérité</h3>
-          <p class="muted mono">Japonais/progression.json</p>
+    <section class="hero" id="top">
+      <div class="hero-copy">
+        <div class="eyebrow" id="chapterLabel">Chapitre actif</div>
+        <h1>Le sanctuaire <span>N5</span> attend.</h1>
+        <p class="lead">Chaque session allume une lanterne sur le chemin. Une étoile sauve la journée, deux font une journée solide. Pas de dette, juste le prochain pas.</p>
+        <div class="hero-actions">
+          <a class="button primary" href="#quests">Voir la quête du jour</a>
+          <a class="button" href="#campaign">Explorer le chemin</a>
         </div>
-        <div class="side-card">
-          <h3>Boucle quotidienne</h3>
-          <ul class="side-list">
-            <li>Quête du matin, courte et réaliste.</li>
-            <li>Débrief du soir, résultats réels uniquement.</li>
-            <li>XP, streak et jalons mis à jour automatiquement.</li>
-          </ul>
-        </div>
+      </div>
+      <div class="countdown" id="countdown"><div><strong id="daysLeft">...</strong><span>jours avant décembre</span></div></div>
+      <div class="hero-stats" id="heroStats"></div>
+    </section>
+
+    <div class="layout">
+      <div class="stack">
+        <section class="panel" id="quests">
+          <div class="panel-inner">
+            <div class="section-head">
+              <div><div class="eyebrow">Aujourd'hui</div><h2>Le journal de quête</h2></div>
+              <p class="section-note" id="todaySummary">Le matin propose. Le réel confirme.</p>
+            </div>
+            <div class="quest-list" id="questList"></div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-inner">
+            <div class="section-head">
+              <div><div class="eyebrow">Trois disciplines</div><h2>Les dojos du voyageur</h2></div>
+              <p class="section-note">Anki construit la base. Obi donne la structure. L'écoute rend le japonais vivant.</p>
+            </div>
+            <div class="dojo-grid" id="dojoGrid"></div>
+          </div>
+        </section>
+
+        <section class="panel path-panel" id="campaign">
+          <div class="panel-inner">
+            <div class="section-head">
+              <div><div class="eyebrow">Carte de campagne</div><h2>Le chemin vers décembre</h2></div>
+              <p class="section-note">Les jalons ne sont pas des verdicts. Ce sont juste les lanternes suivantes.</p>
+            </div>
+          </div>
+          <div class="campaign-map">
+            <div class="path-line"><i id="pathProgress"></i></div>
+            <div class="milestones" id="milestones"></div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-inner">
+            <div class="section-head">
+              <div><div class="eyebrow">Traces confirmées</div><h2>Le carnet de route</h2></div>
+              <p class="section-note">Aucune intention maquillée en victoire. Ici, uniquement ce qui a vraiment été fait.</p>
+            </div>
+            <div class="logs" id="logs"></div>
+          </div>
+        </section>
+      </div>
+
+      <aside class="stack side-stack">
+        <section class="panel companion" id="companionCard">
+          <div class="companion-copy">
+            <div class="companion-stage" id="companionStage">Éclaireur</div>
+            <h2>Mimir, gardien du chemin</h2>
+          </div>
+          <img src="assets/kitsune-guide.png" alt="Kitsune érudit portant le livre du voyageur N5">
+          <p class="speech" id="companionSpeech"></p>
+        </section>
+
+        <section class="panel week-panel">
+          <div class="panel-inner">
+            <div class="week-top">
+              <div><div class="eyebrow">Cette semaine</div><h2>Les lanternes</h2></div>
+              <div class="week-score"><strong id="weekScore">0</strong><span id="weekTarget"> / 8 étoiles</span></div>
+            </div>
+            <div class="week-days" id="weekDays"></div>
+            <div class="bar"><i id="weekBar"></i></div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-inner">
+            <div class="eyebrow">Règle active</div>
+            <h2 style="margin-top:6px;font-size:25px">Le sas Anki</h2>
+            <p id="ankiRule" style="margin-top:11px;color:var(--mist);font-size:12px"></p>
+          </div>
+        </section>
       </aside>
-    </section>
-
-    <section class="grid">
-      <article class="panel card section">
-        <div class="section-head">
-          <div>
-            <div class="kicker">Progression</div>
-            <h3 class="big">XP, niveau, cap</h3>
-          </div>
-          <p>Ce bloc affiche ce qui compte vraiment. Tu vois où tu en es, sans devoir ouvrir une note ou une automation.</p>
-        </div>
-        <div class="progress-shell" id="progressGrid"></div>
-      </article>
-
-      <article class="panel card section">
-        <div class="section-head">
-          <div>
-            <div class="kicker">Boucle active</div>
-            <h3 class="big">Quêtes du jour</h3>
-          </div>
-          <p>Le matin propose. Le soir valide. La vraie boucle, c’est le réel, pas l’intention.</p>
-        </div>
-        <div class="quest-list" id="questList"></div>
-      </article>
-
-      <article class="panel timeline section full">
-        <div class="section-head">
-          <div>
-            <div class="kicker">Jalons</div>
-            <h3 class="big">Le chemin vers décembre 2026</h3>
-          </div>
-          <p>Une carte simple des points de passage. Tu peux y ajouter les repères Anki, Obi et JLPT au fil de l’eau.</p>
-        </div>
-        <ul class="milestones" id="milestones"></ul>
-      </article>
-
-      <article class="panel card section">
-        <div class="section-head">
-          <div>
-            <div class="kicker">Avatar</div>
-            <h3 class="big">Compagnon en évolution</h3>
-          </div>
-          <p>Le personnage change d’état avec tes étoiles. C’est la couche “jeu” la plus visible.</p>
-        </div>
-        <div class="avatar-box">
-          <div class="avatar">
-            <div class="avatar-figure" id="avatarFigure"></div>
-            <p id="avatarCopy" class="muted"></p>
-          </div>
-          <div class="logbook">
-            <div class="kicker">Dernières traces</div>
-            <div class="log-lines" id="logLines"></div>
-          </div>
-        </div>
-      </article>
-
-      <article class="panel card section">
-        <div class="section-head">
-          <div>
-            <div class="kicker">Structure</div>
-            <h3 class="big">Ce qui va vivre derrière</h3>
-          </div>
-          <p>La couche visible reste jolie. La couche invisible doit rester simple à écrire depuis les automations.</p>
-        </div>
-        <div class="quest-list">
-          <div class="quest"><div class="pill">1</div><div><strong>Matin</strong><small>Quête du jour, objectif, créneau, blocage éventuel.</small></div><span class="badge">Quest</span></div>
-          <div class="quest"><div class="pill">2</div><div><strong>Soir</strong><small>Résultat réel, étoiles gagnées, prochaine marche.</small></div><span class="badge">Debrief</span></div>
-          <div class="quest"><div class="pill">3</div><div><strong>Source</strong><small>Un JSON versionné sur GitHub, consultable partout.</small></div><span class="badge">Truth</span></div>
-        </div>
-      </article>
-    </section>
-
-    <div class="footer">
-      <span>Prototype statique, prêt pour GitHub Pages ou un autre hébergement simple.</span>
-      <span class="mono">Dernière mise à jour: <span id="lastUpdate"></span></span>
     </div>
+
+    <footer class="footer">
+      <span>一歩一歩, un pas après l'autre.</span>
+      <span id="lastUpdate">Dernière mise à jour...</span>
+    </footer>
   </main>
 
   <script>
     const fallback = {
-      updatedAt: "2026-07-15T13:20:00+02:00",
-      title: "JLPT Quest",
-      level: 3,
-      xp: 182,
-      xpNext: 250,
-      streakDays: 2,
-      totalStars: 5,
-      anki: { doneToday: true, minutes: 12, due: 326, backlog: 310 },
-      obi: { currentLesson: 45, lessonTitle: "Aimer, détester et préférer", minutes: 10, doneToday: true },
-      listening: { title: "Japanese with Shun", minutes: 0, doneToday: false },
-      morningQuest: "12 à 15 min d'Anki reviews only.",
-      eveningQuest: "5 à 10 min d'Obi 45 si tu as encore de l'élan.",
+      schemaVersion: 2,
+      updatedAt: "2026-07-15T13:30:00+02:00",
+      profile: { name: "Juliann", rank: "Voyageur N5", level: 3, xp: 182, xpNext: 250, streakDays: 2, lifetimeStars: 5 },
+      campaign: { target: "JLPT N5", targetMonth: "Décembre 2026", countdownDate: "2026-12-01", currentChapter: "Fondations retrouvées", tagline: "一歩一歩" },
+      today: { date: "2026-07-15", status: "solid", stars: 2, morningQuest: "12 à 15 min d'Anki, reviews uniquement.", eveningQuest: "Continuer la leçon Obi 45 sans pression de la finir.", confirmedSummary: "16 reviews en 12 min, puis 10 min actives sur Obi 45.", energy: "Relancé" },
+      anki: { doneToday: true, minutes: 12, reviewsToday: 16, due: 326, backlog: 310, newCardsEnabled: false, newCardsUnlockAt: 150 },
+      obi: { doneToday: true, activeRecall: true, currentLesson: 45, totalLessons: 82, lessonTitle: "Aimer, détester et préférer", minutes: 10, lessonsThisWeek: 1, weeklyTarget: 3 },
+      listening: { doneToday: false, title: "Japanese with Shun", minutes: 0, weeklyMinutes: 0, weeklyTargetMinutes: 30 },
+      week: { start: "2026-07-13", stars: 2, target: 8, bonusStars: 0, days: [{ date: "2026-07-15", label: "Mer", stars: 2, confirmed: true }] },
       milestones: [
-        { date: "2026-07-15", title: "Reprise propre", text: "Anki remis en route et Obi 45 relancé sans nouveau vocab." },
-        { date: "2026-08", title: "Routine stable", text: "Anki quotidien et Obi 3 fois par semaine." },
-        { date: "2026-10", title: "Mock N5", text: "Test complet pour voir les trous réels." },
-        { date: "2026-12", title: "JLPT N5", text: "Objectif final, avec la base déjà en place." }
+        { date: "2026-07-15", title: "Le feu est rallumé", text: "Anki et Obi ont repris sans nouvelles cartes.", state: "complete" },
+        { date: "2026-08", title: "Camp de base", text: "Anki quotidien, Obi trois fois par semaine.", state: "next" },
+        { date: "2026-10", title: "Premier mock N5", text: "Un test complet révèle les trous réels.", state: "locked" },
+        { date: "2026-12", title: "Le sanctuaire N5", text: "Passage du JLPT avec une base consolidée.", state: "locked" }
       ],
       recentLogs: [
-        { label: "Matin", value: "16 reviews en 12 min" },
-        { label: "Obi", value: "Leçon 45 lancée" },
-        { label: "Note", value: "Boucle relancée" }
+        { date: "2026-07-15", label: "Anki", value: "16 reviews en 12 min", confirmed: true },
+        { date: "2026-07-15", label: "Obi 45", value: "10 min actives", confirmed: true }
       ]
     };
 
-    function pct(value, max) {
-      return Math.max(0, Math.min(100, Math.round((value / max) * 100)));
+    const clamp = (value, min = 0, max = 100) => Math.min(max, Math.max(min, Number(value) || 0));
+    const pct = (value, max) => max > 0 ? clamp(Math.round((Number(value) / Number(max)) * 100)) : 0;
+    const esc = (value) => String(value ?? "").replace(/[&<>'"]/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[char]);
+
+    function render(data, live) {
+      const days = daysUntil(data.campaign.countdownDate);
+      const elapsed = clamp(100 - Math.round((days / 139) * 100));
+      document.getElementById("daysLeft").textContent = days;
+      document.getElementById("countdown").style.setProperty("--countdown", `${elapsed}%`);
+      document.getElementById("chapterLabel").textContent = `Chapitre ${String(data.profile.level).padStart(2, "0")} · ${data.campaign.currentChapter}`;
+      document.getElementById("todaySummary").textContent = data.today.confirmedSummary || "Le matin propose. Le réel confirme.";
+
+      const sync = document.getElementById("syncState");
+      sync.classList.toggle("is-offline", !live);
+      document.getElementById("syncLabel").textContent = live ? "Progression synchronisée" : "Aperçu hors ligne";
+      document.getElementById("offlineNotice").classList.toggle("visible", !live && location.protocol === "file:");
+
+      document.getElementById("heroStats").innerHTML = [
+        ["Rang", data.profile.rank],
+        ["Niveau", `Niveau ${data.profile.level}`],
+        ["Série", `${data.profile.streakDays} jours`],
+        ["Aujourd'hui", `${stars(data.today.stars)} ${data.today.stars}/4`]
+      ].map(([label, value]) => `<div class="hero-stat"><span>${esc(label)}</span><strong>${esc(value)}</strong></div>`).join("");
+
+      const quests = [
+        { icon: "復", title: "Anki, la mémoire", body: data.today.morningQuest, done: data.anki.doneToday, state: data.anki.doneToday ? `${data.anki.minutes} min faites` : "À faire" },
+        { icon: "文", title: `Obi ${data.obi.currentLesson}, la structure`, body: data.today.eveningQuest, done: data.obi.doneToday, state: data.obi.doneToday ? "Reprise active" : "En attente" },
+        { icon: "聴", title: "Écoute, le monde vivant", body: `${data.listening.title}, objectif 10 minutes attentives`, done: data.listening.doneToday, state: data.listening.doneToday ? "Étoile gagnée" : "Optionnelle" }
+      ];
+      document.getElementById("questList").innerHTML = quests.map(item => `
+        <article class="quest-card ${item.done ? "is-done" : ""}">
+          <div class="quest-icon">${esc(item.done ? "✓" : item.icon)}</div>
+          <div class="quest-copy"><strong>${esc(item.title)}</strong><span>${esc(item.body)}</span></div>
+          <div class="quest-state">${esc(item.state)}</div>
+        </article>`).join("");
+
+      const reviewsToUnlock = Math.max(0, data.anki.backlog - data.anki.newCardsUnlockAt);
+      const dojos = [
+        { mark: "復", name: "Anki", value: `${data.anki.backlog}`, meta: `${reviewsToUnlock} reviews avant le retour des nouvelles cartes`, progress: data.anki.newCardsEnabled ? 100 : clamp(100 - (reviewsToUnlock / 1.6)), foot: [`${data.anki.reviewsToday} aujourd'hui`, `${data.anki.minutes} min`] },
+        { mark: "文", name: "Obi Senpai", value: `${data.obi.currentLesson}/${data.obi.totalLessons}`, meta: data.obi.lessonTitle, progress: pct(data.obi.currentLesson, data.obi.totalLessons), foot: [`${data.obi.lessonsThisWeek}/${data.obi.weeklyTarget} cette semaine`, `${pct(data.obi.currentLesson, data.obi.totalLessons)}%`] },
+        { mark: "聴", name: "Écoute", value: `${data.listening.weeklyMinutes} min`, meta: data.listening.title, progress: pct(data.listening.weeklyMinutes, data.listening.weeklyTargetMinutes), foot: ["Cap hebdo", `${data.listening.weeklyTargetMinutes} min`] }
+      ];
+      document.getElementById("dojoGrid").innerHTML = dojos.map(item => `
+        <article class="dojo" data-mark="${esc(item.mark)}">
+          <div class="dojo-top"><span class="dojo-name">${esc(item.name)}</span><span class="quest-state">${Math.round(item.progress)}%</span></div>
+          <div class="dojo-value">${esc(item.value)}</div><p class="dojo-meta">${esc(item.meta)}</p>
+          <div class="bar"><i style="--w:${item.progress}%"></i></div>
+          <div class="dojo-foot"><span>${esc(item.foot[0])}</span><span>${esc(item.foot[1])}</span></div>
+        </article>`).join("");
+
+      const completeCount = data.milestones.filter(item => item.state === "complete").length;
+      const pathPct = pct(Math.max(0, completeCount - 1), Math.max(1, data.milestones.length - 1));
+      document.getElementById("pathProgress").style.setProperty("--w", `${pathPct}%`);
+      document.getElementById("milestones").innerHTML = data.milestones.map(item => `
+        <article class="milestone ${esc(item.state)}">
+          <div class="milestone-date">${esc(item.date)}</div><div class="milestone-node"></div>
+          <strong>${esc(item.title)}</strong><p>${esc(item.text)}</p>
+        </article>`).join("");
+
+      const stage = data.profile.lifetimeStars >= 16 ? "Messager du sanctuaire" : data.profile.lifetimeStars >= 8 ? "Gardien des lanternes" : "Éclaireur du chemin";
+      const companionState = data.today.stars >= 2 ? "active" : "rest";
+      document.getElementById("companionStage").textContent = `${stage} · ${data.profile.lifetimeStars} étoiles`;
+      document.getElementById("companionCard").dataset.state = companionState;
+      document.getElementById("companionSpeech").textContent = companionLine(data.today.stars, data.today.energy);
+
+      renderWeek(data.week);
+      document.getElementById("logs").innerHTML = data.recentLogs.map(item => `
+        <div class="log"><span class="log-date">${formatShortDate(item.date)}</span><strong>${esc(item.label)}</strong><span>${esc(item.value)}</span></div>`).join("");
+
+      document.getElementById("ankiRule").textContent = data.anki.newCardsEnabled
+        ? "Le backlog est sous le seuil. Les nouvelles cartes peuvent revenir doucement, 3 à 5 maximum."
+        : `Nouvelles cartes gelées jusqu'à ${data.anki.newCardsUnlockAt} reviews de retard. Il en reste ${reviewsToUnlock} à résorber, sans mode punition.`;
+      document.getElementById("lastUpdate").textContent = `Mis à jour ${formatDateTime(data.updatedAt)}`;
     }
 
-    function render(data) {
-      const topStats = document.getElementById("topStats");
-      const headerChips = document.getElementById("headerChips");
-      const progressGrid = document.getElementById("progressGrid");
-      const questList = document.getElementById("questList");
-      const milestones = document.getElementById("milestones");
-      const logLines = document.getElementById("logLines");
-      const avatarCopy = document.getElementById("avatarCopy");
-      const avatarFigure = document.getElementById("avatarFigure");
-
-      headerChips.innerHTML = [
-        { label: "Niveau", value: `Lv ${data.level}` },
-        { label: "XP", value: `${data.xp}` },
-        { label: "Étoiles", value: `${data.totalStars}` },
-      ].map(item => `<span class="chip"><strong>${item.value}</strong>${item.label}</span>`).join("");
-
-      topStats.innerHTML = [
-        { value: `${pct(data.xp, data.xpNext)}%`, label: "vers le prochain palier" },
-        { value: `${data.streakDays} j`, label: "streak actuelle" },
-        { value: `${data.anki.backlog}`, label: "reviews en retard" }
-      ].map(item => `<div class="meta"><b>${item.value}</b><span>${item.label}</span></div>`).join("");
-
-      progressGrid.innerHTML = [
-        { title: "XP totale", value: data.xp, meta: `Objectif palier suivant: ${data.xpNext}`, w: `${pct(data.xp, data.xpNext)}%` },
-        { title: "Anki", value: `${data.anki.minutes} min`, meta: `Backlog ${data.anki.backlog} / due ${data.anki.due}`, w: `${pct(data.anki.minutes, 20)}%` },
-        { title: "Obi", value: `L${data.obi.currentLesson}`, meta: data.obi.lessonTitle, w: `${pct(data.obi.currentLesson, 82)}%` },
-        { title: "Étoiles", value: data.totalStars, meta: "Score de la journée / semaine", w: `${pct(data.totalStars, 4)}%` }
-      ].map(item => `
-        <div class="progress-box">
-          <strong>${item.title}</strong>
-          <div style="font-size:1.35rem;font-weight:900;margin-top:4px">${item.value}</div>
-          <div class="muted" style="margin-top:4px">${item.meta}</div>
-          <div class="bar"><i style="--w:${item.w}"></i></div>
-        </div>
-      `).join("");
-
-      questList.innerHTML = [
-        {
-          title: "Quête du matin",
-          body: data.morningQuest,
-          tag: data.anki.doneToday ? "Fait" : "À faire",
-          tone: data.anki.doneToday ? "done" : "todo"
-        },
-        {
-          title: "Quête du soir",
-          body: data.eveningQuest,
-          tag: data.obi.doneToday ? "Relancé" : "En attente",
-          tone: data.obi.doneToday ? "done" : "todo"
-        },
-        {
-          title: "Écoute",
-          body: `${data.listening.title} - ${data.listening.minutes} min`,
-          tag: data.listening.doneToday ? "Validé" : "Bonus",
-          tone: data.listening.doneToday ? "done" : "bonus"
-        }
-      ].map(item => `
-        <div class="quest">
-          <div class="pill">${item.tone === "done" ? "✓" : item.tone === "bonus" ? "+" : "!"}</div>
-          <div>
-            <strong>${item.title}</strong>
-            <small>${item.body}</small>
-          </div>
-          <span class="badge">${item.tag}</span>
-        </div>
-      `).join("");
-
-      milestones.innerHTML = data.milestones.map(item => `
-        <li class="milestone">
-          <time>${item.date}</time>
-          <div>
-            <strong>${item.title}</strong>
-            <span>${item.text}</span>
-          </div>
-        </li>
-      `).join("");
-
-      logLines.innerHTML = data.recentLogs.map(item => `
-        <div class="log-line">
-          <strong>${item.label}</strong>
-          <span class="muted">${item.value}</span>
-        </div>
-      `).join("");
-
-      avatarCopy.textContent = data.totalStars >= 5
-        ? "Le compagnon passe en mode actif. Les contours deviennent plus nets, la lueur monte."
-        : data.totalStars >= 2
-          ? "Le compagnon se réveille. Une ou deux étoiles suffisent déjà à le faire avancer."
-          : "Le compagnon attend sa première vraie impulsion. Le simple contact compte déjà.";
-
-      avatarFigure.dataset.state = data.totalStars >= 5 ? "active" : data.totalStars >= 2 ? "awake" : "sleep";
-      document.getElementById("lastUpdate").textContent = new Date(data.updatedAt).toLocaleString("fr-FR", { dateStyle: "medium", timeStyle: "short" });
+    function renderWeek(week) {
+      const labels = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
+      const start = new Date(`${week.start}T12:00:00+02:00`);
+      const byDate = new Map(week.days.map(day => [day.date, day]));
+      const cells = labels.map((label, index) => {
+        const date = new Date(start);
+        date.setDate(start.getDate() + index);
+        const iso = date.toISOString().slice(0, 10);
+        const day = byDate.get(iso) || { stars: 0, confirmed: false };
+        return `<div class="day ${day.confirmed ? "confirmed" : ""}"><span>${label}</span><span class="day-stars">${day.stars ? "★".repeat(day.stars) : "·"}</span></div>`;
+      });
+      document.getElementById("weekDays").innerHTML = cells.join("");
+      document.getElementById("weekScore").textContent = week.stars;
+      document.getElementById("weekTarget").textContent = ` / ${week.target} étoiles`;
+      document.getElementById("weekBar").style.setProperty("--w", `${pct(week.stars, week.target)}%`);
     }
 
-    async function load() {
+    function companionLine(starCount, energy) {
+      if (starCount >= 3) return `Trois lanternes. Très belle journée, ${energy ? energy.toLowerCase() : "capitaine"}. On garde le feu, pas besoin d'en rajouter.`;
+      if (starCount >= 2) return "Deux étoiles, journée solide. Anki et Obi ont repris leur place, exactement sans séance héroïque.";
+      if (starCount === 1) return "Une étoile suffit pour que le chemin reste visible. La journée est sauvée.";
+      return "Le chemin n'a pas disparu. Une session de dix minutes suffit pour rallumer la première lanterne.";
+    }
+
+    function stars(count) { return Number(count) > 0 ? "★".repeat(Number(count)) : "☆"; }
+    function daysUntil(date) { return Math.max(0, Math.ceil((new Date(`${date}T00:00:00+01:00`) - new Date()) / 86400000)); }
+    function formatShortDate(date) { return new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "short" }).format(new Date(`${date}T12:00:00+02:00`)); }
+    function formatDateTime(date) { return new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium", timeStyle: "short" }).format(new Date(date)); }
+
+    async function boot() {
       try {
-        const res = await fetch("../progression.json", { cache: "no-store" });
-        if (!res.ok) throw new Error("progression.json unavailable");
-        render(await res.json());
-      } catch (err) {
-        render(fallback);
+        const response = await fetch(`../progression.json?ts=${Date.now()}`, { cache: "no-store" });
+        if (!response.ok) throw new Error("progression.json unavailable");
+        render(await response.json(), true);
+      } catch {
+        render(fallback, false);
       }
     }
 
-    load();
+    boot();
   </script>
 </body>
 </html>

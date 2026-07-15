@@ -1,60 +1,109 @@
 {
-  "updatedAt": "2026-07-15T13:20:00+02:00",
-  "title": "JLPT Quest",
-  "level": 3,
-  "xp": 182,
-  "xpNext": 250,
-  "streakDays": 2,
-  "totalStars": 5,
+  "schemaVersion": 2,
+  "updatedAt": "2026-07-15T13:30:00+02:00",
+  "profile": {
+    "name": "Juliann",
+    "rank": "Voyageur N5",
+    "level": 3,
+    "xp": 182,
+    "xpNext": 250,
+    "streakDays": 2,
+    "lifetimeStars": 5
+  },
+  "campaign": {
+    "target": "JLPT N5",
+    "targetMonth": "Décembre 2026",
+    "countdownDate": "2026-12-01",
+    "currentChapter": "Fondations retrouvées",
+    "tagline": "一歩一歩"
+  },
+  "today": {
+    "date": "2026-07-15",
+    "status": "solid",
+    "stars": 2,
+    "morningQuest": "12 à 15 min d'Anki, reviews uniquement.",
+    "eveningQuest": "Continuer la leçon Obi 45 sans pression de la finir.",
+    "confirmedSummary": "16 reviews en 12 min, puis 10 min actives sur Obi 45.",
+    "energy": "Relancé"
+  },
   "anki": {
     "doneToday": true,
     "minutes": 12,
+    "reviewsToday": 16,
     "due": 326,
-    "backlog": 310
+    "backlog": 310,
+    "newCardsEnabled": false,
+    "newCardsUnlockAt": 150
   },
   "obi": {
+    "doneToday": true,
+    "activeRecall": true,
     "currentLesson": 45,
+    "totalLessons": 82,
     "lessonTitle": "Aimer, détester et préférer",
     "minutes": 10,
-    "doneToday": true
+    "lessonsThisWeek": 1,
+    "weeklyTarget": 3
   },
   "listening": {
+    "doneToday": false,
     "title": "Japanese with Shun",
     "minutes": 0,
-    "doneToday": false
+    "weeklyMinutes": 0,
+    "weeklyTargetMinutes": 30
   },
-  "morningQuest": "12 à 15 min d'Anki reviews only.",
-  "eveningQuest": "5 à 10 min d'Obi 45 si tu as encore de l'élan.",
+  "week": {
+    "start": "2026-07-13",
+    "stars": 2,
+    "target": 8,
+    "bonusStars": 0,
+    "days": [
+      {
+        "date": "2026-07-15",
+        "label": "Mer",
+        "stars": 2,
+        "confirmed": true
+      }
+    ]
+  },
   "milestones": [
     {
       "date": "2026-07-15",
-      "title": "Reprise propre",
-      "text": "Anki remis en route et Obi 45 relancé sans nouveau vocab."
+      "title": "Le feu est rallumé",
+      "text": "Anki et Obi ont repris sans nouvelles cartes.",
+      "state": "complete"
     },
     {
       "date": "2026-08",
-      "title": "Routine stable",
-      "text": "Anki quotidien et Obi 3 fois par semaine."
+      "title": "Camp de base",
+      "text": "Routine stable : Anki quotidien, Obi trois fois par semaine.",
+      "state": "next"
     },
     {
       "date": "2026-10",
-      "title": "Mock N5",
-      "text": "Test complet pour voir les trous réels."
+      "title": "Premier mock N5",
+      "text": "Un test complet pour révéler les trous réels.",
+      "state": "locked"
     },
     {
       "date": "2026-12",
-      "title": "JLPT N5",
-      "text": "Objectif final, avec la base déjà en place."
+      "title": "Le sanctuaire N5",
+      "text": "Passage du JLPT N5 avec une base consolidée.",
+      "state": "locked"
     }
   ],
   "recentLogs": [
     {
-      "label": "Matin",
-      "value": "16 reviews en 12 min"
+      "date": "2026-07-15",
+      "label": "Anki",
+      "value": "16 reviews en 12 min",
+      "confirmed": true
     },
     {
-      "label": "Soir",
-      "value": "Obi 45 lancé"
+      "date": "2026-07-15",
+      "label": "Obi 45",
+      "value": "10 min actives sur aimer, détester et préférer",
+      "confirmed": true
     }
   ]
 }

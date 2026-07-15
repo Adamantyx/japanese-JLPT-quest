@@ -1,62 +1,65 @@
-# JLPT Quest Progression Format
+# Format de progression v2
 
-`progression.json` is the single source of truth for the dashboard and the Japanese morning/evening loop.
+Le fichier canonique est `Japonais/progression.json`.
 
-## Core fields
+## Blocs
 
-- `updatedAt`: ISO timestamp of the last write.
-- `title`: display title.
-- `level`: current account level.
-- `xp`: total experience points.
-- `xpNext`: XP target for the next level.
-- `streakDays`: current streak length.
-- `totalStars`: stars earned today or in the current window.
+- `profile` : niveau, XP du niveau courant, streak et étoiles cumulées.
+- `campaign` : objectif N5, chapitre et date de compte à rebours.
+- `today` : quête proposée, résultat confirmé, énergie et étoiles du jour.
+- `anki`, `obi`, `listening` : état des trois disciplines.
+- `week` : étoiles de la semaine et jours confirmés.
+- `milestones` : jalons de la campagne.
+- `recentLogs` : traces factuelles les plus récentes.
 
-## Daily tracking
+## Événement `quest`
 
-- `anki.doneToday`: whether Anki was done.
-- `anki.minutes`: minutes spent in Anki.
-- `anki.due`: current due cards count.
-- `anki.backlog`: backlog behind schedule.
-- `obi.doneToday`: whether Obi was done.
-- `obi.currentLesson`: current lesson number.
-- `obi.lessonTitle`: lesson theme.
-- `obi.minutes`: minutes spent on Obi.
-- `listening.doneToday`: whether listening was done.
-- `listening.title`: listening source.
-- `listening.minutes`: minutes spent listening.
-
-## Morning payload
-
-Use this when the morning automation proposes the day:
+Champs obligatoires :
 
 ```json
 {
-  "morningQuest": "12 à 15 min d'Anki reviews only.",
-  "eveningQuest": "5 à 10 min d'Obi 45 si tu as encore de l'élan.",
-  "recentLogs": [
-    { "label": "Matin", "value": "Quête proposée" }
-  ]
+  "date": "2026-07-16",
+  "morningQuest": "15 min Anki reviews uniquement.",
+  "eveningQuest": "Reprise active Obi 45.",
+  "backlog": 310
 }
 ```
 
-## Evening payload
+Une nouvelle date remet uniquement les compteurs journaliers à zéro. Elle ne donne aucune étoile et aucune XP.
 
-Use this when the evening automation confirms the actual result:
+## Événement `result`
+
+Champs possibles après confirmation explicite de Juliann :
 
 ```json
 {
-  "totalStars": 6,
-  "recentLogs": [
-    { "label": "Anki", "value": "12 min, 16 reviews" },
-    { "label": "Obi", "value": "10 min, leçon 45" },
-    { "label": "Écoute", "value": "0 min" }
-  ]
+  "date": "2026-07-16",
+  "anki": {
+    "minutes": 12,
+    "reviewsToday": 18,
+    "backlog": 292
+  },
+  "obi": {
+    "minutes": 10,
+    "activeRecall": true,
+    "currentLesson": 45
+  },
+  "listening": {
+    "minutes": 0
+  },
+  "bonus": {
+    "earned": false
+  },
+  "summary": "Anki et Obi confirmés.",
+  "energy": "Bonne"
 }
 ```
 
-## Rule
+## Barème calculé
 
-- The automations should never invent a result.
-- If the user has not confirmed the action, the payload must stay factual and provisional.
-- The JSON should stay compact enough to be versioned in Git without friction.
+- Anki : 1 étoile à partir de 10 minutes.
+- Obi : 1 étoile si `activeRecall` ou `lessonCompleted` est vrai.
+- Écoute : 1 étoile à partir de 10 minutes.
+- Bonus : 1 étoile, limité à deux jours par semaine.
+- Une nouvelle étoile ajoute 40 XP.
+- Le script est idempotent pour une même journée : relancer le même bilan ne redonne pas d'XP.

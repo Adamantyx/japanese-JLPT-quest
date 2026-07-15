@@ -1,29 +1,36 @@
-# JLPT Quest Dashboard
+# JLPT Quest
 
-Dashboard statique pour suivre la progression N5 de Juliann.
+Dashboard gamifié de Juliann pour le JLPT N5 de décembre 2026.
 
-## Source de vérité
+## Source unique
 
-- `../progression.json`
+`../progression.json` est la seule source éditable. Le fichier présent dans le dépôt GitHub est une copie de déploiement générée par le script de publication.
 
-## Pages
+## Boucle quotidienne
 
-- `index.html` : interface visuelle responsive.
+1. La quête du matin enregistre uniquement le plan du jour avec l'événement `quest`.
+2. Le débrief du soir enregistre uniquement les actions explicitement confirmées avec l'événement `result`.
+3. Le script calcule les étoiles, l'XP, le niveau, la semaine et le streak.
+4. `publish-dashboard.mjs` copie le dashboard et la progression vers le dépôt public, puis pousse les changements.
 
-## But
+## Commandes
 
-- Centraliser la progression journalière.
-- Afficher XP, niveau, streak, backlog Anki et avancement Obi.
-- Servir de base à un futur déploiement GitHub Pages.
-- Permettre aux automatisations du matin et du soir de mettre à jour le même fichier.
+```bash
+printf '%s' '{"date":"2026-07-16","morningQuest":"15 min Anki reviews.","eveningQuest":"Obi 45, reprise active."}' \
+  | node scripts/record-japanese-session.mjs quest
 
-## Mise à jour
+printf '%s' '{"date":"2026-07-16","anki":{"minutes":12,"reviewsToday":18,"backlog":292},"obi":{"minutes":10,"activeRecall":true},"summary":"Anki et Obi confirmés.","energy":"Bonne"}' \
+  | node scripts/record-japanese-session.mjs result
 
-- Script : `scripts/update-progression.mjs`
-- Usage : `node scripts/update-progression.mjs < payload.json`
-- Le script fusionne le JSON reçu dans `../progression.json`.
+node scripts/publish-dashboard.mjs
+```
 
-## Notes d'intégration
+## Aperçu local
 
-- Les automations du matin et du soir devront écrire dans `../progression.json`.
-- Le site lit le JSON en local de repo et peut être publié tel quel sur un hébergement statique.
+Le JSON ne peut pas être lu correctement via `file://`. Lance un serveur local depuis `Japonais/` :
+
+```bash
+python3 -m http.server 4173
+```
+
+Puis ouvre `http://localhost:4173/`.

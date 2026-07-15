@@ -1,21 +1,34 @@
-# Deployment Notes
+# Déploiement
 
-## Recommended target
+## Dépôt
 
-- Static hosting, ideally GitHub Pages.
+- GitHub : `git@github.com:Adamantyx/japanese-JLPT-quest.git`
+- Copie locale de déploiement : `Japonais/japanese-JLPT-quest/`
+- Branche : `main`
 
-## Entry points
+Le dépôt ne contient aucun autre fichier de l'OS perso.
 
-- `Japonais/index.html` redirects to the dashboard.
-- `Japonais/jlpt-quest-dashboard/index.html` is the dashboard itself.
+## Publication
 
-## Data flow
+```bash
+node Japonais/jlpt-quest-dashboard/scripts/publish-dashboard.mjs
+```
 
-- Morning and evening automation both write to `Japonais/progression.json`.
-- The dashboard reads the same file and reflects the latest state.
+Le script copie uniquement :
 
-## Manual verify
+- `Japonais/index.html`
+- `Japonais/progression.json`
+- l'interface, les assets finaux, la documentation et les scripts du dashboard
 
-- Open `Japonais/index.html` locally or on the hosted site.
-- Confirm the dashboard loads.
-- Confirm the JSON path resolves relative to `jlpt-quest-dashboard/index.html`.
+Il crée un commit uniquement en présence de changements, puis pousse `main`.
+
+## GitHub Pages
+
+Dans le dépôt GitHub :
+
+1. Ouvrir `Settings > Pages`.
+2. Choisir `Deploy from a branch`.
+3. Sélectionner `main` et `/ (root)`.
+4. Enregistrer.
+
+L'URL attendue est `https://adamantyx.github.io/japanese-JLPT-quest/`.
