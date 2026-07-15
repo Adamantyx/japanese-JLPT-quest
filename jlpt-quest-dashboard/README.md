@@ -11,7 +11,7 @@ Dashboard gamifié de Juliann pour le JLPT N5 de décembre 2026.
 1. La quête du matin enregistre uniquement le plan du jour avec l'événement `quest`.
 2. Le débrief du soir enregistre uniquement les actions explicitement confirmées avec l'événement `result`.
 3. Le script calcule les étoiles, l'XP, le niveau, la semaine et le streak.
-4. `publish-dashboard.mjs` copie le dashboard et la progression vers le dépôt public, puis pousse les changements.
+4. `publish-dashboard.mjs` copie le dashboard et la progression vers le dépôt GitHub dédié, pousse les changements, puis redéploie Vercel.
 
 ## Commandes
 

@@ -38,7 +38,8 @@ async function main() {
   const date = new Date().toISOString().slice(0, 10);
   runGit(['commit', '-m', `Update JLPT quest ${date}`]);
   runGit(['push', 'origin', 'main']);
-  process.stdout.write('Dashboard committed and pushed.\n');
+  runVercel();
+  process.stdout.write('Dashboard committed, pushed and deployed.\n');
 }
 
 async function assertPublishRepo() {
@@ -55,6 +56,10 @@ async function copy(source, destination) {
 
 function runGit(args) {
   return execFileSync('git', args, { cwd: publishDir, encoding: 'utf8' });
+}
+
+function runVercel() {
+  execFileSync('vercel', ['--prod', '--yes'], { cwd: publishDir, encoding: 'utf8' });
 }
 
 main().catch((error) => {
