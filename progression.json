@@ -1,0 +1,60 @@
+{
+  "updatedAt": "2026-07-15T13:20:00+02:00",
+  "title": "JLPT Quest",
+  "level": 3,
+  "xp": 182,
+  "xpNext": 250,
+  "streakDays": 2,
+  "totalStars": 5,
+  "anki": {
+    "doneToday": true,
+    "minutes": 12,
+    "due": 326,
+    "backlog": 310
+  },
+  "obi": {
+    "currentLesson": 45,
+    "lessonTitle": "Aimer, détester et préférer",
+    "minutes": 10,
+    "doneToday": true
+  },
+  "listening": {
+    "title": "Japanese with Shun",
+    "minutes": 0,
+    "doneToday": false
+  },
+  "morningQuest": "12 à 15 min d'Anki reviews only.",
+  "eveningQuest": "5 à 10 min d'Obi 45 si tu as encore de l'élan.",
+  "milestones": [
+    {
+      "date": "2026-07-15",
+      "title": "Reprise propre",
+      "text": "Anki remis en route et Obi 45 relancé sans nouveau vocab."
+    },
+    {
+      "date": "2026-08",
+      "title": "Routine stable",
+      "text": "Anki quotidien et Obi 3 fois par semaine."
+    },
+    {
+      "date": "2026-10",
+      "title": "Mock N5",
+      "text": "Test complet pour voir les trous réels."
+    },
+    {
+      "date": "2026-12",
+      "title": "JLPT N5",
+      "text": "Objectif final, avec la base déjà en place."
+    }
+  ],
+  "recentLogs": [
+    {
+      "label": "Matin",
+      "value": "16 reviews en 12 min"
+    },
+    {
+      "label": "Soir",
+      "value": "Obi 45 lancé"
+    }
+  ]
+}

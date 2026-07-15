@@ -1,0 +1,549 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>JLPT Quest - Juliann</title>
+  <style>
+    :root {
+      --bg: #07111d;
+      --bg-2: #0c1b2f;
+      --panel: rgba(14, 28, 49, 0.86);
+      --panel-2: rgba(18, 40, 67, 0.94);
+      --line: rgba(255,255,255,0.12);
+      --text: #f7f2ea;
+      --muted: #aec0d5;
+      --cyan: #77d8d1;
+      --gold: #f7c66b;
+      --orange: #ff9861;
+      --violet: #9d8cff;
+      --green: #92e28f;
+      --red: #ff8a8a;
+      --shadow: 0 20px 50px rgba(0,0,0,.32);
+      --radius: 22px;
+      --radius-sm: 14px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--text);
+      font: 16px/1.5 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 20% 10%, rgba(119, 216, 209, .20), transparent 28%),
+        radial-gradient(circle at 84% 0%, rgba(247, 198, 107, .18), transparent 24%),
+        radial-gradient(circle at 78% 55%, rgba(157, 140, 255, .14), transparent 30%),
+        linear-gradient(180deg, #050b14 0%, var(--bg) 36%, #081a2b 100%);
+      min-height: 100vh;
+    }
+    a { color: inherit; }
+    .wrap { width: min(1280px, calc(100vw - 28px)); margin: 0 auto; padding: 22px 0 40px; }
+    .topbar, .hero, .grid, .bottom { display: grid; gap: 16px; }
+    .topbar {
+      grid-template-columns: 1.1fr auto;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+    .brand {
+      display: flex; gap: 14px; align-items: center;
+      padding: 18px 0;
+    }
+    .sigil {
+      width: 56px; height: 56px; border-radius: 18px;
+      display: grid; place-items: center;
+      background: linear-gradient(135deg, rgba(247,198,107,.98), rgba(255,152,97,.96));
+      color: #111; font-weight: 900; font-size: 1.2rem;
+      box-shadow: 0 18px 30px rgba(247, 198, 107, .18);
+      flex: 0 0 auto;
+    }
+    h1, h2, h3, p { margin: 0; }
+    h1 { font-size: clamp(1.5rem, 3vw, 2.4rem); line-height: 1.05; }
+    .sub { color: var(--muted); margin-top: 6px; max-width: 62ch; }
+    .chip-row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: end; }
+    .chip {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 12px; border-radius: 999px; border: 1px solid var(--line);
+      background: rgba(255,255,255,.04); color: var(--muted); font-weight: 700;
+    }
+    .chip strong { color: var(--text); }
+    .hero {
+      grid-template-columns: 1.25fr .75fr;
+      margin-bottom: 16px;
+    }
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+    }
+    .hero-main {
+      position: relative;
+      overflow: hidden;
+      min-height: 340px;
+      padding: 28px;
+      background:
+        radial-gradient(circle at 15% 20%, rgba(119, 216, 209, .18), transparent 22%),
+        radial-gradient(circle at 85% 15%, rgba(247, 198, 107, .18), transparent 22%),
+        linear-gradient(145deg, rgba(20, 45, 74, .92), rgba(10, 18, 32, .92));
+    }
+    .hero-main::after {
+      content:"";
+      position:absolute; inset:auto -8% -36% -8%;
+      height: 220px;
+      background:
+        radial-gradient(circle at 15% 30%, rgba(255,255,255,.10), transparent 28%),
+        radial-gradient(circle at 35% 55%, rgba(255,255,255,.08), transparent 24%),
+        radial-gradient(circle at 66% 48%, rgba(255,255,255,.10), transparent 25%),
+        radial-gradient(circle at 84% 25%, rgba(255,255,255,.07), transparent 22%);
+      opacity: .8;
+      pointer-events: none;
+    }
+    .kicker { color: var(--gold); text-transform: uppercase; letter-spacing: .09em; font-size: .76rem; font-weight: 900; }
+    .hero-title {
+      font-size: clamp(2.1rem, 5.3vw, 4.8rem);
+      line-height: .96;
+      margin-top: 14px;
+      max-width: 11ch;
+    }
+    .hero-title span { color: var(--cyan); }
+    .hero-copy { max-width: 65ch; color: var(--muted); margin-top: 16px; font-size: 1.04rem; }
+    .meta-row { display:flex; flex-wrap:wrap; gap:10px; margin-top: 22px; }
+    .meta {
+      padding: 12px 14px; border-radius: 16px; border: 1px solid var(--line);
+      background: rgba(255,255,255,.04); min-width: 160px;
+    }
+    .meta b { display:block; font-size: 1.25rem; }
+    .meta span { color: var(--muted); font-size: .88rem; }
+    .hero-side {
+      padding: 22px;
+      display:grid; gap: 14px;
+      grid-template-rows: auto auto auto 1fr;
+    }
+    .orb {
+      height: 144px;
+      border-radius: 24px;
+      position: relative;
+      overflow:hidden;
+      background:
+        radial-gradient(circle at 50% 36%, rgba(255,255,255,.20), transparent 16%),
+        radial-gradient(circle at 52% 52%, rgba(119,216,209,.36), rgba(119,216,209,.08) 28%, transparent 49%),
+        linear-gradient(180deg, rgba(18, 41, 67, .85), rgba(8, 20, 36, .9));
+      border: 1px solid rgba(255,255,255,.12);
+    }
+    .orb::before {
+      content:"";
+      position:absolute; inset: 18px 22px 36px;
+      border-radius: 999px;
+      border: 2px solid rgba(255,255,255,.12);
+      filter: drop-shadow(0 0 20px rgba(119, 216, 209, .20));
+    }
+    .orb::after {
+      content:"";
+      position:absolute; left: 50%; top: 50%;
+      width: 88px; height: 88px; transform: translate(-50%, -50%);
+      border-radius: 28px;
+      background: linear-gradient(180deg, rgba(247,198,107,.95), rgba(255,152,97,.72));
+      clip-path: polygon(50% 2%, 62% 34%, 98% 36%, 70% 58%, 79% 94%, 50% 72%, 21% 94%, 30% 58%, 2% 36%, 38% 34%);
+      box-shadow: 0 0 24px rgba(247,198,107,.42);
+      opacity: .92;
+    }
+    .side-card {
+      padding: 16px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.035);
+    }
+    .side-card h3 { font-size: 1rem; margin-bottom: 8px; }
+    .side-card p, .side-card li { color: var(--muted); }
+    .side-list { margin: 10px 0 0; padding-left: 18px; display:grid; gap: 8px; }
+    .grid { grid-template-columns: repeat(12, 1fr); }
+    .card {
+      padding: 20px;
+      min-height: 100%;
+    }
+    .section {
+      grid-column: span 6;
+      background: var(--panel-2);
+    }
+    .section.full { grid-column: span 12; }
+    .section-head {
+      display:flex; justify-content:space-between; gap: 12px; align-items:end; margin-bottom: 14px;
+    }
+    .section-head p { color: var(--muted); max-width: 62ch; }
+    .big {
+      font-size: clamp(2rem, 4.8vw, 3.6rem);
+      line-height: .96;
+      margin-top: 8px;
+    }
+    .progress-shell {
+      display:grid; gap: 10px; margin-top: 18px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .progress-box {
+      padding: 16px; border-radius: 18px; border: 1px solid var(--line);
+      background: rgba(255,255,255,.04);
+    }
+    .progress-box strong { display:block; font-size: 1.35rem; }
+    .bar {
+      margin-top: 10px; height: 12px; border-radius: 999px;
+      background: rgba(255,255,255,.08); overflow: hidden;
+    }
+    .bar i {
+      display:block; height:100%; border-radius: inherit;
+      background: linear-gradient(90deg, var(--orange), var(--gold), var(--cyan));
+      width: var(--w, 50%);
+    }
+    .quest-list { display:grid; gap: 10px; }
+    .quest {
+      display:grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items:center;
+      padding: 14px 16px; border-radius: 16px; border: 1px solid var(--line);
+      background: rgba(255,255,255,.035);
+    }
+    .quest .pill {
+      width: 38px; height: 38px; border-radius: 12px; display:grid; place-items:center;
+      background: rgba(119,216,209,.16); color: var(--cyan); font-weight: 900;
+    }
+    .quest small { color: var(--muted); display:block; }
+    .badge {
+      padding: 8px 11px; border-radius: 999px; border: 1px solid var(--line);
+      color: var(--text); background: rgba(255,255,255,.03); font-size: .84rem;
+      white-space: nowrap;
+    }
+    .timeline {
+      padding: 20px;
+    }
+    .milestones {
+      list-style: none; padding: 0; margin: 14px 0 0; display:grid; gap: 12px;
+    }
+    .milestone {
+      display:grid; grid-template-columns: 92px 1fr; gap: 12px; align-items:start;
+      padding: 14px 16px; border-radius: 16px; border: 1px solid var(--line); background: rgba(255,255,255,.035);
+    }
+    .milestone time { color: var(--gold); font-weight: 900; }
+    .milestone strong { display:block; margin-bottom: 4px; }
+    .milestone span { color: var(--muted); }
+    .avatar-box {
+      display:grid; gap: 12px;
+      grid-template-columns: 1fr 1fr;
+    }
+    .avatar, .logbook {
+      border-radius: 20px; border: 1px solid var(--line); background: rgba(255,255,255,.035); padding: 18px;
+    }
+    .avatar-figure {
+      height: 220px; border-radius: 20px; position: relative; overflow:hidden;
+      background:
+        radial-gradient(circle at 50% 20%, rgba(255,255,255,.16), transparent 18%),
+        radial-gradient(circle at 50% 58%, rgba(119,216,209,.22), rgba(119,216,209,.05) 28%, transparent 58%),
+        linear-gradient(180deg, rgba(17,35,58,.92), rgba(7,16,29,.92));
+    }
+    .avatar-figure::before {
+      content:""; position:absolute; inset: 30px 26px auto;
+      height: 130px; border-radius: 30px 30px 48px 48px;
+      background:
+        radial-gradient(circle at 50% 34%, rgba(255,255,255,.15), transparent 13%),
+        linear-gradient(180deg, rgba(255,152,97,.95), rgba(247,198,107,.76));
+      clip-path: polygon(50% 8%, 65% 17%, 74% 33%, 71% 57%, 58% 77%, 42% 77%, 29% 57%, 26% 33%, 35% 17%);
+      filter: drop-shadow(0 14px 30px rgba(255, 152, 97, .15));
+    }
+    .avatar-figure::after {
+      content:""; position:absolute; left: 50%; bottom: 28px; width: 124px; height: 56px;
+      transform: translateX(-50%);
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(119,216,209,.78), rgba(157,140,255,.70));
+      box-shadow: 0 0 34px rgba(119,216,209,.18);
+    }
+    .avatar-figure[data-state="awake"]::before {
+      filter: saturate(1.15) brightness(1.05);
+    }
+    .avatar-figure[data-state="active"]::after {
+      background: linear-gradient(90deg, rgba(247,198,107,.96), rgba(119,216,209,.90));
+      box-shadow: 0 0 42px rgba(247,198,107,.26);
+    }
+    .avatar p { color: var(--muted); margin-top: 12px; }
+    .log-lines { display:grid; gap: 10px; margin-top: 10px; }
+    .log-line {
+      display:flex; justify-content:space-between; gap: 10px; align-items:center;
+      padding: 12px 14px; border-radius: 14px; background: rgba(255,255,255,.04); border:1px solid var(--line);
+    }
+    .log-line strong { display:block; }
+    .muted { color: var(--muted); }
+    .footer {
+      margin-top: 16px; color: var(--muted); font-size: .94rem;
+      display:flex; justify-content:space-between; gap: 12px; flex-wrap: wrap;
+    }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    @media (max-width: 920px) {
+      .hero, .topbar, .avatar-box, .grid { grid-template-columns: 1fr; }
+      .chip-row { justify-content: start; }
+      .section { grid-column: span 12; }
+    }
+    @media (max-width: 640px) {
+      .wrap { width: min(100vw - 18px, 1280px); }
+      .hero-main, .hero-side, .card, .timeline { padding: 18px; }
+      .hero-main { min-height: 300px; }
+      .progress-shell { grid-template-columns: 1fr; }
+      .milestone { grid-template-columns: 1fr; }
+      .quest { grid-template-columns: auto 1fr; }
+      .quest .badge { grid-column: 2; justify-self: start; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header class="topbar">
+      <div class="brand">
+        <div class="sigil">N5</div>
+        <div>
+          <h1>JLPT Quest</h1>
+          <p class="sub">Un dashboard ludique, lisible sur ordi et téléphone, avec une seule source de vérité pour ta progression japonaise.</p>
+        </div>
+      </div>
+      <div class="chip-row" id="headerChips"></div>
+    </header>
+
+    <section class="hero">
+      <article class="panel hero-main">
+        <div>
+          <div class="kicker">Campagne active</div>
+          <h2 class="hero-title">Le chemin vers le <span>N5</span></h2>
+          <p class="hero-copy">
+            Le principe est simple. Le matin et le soir alimentent une boucle unique.
+            Le site transforme les réponses réelles en XP, en jalons et en progression visuelle.
+            Pas de morale, juste un jeu utile.
+          </p>
+        </div>
+        <div class="meta-row" id="topStats"></div>
+      </article>
+
+      <aside class="panel hero-side">
+        <div class="orb" aria-hidden="true"></div>
+        <div class="side-card">
+          <h3>Source de vérité</h3>
+          <p class="muted mono">Japonais/progression.json</p>
+        </div>
+        <div class="side-card">
+          <h3>Boucle quotidienne</h3>
+          <ul class="side-list">
+            <li>Quête du matin, courte et réaliste.</li>
+            <li>Débrief du soir, résultats réels uniquement.</li>
+            <li>XP, streak et jalons mis à jour automatiquement.</li>
+          </ul>
+        </div>
+      </aside>
+    </section>
+
+    <section class="grid">
+      <article class="panel card section">
+        <div class="section-head">
+          <div>
+            <div class="kicker">Progression</div>
+            <h3 class="big">XP, niveau, cap</h3>
+          </div>
+          <p>Ce bloc affiche ce qui compte vraiment. Tu vois où tu en es, sans devoir ouvrir une note ou une automation.</p>
+        </div>
+        <div class="progress-shell" id="progressGrid"></div>
+      </article>
+
+      <article class="panel card section">
+        <div class="section-head">
+          <div>
+            <div class="kicker">Boucle active</div>
+            <h3 class="big">Quêtes du jour</h3>
+          </div>
+          <p>Le matin propose. Le soir valide. La vraie boucle, c’est le réel, pas l’intention.</p>
+        </div>
+        <div class="quest-list" id="questList"></div>
+      </article>
+
+      <article class="panel timeline section full">
+        <div class="section-head">
+          <div>
+            <div class="kicker">Jalons</div>
+            <h3 class="big">Le chemin vers décembre 2026</h3>
+          </div>
+          <p>Une carte simple des points de passage. Tu peux y ajouter les repères Anki, Obi et JLPT au fil de l’eau.</p>
+        </div>
+        <ul class="milestones" id="milestones"></ul>
+      </article>
+
+      <article class="panel card section">
+        <div class="section-head">
+          <div>
+            <div class="kicker">Avatar</div>
+            <h3 class="big">Compagnon en évolution</h3>
+          </div>
+          <p>Le personnage change d’état avec tes étoiles. C’est la couche “jeu” la plus visible.</p>
+        </div>
+        <div class="avatar-box">
+          <div class="avatar">
+            <div class="avatar-figure" id="avatarFigure"></div>
+            <p id="avatarCopy" class="muted"></p>
+          </div>
+          <div class="logbook">
+            <div class="kicker">Dernières traces</div>
+            <div class="log-lines" id="logLines"></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel card section">
+        <div class="section-head">
+          <div>
+            <div class="kicker">Structure</div>
+            <h3 class="big">Ce qui va vivre derrière</h3>
+          </div>
+          <p>La couche visible reste jolie. La couche invisible doit rester simple à écrire depuis les automations.</p>
+        </div>
+        <div class="quest-list">
+          <div class="quest"><div class="pill">1</div><div><strong>Matin</strong><small>Quête du jour, objectif, créneau, blocage éventuel.</small></div><span class="badge">Quest</span></div>
+          <div class="quest"><div class="pill">2</div><div><strong>Soir</strong><small>Résultat réel, étoiles gagnées, prochaine marche.</small></div><span class="badge">Debrief</span></div>
+          <div class="quest"><div class="pill">3</div><div><strong>Source</strong><small>Un JSON versionné sur GitHub, consultable partout.</small></div><span class="badge">Truth</span></div>
+        </div>
+      </article>
+    </section>
+
+    <div class="footer">
+      <span>Prototype statique, prêt pour GitHub Pages ou un autre hébergement simple.</span>
+      <span class="mono">Dernière mise à jour: <span id="lastUpdate"></span></span>
+    </div>
+  </main>
+
+  <script>
+    const fallback = {
+      updatedAt: "2026-07-15T13:20:00+02:00",
+      title: "JLPT Quest",
+      level: 3,
+      xp: 182,
+      xpNext: 250,
+      streakDays: 2,
+      totalStars: 5,
+      anki: { doneToday: true, minutes: 12, due: 326, backlog: 310 },
+      obi: { currentLesson: 45, lessonTitle: "Aimer, détester et préférer", minutes: 10, doneToday: true },
+      listening: { title: "Japanese with Shun", minutes: 0, doneToday: false },
+      morningQuest: "12 à 15 min d'Anki reviews only.",
+      eveningQuest: "5 à 10 min d'Obi 45 si tu as encore de l'élan.",
+      milestones: [
+        { date: "2026-07-15", title: "Reprise propre", text: "Anki remis en route et Obi 45 relancé sans nouveau vocab." },
+        { date: "2026-08", title: "Routine stable", text: "Anki quotidien et Obi 3 fois par semaine." },
+        { date: "2026-10", title: "Mock N5", text: "Test complet pour voir les trous réels." },
+        { date: "2026-12", title: "JLPT N5", text: "Objectif final, avec la base déjà en place." }
+      ],
+      recentLogs: [
+        { label: "Matin", value: "16 reviews en 12 min" },
+        { label: "Obi", value: "Leçon 45 lancée" },
+        { label: "Note", value: "Boucle relancée" }
+      ]
+    };
+
+    function pct(value, max) {
+      return Math.max(0, Math.min(100, Math.round((value / max) * 100)));
+    }
+
+    function render(data) {
+      const topStats = document.getElementById("topStats");
+      const headerChips = document.getElementById("headerChips");
+      const progressGrid = document.getElementById("progressGrid");
+      const questList = document.getElementById("questList");
+      const milestones = document.getElementById("milestones");
+      const logLines = document.getElementById("logLines");
+      const avatarCopy = document.getElementById("avatarCopy");
+      const avatarFigure = document.getElementById("avatarFigure");
+
+      headerChips.innerHTML = [
+        { label: "Niveau", value: `Lv ${data.level}` },
+        { label: "XP", value: `${data.xp}` },
+        { label: "Étoiles", value: `${data.totalStars}` },
+      ].map(item => `<span class="chip"><strong>${item.value}</strong>${item.label}</span>`).join("");
+
+      topStats.innerHTML = [
+        { value: `${pct(data.xp, data.xpNext)}%`, label: "vers le prochain palier" },
+        { value: `${data.streakDays} j`, label: "streak actuelle" },
+        { value: `${data.anki.backlog}`, label: "reviews en retard" }
+      ].map(item => `<div class="meta"><b>${item.value}</b><span>${item.label}</span></div>`).join("");
+
+      progressGrid.innerHTML = [
+        { title: "XP totale", value: data.xp, meta: `Objectif palier suivant: ${data.xpNext}`, w: `${pct(data.xp, data.xpNext)}%` },
+        { title: "Anki", value: `${data.anki.minutes} min`, meta: `Backlog ${data.anki.backlog} / due ${data.anki.due}`, w: `${pct(data.anki.minutes, 20)}%` },
+        { title: "Obi", value: `L${data.obi.currentLesson}`, meta: data.obi.lessonTitle, w: `${pct(data.obi.currentLesson, 82)}%` },
+        { title: "Étoiles", value: data.totalStars, meta: "Score de la journée / semaine", w: `${pct(data.totalStars, 4)}%` }
+      ].map(item => `
+        <div class="progress-box">
+          <strong>${item.title}</strong>
+          <div style="font-size:1.35rem;font-weight:900;margin-top:4px">${item.value}</div>
+          <div class="muted" style="margin-top:4px">${item.meta}</div>
+          <div class="bar"><i style="--w:${item.w}"></i></div>
+        </div>
+      `).join("");
+
+      questList.innerHTML = [
+        {
+          title: "Quête du matin",
+          body: data.morningQuest,
+          tag: data.anki.doneToday ? "Fait" : "À faire",
+          tone: data.anki.doneToday ? "done" : "todo"
+        },
+        {
+          title: "Quête du soir",
+          body: data.eveningQuest,
+          tag: data.obi.doneToday ? "Relancé" : "En attente",
+          tone: data.obi.doneToday ? "done" : "todo"
+        },
+        {
+          title: "Écoute",
+          body: `${data.listening.title} - ${data.listening.minutes} min`,
+          tag: data.listening.doneToday ? "Validé" : "Bonus",
+          tone: data.listening.doneToday ? "done" : "bonus"
+        }
+      ].map(item => `
+        <div class="quest">
+          <div class="pill">${item.tone === "done" ? "✓" : item.tone === "bonus" ? "+" : "!"}</div>
+          <div>
+            <strong>${item.title}</strong>
+            <small>${item.body}</small>
+          </div>
+          <span class="badge">${item.tag}</span>
+        </div>
+      `).join("");
+
+      milestones.innerHTML = data.milestones.map(item => `
+        <li class="milestone">
+          <time>${item.date}</time>
+          <div>
+            <strong>${item.title}</strong>
+            <span>${item.text}</span>
+          </div>
+        </li>
+      `).join("");
+
+      logLines.innerHTML = data.recentLogs.map(item => `
+        <div class="log-line">
+          <strong>${item.label}</strong>
+          <span class="muted">${item.value}</span>
+        </div>
+      `).join("");
+
+      avatarCopy.textContent = data.totalStars >= 5
+        ? "Le compagnon passe en mode actif. Les contours deviennent plus nets, la lueur monte."
+        : data.totalStars >= 2
+          ? "Le compagnon se réveille. Une ou deux étoiles suffisent déjà à le faire avancer."
+          : "Le compagnon attend sa première vraie impulsion. Le simple contact compte déjà.";
+
+      avatarFigure.dataset.state = data.totalStars >= 5 ? "active" : data.totalStars >= 2 ? "awake" : "sleep";
+      document.getElementById("lastUpdate").textContent = new Date(data.updatedAt).toLocaleString("fr-FR", { dateStyle: "medium", timeStyle: "short" });
+    }
+
+    async function load() {
+      try {
+        const res = await fetch("../progression.json", { cache: "no-store" });
+        if (!res.ok) throw new Error("progression.json unavailable");
+        render(await res.json());
+      } catch (err) {
+        render(fallback);
+      }
+    }
+
+    load();
+  </script>
+</body>
+</html>
