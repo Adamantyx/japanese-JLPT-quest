@@ -38,8 +38,7 @@ async function main() {
   const date = new Date().toISOString().slice(0, 10);
   runGit(['commit', '-m', `Update JLPT quest ${date}`]);
   runGit(['push', 'origin', 'main']);
-  runVercel();
-  process.stdout.write('Dashboard committed, pushed and deployed.\n');
+  process.stdout.write('Dashboard committed and pushed.\n');
 }
 
 async function assertPublishRepo() {
@@ -56,28 +55,6 @@ async function copy(source, destination) {
 
 function runGit(args) {
   return execFileSync('git', args, { cwd: publishDir, encoding: 'utf8' });
-}
-
-function runVercel() {
-  const output = execFileSync('vercel', ['--prod', '--yes', '--no-wait', '--no-color', '--format', 'json'], {
-    cwd: publishDir,
-    encoding: 'utf8',
-    stdio: ['ignore', 'pipe', 'inherit'],
-    timeout: 60_000,
-  });
-  const deployment = JSON.parse(output);
-  const url = deployment.deployment?.url || deployment.url;
-  if (!url) throw new Error('Vercel did not return a deployment URL.');
-
-  const inspected = JSON.parse(execFileSync(
-    'vercel',
-    ['inspect', url, '--wait', '--timeout', '60s', '--format', 'json', '--no-color'],
-    { cwd: publishDir, encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'], timeout: 70_000 },
-  ));
-  if (inspected.readyState !== 'READY') {
-    throw new Error(`Vercel deployment ended in state ${inspected.readyState || 'unknown'}.`);
-  }
-  process.stdout.write(`Vercel ready: https://${inspected.aliases?.[0] || inspected.url}\n`);
 }
 
 main().catch((error) => {

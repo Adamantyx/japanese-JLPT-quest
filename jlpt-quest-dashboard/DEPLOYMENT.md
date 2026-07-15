@@ -20,13 +20,13 @@ Le script copie uniquement :
 - `Japonais/progression.json`
 - l'interface, les assets finaux, la documentation et les scripts du dashboard
 
-Il crée un commit uniquement en présence de changements, pousse `main`, puis redéploie la production Vercel liée à la copie locale.
+Il crée un commit uniquement en présence de changements puis pousse `main`. GitHub Pages republie alors automatiquement la branche.
 
-## Production active
+## Aperçu actif
 
 - URL : `https://japanese-jlpt-quest.vercel.app/`
-- Projet Vercel : `japanese-jlpt-quest`
-- Le dépôt GitHub privé n'est pas relié automatiquement à Vercel. Le script de publication assure donc le déploiement après chaque mise à jour confirmée.
+- Cet aperçu Vercel fonctionne, mais le compte bloque les redéploiements suivants. Il ne fait donc pas partie de la boucle quotidienne.
+- La cible durable est GitHub Pages.
 
 ## GitHub Pages
 
