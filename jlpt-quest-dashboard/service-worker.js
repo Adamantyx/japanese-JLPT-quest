@@ -1,4 +1,4 @@
-const CACHE = "jlpt-quest-v7";
+const CACHE = "jlpt-quest-v8";
 const SHELL = [
   "./",
   "./index.html",

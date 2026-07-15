@@ -283,14 +283,24 @@ async function loadCloud() {
   const failure = [profileResult, eventsResult, scoresResult, questsResult].find(result => result.error);
   if (failure) throw failure.error;
   if (!profileResult.data) throw new Error("Profil Supabase introuvable.");
-  document.getElementById("importHistoryButton").hidden = eventsResult.data.length > 0;
+  const cloudIsEmpty = eventsResult.data.length === 0;
+  document.getElementById("importHistoryButton").hidden = !cloudIsEmpty;
+  document.getElementById("restoreBanner").hidden = !cloudIsEmpty;
+  if (cloudIsEmpty) {
+    render(baseData, true, "Compte relié");
+    document.getElementById("restoreBanner").hidden = false;
+    setSync("pending", "Progression à restaurer");
+    return;
+  }
   render(deriveProgression(profileResult.data, eventsResult.data, scoresResult.data, questsResult.data), true);
 }
 
 async function importStarterHistory() {
   if (!session) return;
   const button = document.getElementById("importHistoryButton");
+  const restoreButton = document.getElementById("restoreProgressButton");
   button.disabled = true;
+  restoreButton.disabled = true;
   const profileUpdate = {
     display_name: "Juliann",
     level_seed: 3,
@@ -320,12 +330,14 @@ async function importStarterHistory() {
     const failure = results.find(result => result.error);
     if (failure) throw failure.error;
     button.hidden = true;
+    document.getElementById("restoreBanner").hidden = true;
     showToast("Le départ du 15 juillet est importé. Tes 2 étoiles sont là.");
     await loadCloud();
   } catch (error) {
     showToast(readableError(error));
   } finally {
     button.disabled = false;
+    restoreButton.disabled = false;
   }
 }
 
@@ -498,6 +510,7 @@ async function handleSession(nextSession) {
   document.getElementById("signedInActions").hidden = !signedIn;
   document.getElementById("accountCard").classList.toggle("visible", signedIn);
   document.getElementById("previewBanner").hidden = signedIn;
+  if (!signedIn) document.getElementById("restoreBanner").hidden = true;
   if (signedIn) {
     document.getElementById("accountName").textContent = session.user.user_metadata?.display_name || "Voyageur N5";
     document.getElementById("accountEmail").textContent = session.user.email;
@@ -525,6 +538,7 @@ function bindUi() {
   document.getElementById("quickAddButton").addEventListener("click", () => openEntry());
   document.getElementById("heroRecordButton").addEventListener("click", () => openEntry());
   document.getElementById("previewLoginButton").addEventListener("click", () => openAuth());
+  document.getElementById("restoreProgressButton").addEventListener("click", importStarterHistory);
   document.getElementById("accountButton").addEventListener("click", () => openAuth());
   document.getElementById("questList").addEventListener("click", event => {
     const quest = event.target.closest("[data-entry-category]");
