@@ -478,12 +478,12 @@ async function importStarterHistory() {
 
 async function submitEntry(event) {
   event.preventDefault();
-  if (!session) {
+  const category = document.getElementById("entryCategory").value;
+  if (!session && category !== "duolingo") {
     document.getElementById("entryDialog").close();
     openAuth();
     return;
   }
-  const category = document.getElementById("entryCategory").value;
   const payload = {
     id: crypto.randomUUID(),
     occurred_on: document.getElementById("entryDate").value,
@@ -503,7 +503,13 @@ async function submitEntry(event) {
   const submit = document.querySelector('#entryForm button[type="submit"]');
   submit.disabled = true;
   try {
-    if (category === "duolingo" && navigator.onLine) {
+    if (!session) {
+      if (!queueEvent(payload)) return;
+      baseData = applyPendingPreviewEvents(baseData);
+      render(baseData, false, "Étincelle gardée sur cet appareil");
+      showToast("Étincelle allumée. +5 XP, elle sera synchronisée à la connexion.");
+      celebrate(payload);
+    } else if (category === "duolingo" && navigator.onLine) {
       const { data: existingSpark, error: sparkError } = await client
         .from("study_events")
         .select("id")
@@ -516,10 +522,10 @@ async function submitEntry(event) {
         return;
       }
     }
-    if (!navigator.onLine) {
+    if (session && !navigator.onLine) {
       if (!queueEvent(payload)) return;
       showToast(category === "duolingo" ? "Étincelle gardée hors ligne." : "Session gardée hors ligne. Elle partira au retour du réseau.");
-    } else {
+    } else if (session) {
       const { error } = await client.from("study_events").insert(payload);
       if (error && isNetworkError(error)) {
         if (!queueEvent(payload)) return;
@@ -551,6 +557,53 @@ function queueEvent(payload) {
   localStorage.setItem(pendingKey, JSON.stringify(queued));
   setSync("pending", `${queued.length} session${queued.length > 1 ? "s" : ""} en attente`);
   return true;
+}
+
+function applyPendingPreviewEvents(data) {
+  const queued = JSON.parse(localStorage.getItem(pendingKey) || "[]");
+  const pendingSparks = queued.filter(item => item.category === "duolingo");
+  const today = toIsoDate();
+  const todaySpark = pendingSparks.find(item => item.occurred_on === today);
+  if (!todaySpark || data.duolingo?.doneToday) return data;
+
+  const next = structuredClone(data);
+  const minutes = Number(todaySpark.minutes || 0);
+  next.duolingo = {
+    ...next.duolingo,
+    doneToday: true,
+    minutes,
+    sparksToday: 1,
+    xpToday: 5
+  };
+  next.profile.xp = Number(next.profile.xp || 0) + 5;
+  while (next.profile.xp >= next.profile.xpNext) {
+    next.profile.level += 1;
+    next.profile.xpNext += 100;
+  }
+
+  const weekStartDate = toIsoDate(startOfWeek(new Date()));
+  const knownSparkDates = next.week.days.filter(day => day.duolingoEarned).map(day => day.date);
+  const pendingSparkDates = pendingSparks.map(item => item.occurred_on);
+  const weekSparkDates = [...new Set([...knownSparkDates, ...pendingSparkDates])].filter(date => date >= weekStartDate);
+  next.duolingo.daysThisWeek = weekSparkDates.length;
+  next.duolingo.streakDays = calculateDateStreak([...new Set([...knownSparkDates, ...pendingSparkDates])]);
+
+  let day = next.week.days.find(item => item.date === today);
+  if (!day) {
+    day = { date: today, label: new Intl.DateTimeFormat("fr-FR", { weekday: "short" }).format(new Date()), stars: 0, confirmed: true };
+    next.week.days.push(day);
+  }
+  if (!day.duolingoEarned) {
+    day.duolingoEarned = true;
+    day.totalMinutes = Number(day.totalMinutes || 0) + minutes;
+    next.week.totalMinutes = Number(next.week.totalMinutes || 0) + minutes;
+  }
+  next.recentLogs = [
+    { date: today, label: "Duolingo", value: `${minutes} min, étincelle +5 XP`, confirmed: true },
+    ...next.recentLogs.filter(log => !(log.date === today && log.label === "Duolingo"))
+  ].slice(0, 8);
+  next.updatedAt = new Date().toISOString();
+  return next;
 }
 
 async function flushQueue() {
@@ -676,7 +729,7 @@ async function handleSession(nextSession) {
 }
 
 function openEntry(category = null) {
-  if (!session) return openAuth("Connecte-toi une fois pour enregistrer ta progression depuis tous tes appareils.");
+  if (!session && category !== "duolingo") return openAuth("Connecte-toi une fois pour enregistrer ta progression depuis tous tes appareils.");
   if (category) document.getElementById("entryCategory").value = category;
   updateCategoryFields();
   document.getElementById("entryDate").value = toIsoDate();
@@ -812,9 +865,9 @@ async function loadBaseData() {
   try {
     const response = await fetch(`../progression.json?ts=${Date.now()}`, { cache: "no-store" });
     if (!response.ok) throw new Error("progression.json unavailable");
-    return applyLocalBossAttempt(await response.json());
+    return applyPendingPreviewEvents(applyLocalBossAttempt(await response.json()));
   } catch {
-    return applyLocalBossAttempt(fallback);
+    return applyPendingPreviewEvents(applyLocalBossAttempt(fallback));
   }
 }
 

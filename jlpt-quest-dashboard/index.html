@@ -350,7 +350,7 @@
     .companion-copy { position: relative; z-index: 3; padding: 25px 25px 0; }
     .companion h2 { margin-top: 5px; font-size: 28px; }
     .companion-stage { color: var(--gold); font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
-    .companion img { position: absolute; z-index: 1; right: -24px; bottom: -25px; width: min(96%, 380px); filter: drop-shadow(0 25px 28px rgba(0,0,0,.42)); transition: filter .4s ease; transform-origin: 50% 100%; animation: companionBreath 5.2s ease-in-out infinite; }
+    .companion img { position: absolute; z-index: 4; right: -8px; bottom: -15px; width: auto; height: min(67%, 315px); max-width: 85%; pointer-events: none; filter: drop-shadow(0 25px 28px rgba(0,0,0,.42)); transition: filter .4s ease; transform-origin: 50% 100%; animation: companionBreath 5.2s ease-in-out infinite; }
     .companion[data-state="active"] img { filter: drop-shadow(0 25px 28px rgba(0,0,0,.42)) drop-shadow(0 0 22px rgba(231,189,104,.18)); }
     .speech { position: absolute; z-index: 4; left: 22px; right: 22px; bottom: 20px; max-width: 270px; padding: 14px 15px; border: 1px solid rgba(255,255,255,.15); border-radius: 17px 17px 17px 4px; background: rgba(5,18,28,.88); color: #d7dfda; font-size: 12px; backdrop-filter: blur(12px); }
 
@@ -803,6 +803,6 @@
 
   <script src="vendor/supabase.min.js"></script>
   <script src="supabase-config.js"></script>
-  <script src="app.js"></script>
+  <script src="app.js?v=10"></script>
 </body>
 </html>

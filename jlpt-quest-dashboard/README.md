@@ -10,7 +10,7 @@ L'application permet de créer un compte, puis d'enregistrer directement une ses
 
 ## Couche jeu
 
-- Duolingo est une étincelle : `+5 XP` une fois par jour, sans étoile et sans sauver la journée.
+- Duolingo est une étincelle : `+5 XP` une fois par jour, sans étoile et sans sauver la journée. Sans compte, elle reste localement en attente puis se synchronise à la connexion.
 - Mimir évolue selon les étoiles cumulées et le décor change avec lui.
 - La carte N5 montre uniquement une couverture prouvée, sans inventer un pourcentage de vocabulaire ou de kanji.
 - L'expédition hebdomadaire résume étoiles, minutes, reviews et reprises Obi.
