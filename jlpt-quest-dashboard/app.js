@@ -1,6 +1,6 @@
 const fallback = {
   schemaVersion: 2,
-  updatedAt: "2026-07-15T13:30:00+02:00",
+  updatedAt: "2026-07-15T22:55:00+02:00",
   profile: { name: "Juliann", rank: "Voyageur N5", level: 3, xp: 182, xpNext: 250, streakDays: 2, lifetimeStars: 5 },
   campaign: { target: "JLPT N5", targetMonth: "Décembre 2026", countdownDate: "2026-12-01", currentChapter: "Fondations retrouvées", tagline: "一歩一歩" },
   today: { date: "2026-07-15", status: "solid", stars: 2, morningQuest: "12 à 15 min d'Anki, reviews uniquement.", eveningQuest: "Continuer la leçon Obi 45 sans pression de la finir.", confirmedSummary: "16 reviews en 12 min, puis 10 min actives sur Obi 45.", energy: "Relancé" },
@@ -30,12 +30,13 @@ let client = null;
 let session = null;
 let installPrompt = null;
 let toastTimer = null;
+let celebrationTimer = null;
 let authMode = "login";
 
 function render(data, live, syncText = "Progression synchronisée") {
   const days = daysUntil(data.campaign.countdownDate);
   const elapsed = clamp(100 - Math.round((days / 139) * 100));
-  document.getElementById("daysLeft").textContent = days;
+  animateNumber(document.getElementById("daysLeft"), days, value => String(value), 650);
   document.getElementById("countdown").style.setProperty("--countdown", `${elapsed}%`);
   document.getElementById("chapterLabel").textContent = `Chapitre ${String(data.profile.level).padStart(2, "0")} · ${data.campaign.currentChapter}`;
   document.getElementById("todaySummary").textContent = data.today.confirmedSummary || "Le matin propose. Le réel confirme.";
@@ -55,11 +56,11 @@ function render(data, live, syncText = "Progression synchronisée") {
   const xpProgress = pct(data.profile.xp, data.profile.xpNext);
   const xpRemaining = Math.max(0, Number(data.profile.xpNext) - Number(data.profile.xp));
   document.getElementById("levelSigil").textContent = String(data.profile.level).padStart(2, "0");
-  document.getElementById("xpText").textContent = `${data.profile.xp} / ${data.profile.xpNext} XP`;
+  animateNumber(document.getElementById("xpText"), data.profile.xp, value => `${value} / ${data.profile.xpNext} XP`, 900);
   document.getElementById("xpBar").style.setProperty("--w", `${xpProgress}%`);
   document.getElementById("xpProgress").setAttribute("aria-valuenow", String(xpProgress));
   document.getElementById("xpRemaining").textContent = `${xpRemaining} XP restant${xpRemaining > 1 ? "s" : ""}`;
-  document.getElementById("todayLanterns").innerHTML = Array.from({ length: 4 }, (_, index) => `<span class="lantern ${index < Number(data.today.stars) ? "lit" : ""}"></span>`).join("");
+  document.getElementById("todayLanterns").innerHTML = Array.from({ length: 4 }, (_, index) => `<span class="lantern ${index < Number(data.today.stars) ? "lit" : ""}" style="--delay:${index * 0.14}s"></span>`).join("");
   document.getElementById("todayLanterns").setAttribute("aria-label", `${data.today.stars} étoile${Number(data.today.stars) > 1 ? "s" : ""} sur 4 aujourd'hui`);
   document.getElementById("lanternCaption").textContent = data.today.stars >= 2
     ? "Journée solide. Le feu est entretenu, inutile d'en faire un examen blanc."
@@ -73,8 +74,8 @@ function render(data, live, syncText = "Progression synchronisée") {
     { category: "obi", icon: "文", title: `Obi ${data.obi.currentLesson}, la structure`, body: data.today.eveningQuest, done: data.obi.doneToday, state: data.obi.doneToday ? "Reprise active" : "En attente" },
     { category: "listening", icon: "聴", title: "Écoute, le monde vivant", body: `${data.listening.title}, objectif 10 minutes attentives`, done: data.listening.doneToday, state: data.listening.doneToday ? "Étoile gagnée" : "Optionnelle" }
   ];
-  document.getElementById("questList").innerHTML = quests.map(item => `
-    <button class="quest-card ${item.done ? "is-done" : ""}" type="button" data-entry-category="${item.category}">
+  document.getElementById("questList").innerHTML = quests.map((item, index) => `
+    <button class="quest-card ${item.done ? "is-done" : ""}" type="button" data-entry-category="${item.category}" style="--quest-delay:${0.08 + index * 0.1}s">
       <span class="quest-icon">${esc(item.done ? "✓" : item.icon)}</span>
       <span class="quest-copy"><strong>${esc(item.title)}</strong><span>${esc(item.body)}</span></span>
       <span class="quest-meta"><span class="reward">${item.done ? "40 XP acquis" : "+40 XP"}</span><span class="quest-state">${esc(item.state)}</span></span>
@@ -99,6 +100,7 @@ function render(data, live, syncText = "Progression synchronisée") {
   const completeCount = data.milestones.filter(item => item.state === "complete").length;
   const pathPct = pct(Math.max(0, completeCount - 1), Math.max(1, data.milestones.length - 1));
   document.getElementById("pathProgress").style.setProperty("--w", `${pathPct}%`);
+  document.getElementById("pathTraveler").style.setProperty("--x", `${9 + (pathPct * 0.82)}%`);
   document.getElementById("milestones").innerHTML = data.milestones.map(item => `
     <article class="milestone ${esc(item.state)}">
       <div class="milestone-date">${esc(item.date)}</div><div class="milestone-node"></div>
@@ -133,7 +135,7 @@ function renderWeek(week) {
     const day = byDate.get(toIsoDate(date)) || { stars: 0, confirmed: false };
     return `<div class="day ${day.confirmed ? "confirmed" : ""}"><span>${label}</span><span class="day-stars">${day.stars ? "★".repeat(day.stars) : "·"}</span></div>`;
   }).join("");
-  document.getElementById("weekScore").textContent = week.stars;
+  animateNumber(document.getElementById("weekScore"), week.stars, value => String(value), 700);
   document.getElementById("weekTarget").textContent = ` / ${week.target} étoiles`;
   const progress = pct(week.stars, week.target);
   document.getElementById("weekBar").style.setProperty("--w", `${progress}%`);
@@ -366,6 +368,7 @@ async function submitEntry(event) {
         throw error;
       } else {
         showToast("Lanterne allumée. Session confirmée.");
+        celebrate(payload);
         await loadCloud();
       }
     }
@@ -622,6 +625,54 @@ function formatShortDate(date) { return new Intl.DateTimeFormat("fr-FR", { day: 
 function formatDateTime(date) { return new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium", timeStyle: "short" }).format(new Date(date)); }
 function readableError(error) { return error?.message ? `Impossible pour l'instant : ${error.message}` : "Impossible pour l'instant. Réessaie dans un instant."; }
 function isNetworkError(error) { return !navigator.onLine || /fetch|network|connexion|réseau/i.test(error?.message || ""); }
+
+function animateNumber(element, target, formatter, duration = 700) {
+  const finalValue = Number(target) || 0;
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const current = Number(element.dataset.value || String(element.textContent).match(/\d+/)?.[0] || 0);
+  element.dataset.value = String(finalValue);
+  if (reducedMotion || current === finalValue) {
+    element.textContent = formatter(finalValue);
+    return;
+  }
+  cancelAnimationFrame(element._countFrame);
+  const start = performance.now();
+  const tick = now => {
+    const progress = Math.min(1, (now - start) / duration);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    element.textContent = formatter(Math.round(current + ((finalValue - current) * eased)));
+    if (progress < 1) element._countFrame = requestAnimationFrame(tick);
+  };
+  element._countFrame = requestAnimationFrame(tick);
+}
+
+function celebrate(payload) {
+  const earned = payload.category === "anki" ? Number(payload.minutes) >= 10
+    : payload.category === "obi" ? payload.active_recall || payload.lesson_completed
+      : payload.category === "listening" ? Number(payload.minutes) >= 10
+        : payload.category === "bonus";
+  const copy = {
+    anki: ["復", "Mémoire renforcée", `${payload.minutes} min d'Anki inscrites dans le carnet.`],
+    obi: ["文", "Structure consolidée", `Obi ${payload.lesson_number || ""} avance d'un pas.`],
+    listening: ["聴", "Oreille éveillée", `${payload.minutes} min de japonais vivant.`],
+    bonus: ["遊", "Bonus plaisir", "Le japonais a aussi le droit d'être un jeu."]
+  }[payload.category] || ["星", "Trace enregistrée", "Le chemin garde la mémoire de ce pas."];
+  document.getElementById("celebrationSigil").textContent = copy[0];
+  document.getElementById("celebrationTitle").textContent = earned ? copy[1] : "Trace enregistrée";
+  document.getElementById("celebrationText").textContent = copy[2];
+  document.getElementById("celebrationXp").textContent = earned ? "+40 XP · 1 lanterne" : "Pas d'étoile, mais le pas compte";
+  document.getElementById("celebrationParticles").innerHTML = Array.from({ length: 18 }, (_, index) => {
+    const angle = index * 20;
+    const distance = 100 + ((index % 4) * 24);
+    const color = index % 3 === 0 ? "#5eb7aa" : index % 2 === 0 ? "#e66f43" : "#f8d98e";
+    return `<i class="celebration-particle" style="--angle:${angle}deg;--distance:${distance}px;--particle-delay:${(index % 5) * 0.025}s;--particle-color:${color}"></i>`;
+  }).join("");
+  const celebration = document.getElementById("celebration");
+  celebration.classList.remove("visible");
+  requestAnimationFrame(() => requestAnimationFrame(() => celebration.classList.add("visible")));
+  clearTimeout(celebrationTimer);
+  celebrationTimer = setTimeout(() => celebration.classList.remove("visible"), 2200);
+}
 
 function showToast(message) {
   const toast = document.getElementById("toast");
