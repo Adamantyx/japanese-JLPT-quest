@@ -59,7 +59,11 @@ function runGit(args) {
 }
 
 function runVercel() {
-  execFileSync('vercel', ['--prod', '--yes'], { cwd: publishDir, encoding: 'utf8' });
+  execFileSync('vercel', ['--prod', '--yes', '--no-wait', '--no-color'], {
+    cwd: publishDir,
+    stdio: 'inherit',
+    timeout: 60_000,
+  });
 }
 
 main().catch((error) => {
