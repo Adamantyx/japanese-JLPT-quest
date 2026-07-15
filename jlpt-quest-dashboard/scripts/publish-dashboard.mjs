@@ -59,11 +59,25 @@ function runGit(args) {
 }
 
 function runVercel() {
-  execFileSync('vercel', ['--prod', '--yes', '--no-wait', '--no-color'], {
+  const output = execFileSync('vercel', ['--prod', '--yes', '--no-wait', '--no-color', '--format', 'json'], {
     cwd: publishDir,
-    stdio: 'inherit',
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'inherit'],
     timeout: 60_000,
   });
+  const deployment = JSON.parse(output);
+  const url = deployment.deployment?.url || deployment.url;
+  if (!url) throw new Error('Vercel did not return a deployment URL.');
+
+  const inspected = JSON.parse(execFileSync(
+    'vercel',
+    ['inspect', url, '--wait', '--timeout', '60s', '--format', 'json', '--no-color'],
+    { cwd: publishDir, encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'], timeout: 70_000 },
+  ));
+  if (inspected.readyState !== 'READY') {
+    throw new Error(`Vercel deployment ended in state ${inspected.readyState || 'unknown'}.`);
+  }
+  process.stdout.write(`Vercel ready: https://${inspected.aliases?.[0] || inspected.url}\n`);
 }
 
 main().catch((error) => {
