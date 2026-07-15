@@ -16,6 +16,7 @@ async function main() {
   await fs.mkdir(path.join(publishDashboardDir, 'fonts'), { recursive: true });
   await fs.mkdir(path.join(publishDashboardDir, 'scripts'), { recursive: true });
   await fs.mkdir(path.join(publishDashboardDir, 'supabase'), { recursive: true });
+  await fs.mkdir(path.join(publishDashboardDir, 'supabase', 'migrations'), { recursive: true });
   await fs.mkdir(path.join(publishDashboardDir, 'vendor'), { recursive: true });
 
   await copy(path.join(japaneseDir, 'index.html'), path.join(publishDir, 'index.html'));
@@ -36,6 +37,10 @@ async function main() {
   for (const name of ['schema.sql', 'README.md']) {
     await copy(path.join(dashboardDir, 'supabase', name), path.join(publishDashboardDir, 'supabase', name));
   }
+  await copy(
+    path.join(dashboardDir, 'supabase', 'migrations', '20260715_gamification.sql'),
+    path.join(publishDashboardDir, 'supabase', 'migrations', '20260715_gamification.sql')
+  );
   await copy(path.join(dashboardDir, 'vendor', 'supabase.min.js'), path.join(publishDashboardDir, 'vendor', 'supabase.min.js'));
   for (const name of ['record-japanese-session.mjs', 'update-progression.mjs', 'publish-dashboard.mjs', 'supabase-sync.mjs']) {
     await copy(path.join(scriptDir, name), path.join(publishDashboardDir, 'scripts', name));

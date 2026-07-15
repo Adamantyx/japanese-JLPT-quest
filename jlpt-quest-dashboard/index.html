@@ -119,6 +119,10 @@
       box-shadow: inset 0 0 0 1px rgba(255,255,255,.03), inset 0 -90px 120px rgba(2, 10, 17, .48);
       pointer-events: none;
     }
+    .world-layer { position: absolute; z-index: 1; inset: 0; pointer-events: none; transition: background 1.2s ease, opacity 1.2s ease; }
+    .hero[data-world="dawn"] .world-layer { background: linear-gradient(180deg, rgba(230,111,67,.11), transparent 44%); }
+    .hero[data-world="morning"] .world-layer { background: radial-gradient(circle at 82% 13%, rgba(248,217,142,.26), transparent 18rem), linear-gradient(180deg, rgba(230,111,67,.14), transparent 48%); }
+    .hero[data-world="sanctuary"] .world-layer { background: radial-gradient(circle at 80% 14%, rgba(255,238,167,.34), transparent 21rem), linear-gradient(180deg, rgba(94,183,170,.13), transparent 55%); }
     .fireflies { position: absolute; z-index: 1; inset: 0; overflow: hidden; pointer-events: none; }
     .firefly { position: absolute; left: var(--x); top: var(--y); width: var(--size, 4px); height: var(--size, 4px); border-radius: 50%; background: #ffe6a1; box-shadow: 0 0 8px #f8d98e, 0 0 18px rgba(231,189,104,.65); opacity: 0; animation: fireflyDrift var(--duration, 7s) var(--delay, 0s) ease-in-out infinite; }
     .hero-copy { position: relative; z-index: 2; width: min(610px, 61%); padding: 68px 0 150px 64px; }
@@ -249,6 +253,71 @@
     .reward { color: var(--gold); font-size: 9px; font-weight: 800; letter-spacing: .08em; white-space: nowrap; }
     .quest-card.is-done .reward { color: var(--teal); }
 
+    .spark-panel { overflow: hidden; }
+    .spark-layout { display: grid; grid-template-columns: 76px 1fr auto; align-items: center; gap: 18px; }
+    .spark-orb { position: relative; width: 72px; height: 72px; display: grid; place-items: center; border: 1px solid rgba(248,217,142,.48); border-radius: 50%; color: #2d240f; background: radial-gradient(circle at 38% 30%, #fff6c6, #e7bd68 56%, #e66f43); box-shadow: 0 0 0 8px rgba(231,189,104,.05), 0 0 35px rgba(231,189,104,.25); font: 800 23px/1 "Shippori Mincho", serif; animation: sparkFloat 3.6s ease-in-out infinite; }
+    .spark-orb.is-lit { box-shadow: 0 0 0 8px rgba(231,189,104,.08), 0 0 50px rgba(248,217,142,.45); }
+    .spark-copy h2 { margin-top: 4px; font-size: 25px; }
+    .spark-copy p { margin-top: 5px; color: var(--muted); font-size: 12px; }
+    .spark-stats { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 11px; }
+    .mini-chip { padding: 6px 9px; border: 1px solid var(--line); border-radius: 999px; color: var(--mist); background: rgba(255,255,255,.025); font-size: 11px; font-weight: 700; }
+    .mini-chip.gold { color: var(--gold-bright); border-color: rgba(231,189,104,.3); background: rgba(231,189,104,.07); }
+
+    .skill-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 11px; }
+    .skill-region { position: relative; min-height: 178px; overflow: hidden; padding: 18px; border: 1px solid var(--line); border-radius: 20px; background: linear-gradient(150deg, rgba(255,255,255,.05), rgba(255,255,255,.015)); }
+    .skill-region::after { content: attr(data-mark); position: absolute; right: 8px; bottom: -19px; color: rgba(244,237,220,.035); font: 800 92px/1 "Shippori Mincho", serif; }
+    .skill-region.is-verified { border-color: rgba(94,183,170,.29); background: linear-gradient(150deg, rgba(94,183,170,.09), rgba(255,255,255,.015)); }
+    .skill-region.is-unmeasured { border-style: dashed; }
+    .skill-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .skill-head strong { font: 700 18px/1.2 "Shippori Mincho", serif; }
+    .skill-status { color: var(--gold); font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+    .skill-region p { position: relative; z-index: 1; min-height: 38px; margin-top: 10px; color: var(--muted); font-size: 12px; }
+    .skill-region .bar { position: relative; z-index: 1; margin-top: 16px; }
+    .skill-evidence { position: relative; z-index: 1; display: block; margin-top: 9px; color: var(--mist); font-size: 11px; }
+
+    .seal-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 11px; }
+    .seal { position: relative; min-height: 154px; padding: 18px 14px; border: 1px solid var(--line); border-radius: 20px; text-align: center; background: rgba(255,255,255,.025); }
+    .seal.locked { filter: saturate(.25); opacity: .55; }
+    .seal-icon { width: 54px; height: 54px; display: grid; place-items: center; margin: 0 auto 11px; border: 1px solid rgba(248,217,142,.45); border-radius: 50% 50% 50% 16px; color: #211a0d; background: linear-gradient(145deg, #ffe8a1, #d99d49); box-shadow: 0 0 23px rgba(231,189,104,.18); font: 800 20px/1 "Shippori Mincho", serif; transform: rotate(-45deg); }
+    .seal-icon span { transform: rotate(45deg); }
+    .seal.locked .seal-icon { color: var(--muted); background: #183141; box-shadow: none; }
+    .seal strong { display: block; font-size: 12px; }
+    .seal p { margin-top: 5px; color: var(--muted); font-size: 10px; }
+
+    .boss-card { overflow: hidden; background: radial-gradient(circle at 88% 35%, rgba(230,111,67,.13), transparent 24rem), linear-gradient(145deg, var(--panel-light), var(--panel)); }
+    .boss-layout { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 22px; }
+    .boss-mark { display: inline-grid; place-items: center; width: 34px; height: 34px; margin-bottom: 12px; border: 1px solid rgba(230,111,67,.45); border-radius: 11px; color: #ffd6bd; background: rgba(230,111,67,.12); font-weight: 800; }
+    .boss-copy h2 { font-size: 30px; }
+    .boss-copy p { max-width: 58ch; margin-top: 8px; color: var(--muted); font-size: 12px; }
+    .boss-reward { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 13px; }
+    .boss-score { min-width: 130px; text-align: center; }
+    .boss-score strong { display: block; color: var(--gold-bright); font: 800 37px/1 "Shippori Mincho", serif; }
+    .boss-score span { display: block; margin: 6px 0 12px; color: var(--muted); font-size: 11px; }
+
+    .expedition-list { display: grid; gap: 10px; margin-top: 18px; }
+    .expedition-line { display: flex; justify-content: space-between; gap: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+    .expedition-line strong { color: var(--paper); text-align: right; }
+    .expedition-next { margin-top: 16px; padding: 13px; border: 1px solid rgba(231,189,104,.2); border-radius: 15px; background: rgba(231,189,104,.06); }
+    .expedition-next span { display: block; color: var(--gold); font-size: 10px; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; }
+    .expedition-next strong { display: block; margin-top: 4px; font-size: 13px; }
+
+    .evolution-box { position: absolute; z-index: 5; left: 22px; right: 22px; top: 91px; padding: 11px 12px; border: 1px solid rgba(255,255,255,.11); border-radius: 15px; background: rgba(5,18,28,.68); backdrop-filter: blur(12px); }
+    .evolution-head { display: flex; justify-content: space-between; gap: 10px; color: var(--mist); font-size: 10px; }
+    .evolution-head strong { color: var(--gold-bright); }
+    .evolution-box .bar { margin-top: 8px; }
+    .companion[data-evolution="guardian"]::after, .companion[data-evolution="messenger"]::after, .companion[data-evolution="sage"]::after { content: "✦"; position: absolute; z-index: 2; right: 25px; top: 105px; color: var(--gold); font-size: 28px; text-shadow: 0 0 18px rgba(231,189,104,.65); animation: orbitRune 4s ease-in-out infinite; }
+
+    .quiz-progress { display: flex; gap: 6px; margin-bottom: 18px; }
+    .quiz-progress i { flex: 1; height: 5px; border-radius: 99px; background: rgba(255,255,255,.08); }
+    .quiz-progress i.active { background: var(--gold); box-shadow: 0 0 12px rgba(231,189,104,.3); }
+    .quiz-question { padding: 16px; border: 1px solid var(--line); border-radius: 18px; background: rgba(255,255,255,.025); }
+    .quiz-question + .quiz-question { margin-top: 12px; }
+    .quiz-question legend { padding: 0 5px; font-weight: 800; }
+    .quiz-question small { display: block; margin: 5px 0 12px; color: var(--muted); }
+    .quiz-options { display: grid; gap: 7px; }
+    .quiz-option { display: flex; align-items: flex-start; gap: 9px; padding: 10px 11px; border: 1px solid var(--line); border-radius: 12px; color: var(--mist); cursor: pointer; }
+    .quiz-option:has(input:checked) { color: var(--paper); border-color: rgba(231,189,104,.44); background: rgba(231,189,104,.08); }
+
     .dojo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 11px; }
     .dojo { position: relative; overflow: hidden; min-height: 210px; padding: 18px; border: 1px solid var(--line); border-radius: 20px; background: linear-gradient(155deg, rgba(255,255,255,.055), rgba(255,255,255,.018)); transition: transform .25s ease, border-color .25s ease; }
     .dojo:hover { border-color: rgba(231,189,104,.25); transform: translateY(-3px); }
@@ -371,6 +440,8 @@
     @keyframes companionBreath { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-5px) scale(1.012); } }
     @keyframes celebrationPop { from { opacity: 0; transform: translateY(22px) scale(.82); } to { opacity: 1; transform: translateY(0) scale(1); } }
     @keyframes particleBurst { from { opacity: 1; transform: translate(-50%, -50%) rotate(var(--angle)) translateX(0) scale(1); } to { opacity: 0; transform: translate(-50%, -50%) rotate(var(--angle)) translateX(var(--distance)) scale(.2); } }
+    @keyframes sparkFloat { 0%, 100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-5px) rotate(2deg); } }
+    @keyframes orbitRune { 0%, 100% { transform: translate(0,0) rotate(0); opacity: .55; } 50% { transform: translate(-12px,8px) rotate(180deg); opacity: 1; } }
     @keyframes riseIn { from { opacity: 0; transform: translateY(13px); } to { opacity: 1; transform: translateY(0); } }
     @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; } }
 
@@ -417,7 +488,14 @@
       .quest-icon { width: 42px; height: 42px; }
       .quest-meta { grid-column: 2; justify-content: flex-start; flex-wrap: wrap; }
       .quest-state { justify-self: start; }
+      .spark-layout { grid-template-columns: 58px 1fr; }
+      .spark-orb { width: 56px; height: 56px; font-size: 19px; }
+      .spark-layout .button { grid-column: 1 / -1; }
       .dojo-grid { grid-template-columns: 1fr; }
+      .skill-grid { grid-template-columns: 1fr; }
+      .seal-grid { grid-template-columns: repeat(2, 1fr); }
+      .boss-layout { grid-template-columns: 1fr; }
+      .boss-score { text-align: left; }
       .dojo { min-height: 165px; }
       .campaign-map { padding: 24px 16px; }
       .path-line { display: none; }
@@ -465,6 +543,7 @@
     <div class="offline-notice" id="offlineNotice">Pas de réseau. Tu peux quand même noter une session, elle sera envoyée dès le retour de la connexion.</div>
 
     <section class="hero" id="top">
+      <div class="world-layer" aria-hidden="true"></div>
       <div class="fireflies" aria-hidden="true">
         <i class="firefly" style="--x:48%;--y:18%;--size:3px;--duration:6.8s;--delay:-1.2s"></i>
         <i class="firefly" style="--x:62%;--y:27%;--size:5px;--duration:8.2s;--delay:-4s"></i>
@@ -532,6 +611,14 @@
           </div>
         </section>
 
+        <section class="panel spark-panel" id="duolingoSpark">
+          <div class="panel-inner spark-layout">
+            <div class="spark-orb" id="sparkOrb">火</div>
+            <div class="spark-copy"><div class="eyebrow">Déclencheur gamifié</div><h2>L'étincelle Duolingo</h2><p>Elle lance le mouvement, mais ne remplace jamais une lanterne Anki, Obi ou écoute.</p><div class="spark-stats" id="sparkStats"></div></div>
+            <button class="button" id="recordDuolingoButton" type="button">Noter mon étincelle</button>
+          </div>
+        </section>
+
         <section class="panel">
           <div class="panel-inner">
             <div class="section-head">
@@ -539,6 +626,13 @@
               <p class="section-note">Anki construit la base. Obi donne la structure. L'écoute rend le japonais vivant.</p>
             </div>
             <div class="dojo-grid" id="dojoGrid"></div>
+          </div>
+        </section>
+
+        <section class="panel" id="skills">
+          <div class="panel-inner">
+            <div class="section-head"><div><div class="eyebrow">Carte des compétences</div><h2>Les quatre provinces N5</h2></div><p class="section-note">Couverture et maîtrise sont séparées. Voir une notion n'est pas encore la posséder.</p></div>
+            <div class="skill-grid" id="skillGrid"></div>
           </div>
         </section>
 
@@ -553,6 +647,20 @@
             <div class="path-line"><i id="pathProgress"></i></div>
             <div class="path-traveler" id="pathTraveler" aria-hidden="true"><span>旅</span></div>
             <div class="milestones" id="milestones"></div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-inner">
+            <div class="section-head"><div><div class="eyebrow">Collection</div><h2>Les sceaux du voyageur</h2></div><p class="section-note">Ils récompensent des preuves, jamais de simples intentions.</p></div>
+            <div class="seal-grid" id="sealGrid"></div>
+          </div>
+        </section>
+
+        <section class="panel boss-card" id="bossCard">
+          <div class="panel-inner boss-layout">
+            <div class="boss-copy"><span class="boss-mark">試</span><div class="eyebrow">Épreuve bimensuelle</div><h2>Le mini-boss N5</h2><p id="bossDescription">Cinq questions, trois minutes, aucun verdict définitif. Juste une lampe braquée sur les trous utiles.</p><div class="boss-reward"><span class="mini-chip gold">+25 XP si 4/5</span><span class="mini-chip">Sceau Épreuve</span></div></div>
+            <div class="boss-score"><strong id="bossScore">—</strong><span id="bossStatus">Disponible</span><button class="button primary" id="startBossButton" type="button">Affronter</button></div>
           </div>
         </section>
 
@@ -573,8 +681,17 @@
             <div class="companion-stage" id="companionStage">Éclaireur</div>
             <h2>Mimir, gardien du chemin</h2>
           </div>
+          <div class="evolution-box"><div class="evolution-head"><span>Évolution</span><strong id="evolutionNext">3 étoiles restantes</strong></div><div class="bar"><i id="evolutionBar"></i></div></div>
           <img src="assets/kitsune-guide.webp" alt="Kitsune érudit portant le livre du voyageur N5" loading="lazy" decoding="async">
           <p class="speech" id="companionSpeech"></p>
+        </section>
+
+        <section class="panel">
+          <div class="panel-inner">
+            <div class="eyebrow">Rapport de camp</div><h2 style="margin-top:6px;font-size:27px">Expédition hebdo</h2>
+            <div class="expedition-list" id="expeditionList"></div>
+            <div class="expedition-next"><span>Prochaine marche</span><strong id="expeditionNext">Une session de 10 minutes suffit.</strong></div>
+          </div>
         </section>
 
         <section class="panel week-panel">
@@ -618,11 +735,12 @@
               <option value="anki">Anki</option>
               <option value="obi">Obi Senpai</option>
               <option value="listening">Écoute</option>
+              <option value="duolingo">Duolingo, étincelle</option>
               <option value="bonus">Bonus plaisir</option>
             </select>
           </label>
           <label class="field">Date<input id="entryDate" name="date" type="date" required></label>
-          <label class="field category-only" data-categories="anki obi listening">Minutes<input id="entryMinutes" name="minutes" type="number" min="0" max="600" value="10" required></label>
+          <label class="field category-only" data-categories="anki obi listening duolingo">Minutes<input id="entryMinutes" name="minutes" type="number" min="0" max="600" value="10" required></label>
           <label class="field category-only" data-categories="anki">Reviews<input id="entryReviews" name="reviews" type="number" min="0" max="5000" placeholder="16"></label>
           <label class="field category-only" data-categories="anki">Backlog restant<input id="entryBacklog" name="backlog" type="number" min="0" max="10000" placeholder="310"></label>
           <label class="field category-only" data-categories="obi">Leçon<input id="entryLesson" name="lesson" type="number" min="1" max="82" value="45"></label>
@@ -637,6 +755,14 @@
         <p class="form-hint" id="entryHint">10 minutes d'Anki donnent une étoile. Pas besoin de finir la montagne aujourd'hui.</p>
         <div class="form-actions"><button class="button" type="button" data-close-dialog="entryDialog">Annuler</button><button class="button primary" type="submit">Confirmer la session</button></div>
       </form>
+    </div>
+  </dialog>
+
+  <dialog id="bossDialog">
+    <div class="dialog-inner">
+      <div class="dialog-head"><div><div class="eyebrow">Mini-boss N5</div><h2>Épreuve des fondations</h2></div><button class="icon-button" type="button" data-close-dialog="bossDialog" aria-label="Fermer">×</button></div>
+      <div class="quiz-progress" aria-hidden="true"><i class="active"></i><i class="active"></i><i class="active"></i><i class="active"></i><i class="active"></i></div>
+      <form id="bossForm"><div id="bossQuestions"></div><p class="form-hint">4 bonnes réponses débloquent le sceau et 25 XP. Une tentative ratée ne retire rien.</p><div class="form-actions"><button class="button" type="button" data-close-dialog="bossDialog">Plus tard</button><button class="button primary" type="submit">Valider mes réponses</button></div></form>
     </div>
   </dialog>
 

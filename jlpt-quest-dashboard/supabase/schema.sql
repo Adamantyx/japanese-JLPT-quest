@@ -36,7 +36,7 @@ create table if not exists public.study_events (
   id uuid primary key,
   user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
   occurred_on date not null,
-  category text not null check (category in ('anki', 'obi', 'listening', 'bonus')),
+  category text not null check (category in ('anki', 'obi', 'listening', 'duolingo', 'bonus')),
   minutes integer not null default 0 check (minutes between 0 and 600),
   reviews integer check (reviews between 0 and 5000),
   backlog integer check (backlog between 0 and 10000),
@@ -52,8 +52,31 @@ create table if not exists public.study_events (
   created_at timestamptz not null default now()
 );
 
+alter table public.study_events
+  drop constraint if exists study_events_category_check;
+alter table public.study_events
+  add constraint study_events_category_check
+  check (category in ('anki', 'obi', 'listening', 'duolingo', 'bonus'));
+
 create index if not exists study_events_user_date_idx
   on public.study_events (user_id, occurred_on desc, created_at desc);
+
+create unique index if not exists study_events_one_duolingo_per_day_idx
+  on public.study_events (user_id, occurred_on)
+  where category = 'duolingo';
+
+create table if not exists public.boss_attempts (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
+  cycle_key text not null,
+  score integer not null check (score between 0 and 5),
+  passed boolean not null,
+  answers jsonb not null default '[]'::jsonb,
+  xp_awarded integer not null default 0 check (xp_awarded between 0 and 25),
+  attempted_at timestamptz not null default now(),
+  check ((passed and score >= 4 and xp_awarded = 25) or (not passed and score < 4 and xp_awarded = 0)),
+  unique (user_id, cycle_key)
+);
 
 create index if not exists daily_quests_user_date_idx
   on public.daily_quests (user_id, quest_date desc);
@@ -61,6 +84,7 @@ create index if not exists daily_quests_user_date_idx
 alter table public.profiles enable row level security;
 alter table public.daily_quests enable row level security;
 alter table public.study_events enable row level security;
+alter table public.boss_attempts enable row level security;
 
 drop policy if exists "profiles_select_own" on public.profiles;
 create policy "profiles_select_own" on public.profiles
@@ -102,6 +126,24 @@ create policy "events_update_own" on public.study_events
 
 drop policy if exists "events_delete_own" on public.study_events;
 create policy "events_delete_own" on public.study_events
+  for delete to authenticated using ((select auth.uid()) = user_id);
+
+drop policy if exists "boss_attempts_select_own" on public.boss_attempts;
+create policy "boss_attempts_select_own" on public.boss_attempts
+  for select to authenticated using ((select auth.uid()) = user_id);
+
+drop policy if exists "boss_attempts_insert_own" on public.boss_attempts;
+create policy "boss_attempts_insert_own" on public.boss_attempts
+  for insert to authenticated with check ((select auth.uid()) = user_id);
+
+drop policy if exists "boss_attempts_update_own" on public.boss_attempts;
+create policy "boss_attempts_update_own" on public.boss_attempts
+  for update to authenticated
+  using ((select auth.uid()) = user_id)
+  with check ((select auth.uid()) = user_id);
+
+drop policy if exists "boss_attempts_delete_own" on public.boss_attempts;
+create policy "boss_attempts_delete_own" on public.boss_attempts
   for delete to authenticated using ((select auth.uid()) = user_id);
 
 create or replace function public.touch_updated_at()
@@ -182,11 +224,12 @@ select
   total_minutes
 from ranked;
 
-revoke all on public.profiles, public.daily_quests, public.study_events from anon;
+revoke all on public.profiles, public.daily_quests, public.study_events, public.boss_attempts from anon;
 revoke all on public.daily_scores from anon;
 grant select, update on public.profiles to authenticated;
 grant select, insert, update on public.daily_quests to authenticated;
 grant select, insert, update, delete on public.study_events to authenticated;
+grant select, insert, update, delete on public.boss_attempts to authenticated;
 grant select on public.daily_scores to authenticated;
 
 commit;

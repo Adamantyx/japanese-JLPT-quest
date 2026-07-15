@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "updatedAt": "2026-07-15T22:55:00+02:00",
   "profile": {
     "name": "Juliann",
@@ -52,17 +52,38 @@
     "weeklyMinutes": 0,
     "weeklyTargetMinutes": 30
   },
+  "duolingo": {
+    "doneToday": false,
+    "minutes": 0,
+    "sparksToday": 0,
+    "daysThisWeek": 0,
+    "streakDays": 0,
+    "xpToday": 0
+  },
+  "boss": {
+    "cycle": "2026-07-A",
+    "completed": false,
+    "passed": false,
+    "score": null,
+    "xpAwarded": 0
+  },
   "week": {
     "start": "2026-07-13",
     "stars": 2,
     "target": 8,
     "bonusStars": 0,
+    "totalMinutes": 22,
+    "reviews": 16,
     "days": [
       {
         "date": "2026-07-15",
         "label": "Mer",
         "stars": 2,
-        "confirmed": true
+        "confirmed": true,
+        "bonusEarned": false,
+        "duolingoEarned": false,
+        "totalMinutes": 22,
+        "reviews": 16
       }
     ]
   },

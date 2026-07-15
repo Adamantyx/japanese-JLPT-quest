@@ -29,7 +29,7 @@ function recordQuest(current, input) {
 
   const activeWeek = weekStart(input.date);
   if (next.week?.start !== activeWeek) {
-    next.week = { start: activeWeek, stars: 0, target: next.week?.target || 8, bonusStars: 0, days: [] };
+    next.week = { start: activeWeek, stars: 0, target: next.week?.target || 8, bonusStars: 0, totalMinutes: 0, reviews: 0, days: [] };
   }
 
   if (newDay) {
@@ -45,6 +45,7 @@ function recordQuest(current, input) {
     next.anki = { ...next.anki, doneToday: false, minutes: 0, reviewsToday: 0 };
     next.obi = { ...next.obi, doneToday: false, activeRecall: false, minutes: 0 };
     next.listening = { ...next.listening, doneToday: false, minutes: 0 };
+    next.duolingo = { ...next.duolingo, doneToday: false, minutes: 0, sparksToday: 0, xpToday: 0 };
   } else {
     next.today.morningQuest = input.morningQuest;
     if ('eveningQuest' in input) next.today.eveningQuest = input.eveningQuest;
@@ -74,15 +75,25 @@ function recordResult(current, input) {
   const listening = { ...next.listening, ...(input.listening || {}) };
   listening.doneToday = Number(listening.minutes || 0) >= 10;
 
+  const duolingo = { ...next.duolingo, ...(input.duolingo || {}) };
+  delete duolingo.done;
+  duolingo.doneToday = Boolean(input.duolingo?.done || Number(duolingo.minutes || 0) > 0);
+  duolingo.sparksToday = Number(duolingo.doneToday);
+  duolingo.xpToday = duolingo.doneToday ? 5 : 0;
+
   const existingDay = next.week.days.find((day) => day.date === input.date);
+  const duolingoEarned = duolingo.doneToday && !Boolean(existingDay?.duolingoEarned);
   const bonusEarned = Boolean(input.bonus?.earned) && (Boolean(existingDay?.bonusEarned) || Number(next.week.bonusStars || 0) < 2);
   const stars = Number(anki.doneToday) + Number(obi.doneToday) + Number(listening.doneToday) + Number(bonusEarned);
+  const dayTotalMinutes = Number(anki.minutes || 0) + Number(obi.minutes || 0) + Number(listening.minutes || 0) + Number(duolingo.minutes || 0);
+  const dayReviews = Number(anki.reviewsToday || 0);
   const previousStars = Number(next.today.stars || 0);
   const earnedDelta = Math.max(0, stars - previousStars);
 
   next.anki = anki;
   next.obi = obi;
   next.listening = listening;
+  next.duolingo = duolingo;
   next.today = {
     ...next.today,
     stars,
@@ -92,10 +103,10 @@ function recordResult(current, input) {
   };
 
   next.profile.lifetimeStars = Number(next.profile.lifetimeStars || 0) + earnedDelta;
-  next.profile.xp = Number(next.profile.xp || 0) + earnedDelta * 40;
+  next.profile.xp = Number(next.profile.xp || 0) + (earnedDelta * 40) + (duolingoEarned ? 5 : 0);
   while (next.profile.xp >= next.profile.xpNext) {
-    next.profile.xp -= next.profile.xpNext;
     next.profile.level += 1;
+    next.profile.xpNext += 100;
   }
 
   if (!existingDay && stars > 0) {
@@ -108,12 +119,16 @@ function recordResult(current, input) {
   }
 
   if (existingDay) {
-    Object.assign(existingDay, { stars, confirmed: true, bonusEarned });
+    Object.assign(existingDay, { stars, confirmed: true, bonusEarned, duolingoEarned: Boolean(existingDay.duolingoEarned || duolingoEarned), totalMinutes: dayTotalMinutes, reviews: dayReviews });
   } else {
-    next.week.days.push({ date: input.date, label: weekday(input.date), stars, confirmed: true, bonusEarned });
+    next.week.days.push({ date: input.date, label: weekday(input.date), stars, confirmed: true, bonusEarned, duolingoEarned, totalMinutes: dayTotalMinutes, reviews: dayReviews });
   }
   next.week.stars = next.week.days.reduce((sum, day) => sum + Number(day.stars || 0), 0);
   next.week.bonusStars = next.week.days.filter((day) => day.bonusEarned).length;
+  next.duolingo.daysThisWeek = next.week.days.filter((day) => day.duolingoEarned).length;
+  next.duolingo.streakDays = calculateDateStreak(next.week.days.filter((day) => day.duolingoEarned).map((day) => day.date), input.date);
+  next.week.totalMinutes = next.week.days.reduce((sum, day) => sum + Number(day.totalMinutes || 0), 0);
+  next.week.reviews = next.week.days.reduce((sum, day) => sum + Number(day.reviews || 0), 0);
 
   const logs = buildLogs(input, stars);
   const logKeys = new Set(logs.map((log) => `${log.date}:${log.label}`));
@@ -137,6 +152,9 @@ function buildLogs(input, stars) {
   if (input.bonus?.earned) {
     logs.push({ date: input.date, label: 'Bonus', value: input.bonus.label || 'Immersion plaisir', confirmed: true });
   }
+  if (input.duolingo?.done || Number(input.duolingo?.minutes || 0) > 0) {
+    logs.push({ date: input.date, label: 'Duolingo', value: `${input.duolingo.minutes || 0} min, étincelle +5 XP`, confirmed: true });
+  }
   if (!logs.length) logs.push({ date: input.date, label: 'Bilan', value: `${stars} étoile`, confirmed: true });
   return logs;
 }
@@ -158,6 +176,18 @@ function previousIsoDate(date) {
   const value = new Date(`${date}T12:00:00+02:00`);
   value.setDate(value.getDate() - 1);
   return value.toISOString().slice(0, 10);
+}
+
+function calculateDateStreak(dates, fromDate) {
+  const active = new Set(dates);
+  const cursor = new Date(`${fromDate}T12:00:00+02:00`);
+  if (!active.has(fromDate)) cursor.setDate(cursor.getDate() - 1);
+  let streak = 0;
+  while (active.has(cursor.toISOString().slice(0, 10))) {
+    streak += 1;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  return streak;
 }
 
 function requireFields(input, fields) {

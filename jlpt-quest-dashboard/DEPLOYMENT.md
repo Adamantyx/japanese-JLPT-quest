@@ -22,11 +22,11 @@ Le script copie uniquement :
 
 Il crée un commit uniquement en présence de changements puis pousse `main`. GitHub Pages republie alors automatiquement la branche.
 
-## Aperçu actif
+## Production
 
-- URL : `https://japanese-jlpt-quest.vercel.app/`
-- Cet aperçu Vercel fonctionne, mais le compte bloque les redéploiements suivants. Il ne fait donc pas partie de la boucle quotidienne.
-- La cible durable est GitHub Pages.
+- URL principale : `https://japanese-jlpt-quest.vercel.app/jlpt-quest-dashboard/index.html`
+- URL miroir : `https://adamantyx.github.io/japanese-JLPT-quest/jlpt-quest-dashboard/index.html`
+- Après `publish-dashboard.mjs`, lancer `vercel --prod --yes` depuis la copie locale de déploiement pour publier immédiatement sur l'URL principale.
 
 ## GitHub Pages
 
@@ -37,4 +37,4 @@ Dans le dépôt GitHub :
 3. Sélectionner `main` et `/ (root)`.
 4. Enregistrer.
 
-L'URL attendue est `https://adamantyx.github.io/japanese-JLPT-quest/`.
+L'URL racine est `https://adamantyx.github.io/japanese-JLPT-quest/`.

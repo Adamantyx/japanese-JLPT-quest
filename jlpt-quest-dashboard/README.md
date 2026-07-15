@@ -6,7 +6,16 @@ Dashboard gamifié de Juliann pour le JLPT N5 de décembre 2026.
 
 Supabase est la source de vérité des sessions confirmées et des quêtes. `../progression.json` reste un export local lisible par les automations et le mode de secours hors connexion.
 
-L'application permet de créer un compte, puis d'enregistrer directement une session Anki, Obi, écoute ou bonus. Les étoiles sont calculées depuis le journal `study_events`.
+L'application permet de créer un compte, puis d'enregistrer directement une session Anki, Obi, écoute, Duolingo ou bonus. Les étoiles sont calculées depuis le journal `study_events`.
+
+## Couche jeu
+
+- Duolingo est une étincelle : `+5 XP` une fois par jour, sans étoile et sans sauver la journée.
+- Mimir évolue selon les étoiles cumulées et le décor change avec lui.
+- La carte N5 montre uniquement une couverture prouvée, sans inventer un pourcentage de vocabulaire ou de kanji.
+- L'expédition hebdomadaire résume étoiles, minutes, reviews et reprises Obi.
+- Les sceaux récompensent les jalons réels.
+- Un mini-boss N5 de cinq questions apparaît par quinzaine. Une réussite à `4/5` rapporte `25 XP`.
 
 ## PWA
 
@@ -38,6 +47,9 @@ printf '%s' '{"date":"2026-07-16","morningQuest":"15 min Anki reviews.","evening
   | node scripts/record-japanese-session.mjs quest
 
 printf '%s' '{"date":"2026-07-16","anki":{"minutes":12,"reviewsToday":18,"backlog":292},"obi":{"minutes":10,"activeRecall":true},"summary":"Anki et Obi confirmés.","energy":"Bonne"}' \
+  | node scripts/record-japanese-session.mjs result
+
+printf '%s' '{"date":"2026-07-16","duolingo":{"done":true,"minutes":4},"summary":"Étincelle Duolingo confirmée."}' \
   | node scripts/record-japanese-session.mjs result
 
 node scripts/publish-dashboard.mjs

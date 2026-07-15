@@ -1,5 +1,5 @@
 const fallback = {
-  schemaVersion: 2,
+  schemaVersion: 3,
   updatedAt: "2026-07-15T22:55:00+02:00",
   profile: { name: "Juliann", rank: "Voyageur N5", level: 3, xp: 182, xpNext: 250, streakDays: 2, lifetimeStars: 5 },
   campaign: { target: "JLPT N5", targetMonth: "Décembre 2026", countdownDate: "2026-12-01", currentChapter: "Fondations retrouvées", tagline: "一歩一歩" },
@@ -7,7 +7,9 @@ const fallback = {
   anki: { doneToday: true, minutes: 12, reviewsToday: 16, due: 326, backlog: 310, newCardsEnabled: false, newCardsUnlockAt: 150 },
   obi: { doneToday: true, activeRecall: true, currentLesson: 45, totalLessons: 82, lessonTitle: "Aimer, détester et préférer", minutes: 10, lessonsThisWeek: 1, weeklyTarget: 3 },
   listening: { doneToday: false, title: "Japanese with Shun", minutes: 0, weeklyMinutes: 0, weeklyTargetMinutes: 30 },
-  week: { start: "2026-07-13", stars: 2, target: 8, bonusStars: 0, days: [{ date: "2026-07-15", label: "Mer", stars: 2, confirmed: true }] },
+  duolingo: { doneToday: false, minutes: 0, sparksToday: 0, daysThisWeek: 0, streakDays: 0, xpToday: 0 },
+  boss: { cycle: "2026-07-A", completed: false, passed: false, score: null, xpAwarded: 0 },
+  week: { start: "2026-07-13", stars: 2, target: 8, bonusStars: 0, totalMinutes: 22, reviews: 16, days: [{ date: "2026-07-15", label: "Mer", stars: 2, confirmed: true }] },
   milestones: [
     { date: "2026-07-15", title: "Le feu est rallumé", text: "Anki et Obi ont repris sans nouvelles cartes.", state: "complete" },
     { date: "2026-08", title: "Camp de base", text: "Anki quotidien, Obi trois fois par semaine.", state: "next" },
@@ -24,8 +26,17 @@ const clamp = (value, min = 0, max = 100) => Math.min(max, Math.max(min, Number(
 const pct = (value, max) => max > 0 ? clamp(Math.round((Number(value) / Number(max)) * 100)) : 0;
 const esc = (value) => String(value ?? "").replace(/[&<>'"]/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[char]);
 const pendingKey = "jlpt-quest-pending-events-v1";
+const bossAttemptKey = "jlpt-quest-boss-attempt-v1";
+const bossQuestions = [
+  { prompt: "スーパーで魚を買います。", hint: "Quelle temporalité est exprimée ici ?", options: ["J'ai acheté du poisson au supermarché.", "J'achète ou j'achèterai du poisson au supermarché.", "Je n'achète pas de poisson au supermarché."], answer: 1 },
+  { prompt: "昨日、本を買いました。", hint: "昨日 signifie hier.", options: ["Hier, j'ai acheté un livre.", "Demain, j'achèterai un livre.", "Hier, je n'ai pas acheté de livre."], answer: 0 },
+  { prompt: "魚が好きじゃありません。", hint: "好き exprime le fait d'aimer.", options: ["J'aime le poisson.", "Je préfère le poisson.", "Je n'aime pas le poisson."], answer: 2 },
+  { prompt: "七時＿起きます。", hint: "Je me lève à 7 heures.", options: ["を", "に", "で"], answer: 1 },
+  { prompt: "日曜日", hint: "Quel sens correspond à ce mot ?", options: ["Samedi", "Dimanche", "Aujourd'hui"], answer: 1 }
+];
 
 let baseData = fallback;
+let currentData = fallback;
 let client = null;
 let session = null;
 let installPrompt = null;
@@ -34,12 +45,14 @@ let celebrationTimer = null;
 let authMode = "login";
 
 function render(data, live, syncText = "Progression synchronisée") {
+  currentData = data;
   const days = daysUntil(data.campaign.countdownDate);
   const elapsed = clamp(100 - Math.round((days / 139) * 100));
   animateNumber(document.getElementById("daysLeft"), days, value => String(value), 650);
   document.getElementById("countdown").style.setProperty("--countdown", `${elapsed}%`);
   document.getElementById("chapterLabel").textContent = `Chapitre ${String(data.profile.level).padStart(2, "0")} · ${data.campaign.currentChapter}`;
   document.getElementById("todaySummary").textContent = data.today.confirmedSummary || "Le matin propose. Le réel confirme.";
+  document.getElementById("top").dataset.world = worldStage(data.profile.lifetimeStars);
 
   const mode = live ? "live" : navigator.onLine ? "preview" : "offline";
   setSync(mode, syncText);
@@ -122,6 +135,7 @@ function render(data, live, syncText = "Progression synchronisée") {
     : data.anki.newCardsEnabled
     ? "Le backlog est sous le seuil. Les nouvelles cartes peuvent revenir doucement, 3 à 5 maximum."
     : `Nouvelles cartes gelées jusqu'à ${data.anki.newCardsUnlockAt} reviews de retard. Il en reste ${reviewsToUnlock} à résorber, sans mode punition.`;
+  renderGameSystems(data);
   document.getElementById("lastUpdate").textContent = `Mis à jour ${formatDateTime(data.updatedAt)}`;
 }
 
@@ -153,7 +167,7 @@ function companionLine(starCount, energy) {
   return "Le chemin n'a pas disparu. Une session de dix minutes suffit pour rallumer la première lanterne.";
 }
 
-function deriveProgression(profile, events, scores, quests) {
+function deriveProgression(profile, events, scores, quests, bossAttempts = []) {
   const today = toIsoDate();
   const weekStart = toIsoDate(startOfWeek(new Date()));
   const todayEvents = events.filter(event => event.occurred_on === today);
@@ -166,7 +180,9 @@ function deriveProgression(profile, events, scores, quests) {
   const latestObi = events.find(event => event.category === "obi" && event.lesson_number);
   const starsFromEvents = scores.reduce((total, score) => total + Number(score.total_stars || 0), 0);
   const lifetimeStars = Number(profile.lifetime_stars_seed || 0) + starsFromEvents;
-  const xp = Number(profile.xp_seed || 0) + (starsFromEvents * 40);
+  const duolingoDates = [...new Set(events.filter(event => event.category === "duolingo").map(event => event.occurred_on))];
+  const bossXp = bossAttempts.filter(attempt => attempt.passed).reduce((total, attempt) => total + Number(attempt.xp_awarded || 0), 0);
+  const xp = Number(profile.xp_seed || 0) + (starsFromEvents * 40) + (duolingoDates.length * 5) + bossXp;
   let level = Number(profile.level_seed || 1);
   let xpNext = Number(profile.xp_next_seed || 100);
   while (xp >= xpNext) {
@@ -177,6 +193,7 @@ function deriveProgression(profile, events, scores, quests) {
   const ankiToday = todayEvents.filter(event => event.category === "anki");
   const obiToday = todayEvents.filter(event => event.category === "obi");
   const listeningToday = todayEvents.filter(event => event.category === "listening");
+  const duolingoToday = todayEvents.filter(event => event.category === "duolingo");
   const weekScores = scores.filter(score => score.occurred_on >= weekStart);
   const weekStars = weekScores.reduce((total, score) => total + Number(score.total_stars || 0), 0);
   const logs = events.slice(0, 8).map(eventToLog);
@@ -229,12 +246,30 @@ function deriveProgression(profile, events, scores, quests) {
     weeklyMinutes: weekEvents.filter(event => event.category === "listening").reduce((sum, event) => sum + Number(event.minutes), 0),
     weeklyTargetMinutes: 30
   };
+  data.duolingo = {
+    doneToday: duolingoToday.length > 0,
+    minutes: duolingoToday.reduce((sum, event) => sum + Number(event.minutes || 0), 0),
+    sparksToday: duolingoToday.length ? 1 : 0,
+    daysThisWeek: new Set(weekEvents.filter(event => event.category === "duolingo").map(event => event.occurred_on)).size,
+    streakDays: calculateDateStreak(duolingoDates),
+    xpToday: duolingoToday.length ? 5 : 0
+  };
+  const currentBoss = bossAttempts.find(attempt => attempt.cycle_key === bossCycleKey()) || null;
+  data.boss = {
+    cycle: bossCycleKey(),
+    completed: Boolean(currentBoss),
+    passed: Boolean(currentBoss?.passed),
+    score: currentBoss?.score ?? null,
+    xpAwarded: Number(currentBoss?.xp_awarded || 0)
+  };
   data.week = {
     start: weekStart,
     stars: weekStars,
     target: Number(profile.weekly_star_target || 8),
     bonusStars: weekScores.reduce((total, score) => total + Number(score.bonus_star || 0), 0),
-    days: weekScores.map(score => ({ date: score.occurred_on, stars: Number(score.total_stars), confirmed: true }))
+    days: weekScores.map(score => ({ date: score.occurred_on, stars: Number(score.total_stars), confirmed: true })),
+    totalMinutes: weekEvents.reduce((sum, event) => sum + Number(event.minutes || 0), 0),
+    reviews: weekEvents.reduce((sum, event) => sum + Number(event.reviews || 0), 0)
   };
   data.recentLogs = logs;
   return data;
@@ -245,6 +280,7 @@ function eventToLog(event) {
   if (event.category === "anki") return { ...common, label: "Anki", value: `${event.reviews || 0} reviews en ${event.minutes} min` };
   if (event.category === "obi") return { ...common, label: `Obi ${event.lesson_number || ""}`.trim(), value: `${event.minutes} min${event.active_recall ? " avec rappel actif" : ""}` };
   if (event.category === "listening") return { ...common, label: "Écoute", value: `${event.minutes} min${event.phrase ? `, ${event.phrase}` : ""}` };
+  if (event.category === "duolingo") return { ...common, label: "Duolingo", value: `${event.minutes || 0} min, étincelle +5 XP` };
   return { ...common, label: "Bonus", value: event.note || "Immersion plaisir" };
 }
 
@@ -271,14 +307,113 @@ function calculateStreak(scores) {
   return streak;
 }
 
+function calculateDateStreak(dates) {
+  const active = new Set(dates);
+  let cursor = new Date();
+  if (!active.has(toIsoDate(cursor))) cursor.setDate(cursor.getDate() - 1);
+  let streak = 0;
+  while (active.has(toIsoDate(cursor))) {
+    streak += 1;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  return streak;
+}
+
+function worldStage(starsCount) {
+  if (Number(starsCount) >= 32) return "sanctuary";
+  if (Number(starsCount) >= 16) return "morning";
+  if (Number(starsCount) >= 8) return "dawn";
+  return "night";
+}
+
+function companionEvolution(starsCount) {
+  const stages = [
+    { key: "scout", title: "Éclaireur du chemin", threshold: 0 },
+    { key: "guardian", title: "Gardien des lanternes", threshold: 8 },
+    { key: "messenger", title: "Messager du sanctuaire", threshold: 16 },
+    { key: "sage", title: "Sage des fondations", threshold: 32 }
+  ];
+  const current = [...stages].reverse().find(stage => Number(starsCount) >= stage.threshold) || stages[0];
+  const next = stages[stages.indexOf(current) + 1] || null;
+  return { current, next };
+}
+
+function renderGameSystems(data) {
+  const duolingo = data.duolingo || fallback.duolingo;
+  document.getElementById("sparkOrb").classList.toggle("is-lit", duolingo.doneToday);
+  document.getElementById("sparkOrb").textContent = duolingo.doneToday ? "✓" : "火";
+  document.getElementById("sparkStats").innerHTML = [
+    `<span class="mini-chip gold">${duolingo.doneToday ? "+5 XP aujourd'hui" : "+5 XP max / jour"}</span>`,
+    `<span class="mini-chip">${duolingo.daysThisWeek || 0} jour${Number(duolingo.daysThisWeek) > 1 ? "s" : ""} cette semaine</span>`,
+    `<span class="mini-chip">Série ${duolingo.streakDays || 0} j</span>`
+  ].join("");
+  const sparkButton = document.getElementById("recordDuolingoButton");
+  sparkButton.disabled = Boolean(duolingo.doneToday);
+  sparkButton.textContent = duolingo.doneToday ? "Étincelle allumée" : "Noter mon étincelle";
+
+  const grammarProgress = pct(data.obi.currentLesson, data.obi.totalLessons);
+  const skills = [
+    { mark: "仮", name: "Kana", status: "Socle vérifié", progress: 100, evidence: "Hiragana et katakana acquis", className: "is-verified" },
+    { mark: "文", name: "Grammaire", status: "Couverture", progress: grammarProgress, evidence: `${data.obi.currentLesson}/${data.obi.totalLessons} leçons Obi parcourues`, className: "" },
+    { mark: "語", name: "Vocabulaire", status: "Non mesuré", progress: null, evidence: `${data.anki.backlog ?? "—"} reviews en attente, pas une mesure de maîtrise`, className: "is-unmeasured" },
+    { mark: "漢", name: "Kanji", status: "Non mesuré", progress: null, evidence: "Un futur mini-test débloquera une mesure fiable", className: "is-unmeasured" }
+  ];
+  document.getElementById("skillGrid").innerHTML = skills.map(skill => `
+    <article class="skill-region ${skill.className}" data-mark="${skill.mark}">
+      <div class="skill-head"><strong>${skill.name}</strong><span class="skill-status">${skill.status}</span></div>
+      <p>${skill.progress === null ? "Aucune fausse jauge ici. On attend une preuve exploitable." : skill.progress === 100 ? "Province sécurisée, entretien léger." : "Notions rencontrées dans le parcours Obi."}</p>
+      <div class="bar" role="progressbar" aria-label="${skill.name}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${skill.progress ?? 0}"><i style="--w:${skill.progress ?? 0}%"></i></div>
+      <span class="skill-evidence">${skill.evidence}</span>
+    </article>`).join("");
+
+  const evolution = companionEvolution(data.profile.lifetimeStars);
+  const evolutionProgress = evolution.next ? pct(Number(data.profile.lifetimeStars) - evolution.current.threshold, evolution.next.threshold - evolution.current.threshold) : 100;
+  document.getElementById("companionCard").dataset.evolution = evolution.current.key;
+  document.getElementById("companionStage").textContent = `${evolution.current.title} · ${data.profile.lifetimeStars} étoiles`;
+  document.getElementById("evolutionBar").style.setProperty("--w", `${evolutionProgress}%`);
+  document.getElementById("evolutionNext").textContent = evolution.next ? `${evolution.next.threshold - Number(data.profile.lifetimeStars)} étoiles avant ${evolution.next.title}` : "Évolution maximale actuelle";
+
+  const seals = [
+    { icon: "火", name: "Premier feu", text: "Première étoile confirmée", unlocked: data.profile.lifetimeStars >= 1 },
+    { icon: "双", name: "Journée solide", text: "Deux lanternes en un jour", unlocked: data.today.stars >= 2 },
+    { icon: "四", name: "Cap Obi 45", text: "La moitié du Bootcamp approchée", unlocked: data.obi.currentLesson >= 45 },
+    { icon: "週", name: "Semaine ardente", text: "Cinq étoiles sur une semaine", unlocked: data.week.stars >= 5 },
+    { icon: "復", name: "Montagne réduite", text: "Backlog Anki sous 250", unlocked: data.anki.backlog !== null && data.anki.backlog < 250 },
+    { icon: "試", name: "Épreuve N5", text: "Mini-boss réussi à 4/5", unlocked: Boolean(data.boss?.passed) }
+  ];
+  document.getElementById("sealGrid").innerHTML = seals.map(seal => `<article class="seal ${seal.unlocked ? "" : "locked"}"><div class="seal-icon"><span>${seal.unlocked ? seal.icon : "鎖"}</span></div><strong>${seal.name}</strong><p>${seal.text}</p></article>`).join("");
+
+  const totalMinutes = Number(data.week.totalMinutes ?? (Number(data.anki.minutes) + Number(data.obi.minutes) + Number(data.listening.minutes) + Number(duolingo.minutes)));
+  const nextStep = Number(data.anki.backlog) > 150 ? "10 à 20 min de reviews Anki, aucune nouvelle carte." : data.obi.lessonsThisWeek < data.obi.weeklyTarget ? `Reprise active Obi ${data.obi.currentLesson}.` : "10 min de Japanese with Shun.";
+  document.getElementById("expeditionList").innerHTML = [
+    ["Feu récolté", `${data.week.stars}/${data.week.target} étoiles`],
+    ["Temps engagé", `${totalMinutes} min`],
+    ["Anki", `${data.week.reviews ?? data.anki.reviewsToday} reviews`],
+    ["Obi", `${data.obi.lessonsThisWeek}/${data.obi.weeklyTarget} reprises actives`],
+    ["Étincelles Duo", `${duolingo.daysThisWeek || 0}`]
+  ].map(([label, value]) => `<div class="expedition-line"><span>${label}</span><strong>${value}</strong></div>`).join("");
+  document.getElementById("expeditionNext").textContent = nextStep;
+
+  const boss = data.boss || fallback.boss;
+  document.getElementById("bossScore").textContent = boss.completed ? `${boss.score}/5` : "—";
+  document.getElementById("bossStatus").textContent = boss.completed ? boss.passed ? "Sceau débloqué" : "À retenter au prochain cycle" : "Disponible";
+  document.getElementById("startBossButton").textContent = boss.completed ? "Déjà tenté" : "Affronter";
+  document.getElementById("startBossButton").disabled = boss.completed;
+}
+
+function bossCycleKey(date = new Date()) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${date.getDate() <= 15 ? "A" : "B"}`;
+}
+
 async function loadCloud() {
   if (!session) return;
   setSync("syncing", "Synchronisation...");
-  const [profileResult, eventsResult, scoresResult, questsResult] = await Promise.all([
+  const [profileResult, eventsResult, scoresResult, questsResult, bossResult] = await Promise.all([
     client.from("profiles").select("*").eq("user_id", session.user.id).maybeSingle(),
     client.from("study_events").select("*").order("occurred_on", { ascending: false }).order("created_at", { ascending: false }).limit(500),
     client.from("daily_scores").select("*").order("occurred_on", { ascending: false }).limit(370),
-    client.from("daily_quests").select("*").order("quest_date", { ascending: false }).limit(60)
+    client.from("daily_quests").select("*").order("quest_date", { ascending: false }).limit(60),
+    client.from("boss_attempts").select("*").order("attempted_at", { ascending: false }).limit(30)
   ]);
   const failure = [profileResult, eventsResult, scoresResult, questsResult].find(result => result.error);
   if (failure) throw failure.error;
@@ -292,7 +427,7 @@ async function loadCloud() {
     setSync("pending", "Progression à restaurer");
     return;
   }
-  render(deriveProgression(profileResult.data, eventsResult.data, scoresResult.data, questsResult.data), true);
+  render(deriveProgression(profileResult.data, eventsResult.data, scoresResult.data, questsResult.data, bossResult.error ? [] : bossResult.data), true);
 }
 
 async function importStarterHistory() {
@@ -368,18 +503,31 @@ async function submitEntry(event) {
   const submit = document.querySelector('#entryForm button[type="submit"]');
   submit.disabled = true;
   try {
+    if (category === "duolingo" && navigator.onLine) {
+      const { data: existingSpark, error: sparkError } = await client
+        .from("study_events")
+        .select("id")
+        .eq("category", "duolingo")
+        .eq("occurred_on", payload.occurred_on)
+        .maybeSingle();
+      if (sparkError) throw sparkError;
+      if (existingSpark) {
+        showToast("L'étincelle Duolingo de ce jour est déjà comptée.");
+        return;
+      }
+    }
     if (!navigator.onLine) {
-      queueEvent(payload);
-      showToast("Session gardée hors ligne. Elle partira au retour du réseau.");
+      if (!queueEvent(payload)) return;
+      showToast(category === "duolingo" ? "Étincelle gardée hors ligne." : "Session gardée hors ligne. Elle partira au retour du réseau.");
     } else {
       const { error } = await client.from("study_events").insert(payload);
       if (error && isNetworkError(error)) {
-        queueEvent(payload);
+        if (!queueEvent(payload)) return;
         showToast("Le réseau a décroché. Session gardée sur cet appareil.");
       } else if (error) {
         throw error;
       } else {
-        showToast("Lanterne allumée. Session confirmée.");
+        showToast(category === "duolingo" ? "Étincelle allumée. +5 XP." : "Lanterne allumée. Session confirmée.");
         celebrate(payload);
         await loadCloud();
       }
@@ -395,9 +543,14 @@ async function submitEntry(event) {
 
 function queueEvent(payload) {
   const queued = JSON.parse(localStorage.getItem(pendingKey) || "[]");
+  if (payload.category === "duolingo" && queued.some(item => item.category === "duolingo" && item.occurred_on === payload.occurred_on)) {
+    showToast("Cette étincelle Duolingo attend déjà la synchronisation.");
+    return false;
+  }
   queued.push(payload);
   localStorage.setItem(pendingKey, JSON.stringify(queued));
   setSync("pending", `${queued.length} session${queued.length > 1 ? "s" : ""} en attente`);
+  return true;
 }
 
 async function flushQueue() {
@@ -421,11 +574,12 @@ function updateCategoryFields() {
     field.hidden = !field.dataset.categories.split(" ").includes(category);
   });
   const minutes = document.getElementById("entryMinutes");
-  minutes.value = category === "obi" ? "10" : category === "listening" ? "10" : "12";
+  minutes.value = category === "duolingo" ? "3" : category === "obi" || category === "listening" ? "10" : "12";
   const hints = {
     anki: "10 minutes d'Anki donnent une étoile. Pas besoin de finir la montagne aujourd'hui.",
     obi: "Une reprise active ou une leçon terminée donne l'étoile Obi.",
     listening: "10 minutes attentives donnent l'étoile. Une seule phrase repérée suffit.",
+    duolingo: "Une session donne une étincelle et 5 XP, une seule fois par jour. Elle ne sauve pas la journée.",
     bonus: "Bonus plaisir, One Piece attentif ou kanji relié à un mot connu. Deux fois par semaine maximum."
   };
   document.getElementById("entryHint").textContent = hints[category];
@@ -534,12 +688,88 @@ function openAuth(message = "") {
   document.getElementById("authDialog").showModal();
 }
 
+function openBoss() {
+  const currentBoss = currentData.boss || fallback.boss;
+  if (currentBoss.completed) return showToast("Mini-boss déjà tenté pour ce cycle. Le prochain arrive dans l'autre moitié du mois.");
+  document.getElementById("bossQuestions").innerHTML = bossQuestions.map((question, questionIndex) => `
+    <fieldset class="quiz-question"><legend>${questionIndex + 1}. ${esc(question.prompt)}</legend><small>${esc(question.hint)}</small><div class="quiz-options">
+      ${question.options.map((option, optionIndex) => `<label class="quiz-option"><input type="radio" name="boss-${questionIndex}" value="${optionIndex}" required> <span>${esc(option)}</span></label>`).join("")}
+    </div></fieldset>`).join("");
+  document.getElementById("bossDialog").showModal();
+}
+
+async function submitBoss(event) {
+  event.preventDefault();
+  const answers = bossQuestions.map((_, index) => Number(document.querySelector(`input[name="boss-${index}"]:checked`).value));
+  const score = answers.reduce((total, answer, index) => total + Number(answer === bossQuestions[index].answer), 0);
+  const passed = score >= 4;
+  const attempt = { cycle_key: bossCycleKey(), score, passed, answers, xp_awarded: passed ? 25 : 0 };
+  const button = document.querySelector('#bossForm button[type="submit"]');
+  button.disabled = true;
+  try {
+    if (session) {
+      const { error } = await client.from("boss_attempts").insert(attempt);
+      if (error) throw error;
+      await loadCloud();
+    } else {
+      const previous = readLocalBossAttempt();
+      localStorage.setItem(bossAttemptKey, JSON.stringify(attempt));
+      const next = structuredClone(currentData);
+      next.boss = { cycle: attempt.cycle_key, completed: true, passed, score, xpAwarded: attempt.xp_awarded };
+      if (passed && !previous?.passed) next.profile.xp += 25;
+      baseData = next;
+      render(next, false, "Aperçu non connecté");
+    }
+    document.getElementById("bossDialog").close();
+    showBossResult(score, passed);
+  } catch (error) {
+    showToast(readableError(error));
+  } finally {
+    button.disabled = false;
+  }
+}
+
+function showBossResult(score, passed) {
+  document.getElementById("celebrationSigil").textContent = passed ? "試" : "学";
+  document.getElementById("celebrationTitle").textContent = passed ? "Mini-boss vaincu" : "Trous repérés";
+  document.getElementById("celebrationText").textContent = `${score}/5. ${passed ? "Le sceau Épreuve N5 rejoint ta collection." : "Aucune perte. Ces erreurs indiquent simplement quoi revoir."}`;
+  document.getElementById("celebrationXp").textContent = passed ? "+25 XP · Sceau débloqué" : "Prochaine tentative au prochain cycle";
+  launchCelebrationParticles();
+}
+
+function readLocalBossAttempt() {
+  try {
+    const attempt = JSON.parse(localStorage.getItem(bossAttemptKey) || "null");
+    return attempt?.cycle_key === bossCycleKey() ? attempt : null;
+  } catch {
+    return null;
+  }
+}
+
+function applyLocalBossAttempt(data) {
+  const attempt = readLocalBossAttempt();
+  if (!attempt) return data;
+  const next = structuredClone(data);
+  next.boss = {
+    cycle: attempt.cycle_key,
+    completed: true,
+    passed: Boolean(attempt.passed),
+    score: Number(attempt.score),
+    xpAwarded: Number(attempt.xp_awarded || 0)
+  };
+  if (attempt.passed) next.profile.xp = Number(next.profile.xp || 0) + Number(attempt.xp_awarded || 0);
+  return next;
+}
+
 function bindUi() {
   document.getElementById("quickAddButton").addEventListener("click", () => openEntry());
   document.getElementById("heroRecordButton").addEventListener("click", () => openEntry());
   document.getElementById("previewLoginButton").addEventListener("click", () => openAuth());
   document.getElementById("restoreProgressButton").addEventListener("click", importStarterHistory);
   document.getElementById("accountButton").addEventListener("click", () => openAuth());
+  document.getElementById("recordDuolingoButton").addEventListener("click", () => openEntry("duolingo"));
+  document.getElementById("startBossButton").addEventListener("click", openBoss);
+  document.getElementById("bossForm").addEventListener("submit", submitBoss);
   document.getElementById("questList").addEventListener("click", event => {
     const quest = event.target.closest("[data-entry-category]");
     if (quest) openEntry(quest.dataset.entryCategory);
@@ -582,9 +812,9 @@ async function loadBaseData() {
   try {
     const response = await fetch(`../progression.json?ts=${Date.now()}`, { cache: "no-store" });
     if (!response.ok) throw new Error("progression.json unavailable");
-    return await response.json();
+    return applyLocalBossAttempt(await response.json());
   } catch {
-    return fallback;
+    return applyLocalBossAttempt(fallback);
   }
 }
 
@@ -661,6 +891,7 @@ function animateNumber(element, target, formatter, duration = 700) {
 }
 
 function celebrate(payload) {
+  const isDuolingo = payload.category === "duolingo";
   const earned = payload.category === "anki" ? Number(payload.minutes) >= 10
     : payload.category === "obi" ? payload.active_recall || payload.lesson_completed
       : payload.category === "listening" ? Number(payload.minutes) >= 10
@@ -669,13 +900,18 @@ function celebrate(payload) {
     anki: ["復", "Mémoire renforcée", `${payload.minutes} min d'Anki inscrites dans le carnet.`],
     obi: ["文", "Structure consolidée", `Obi ${payload.lesson_number || ""} avance d'un pas.`],
     listening: ["聴", "Oreille éveillée", `${payload.minutes} min de japonais vivant.`],
+    duolingo: ["火", "Étincelle allumée", "Le mouvement est lancé. La vraie quête reste Anki, Obi ou l'écoute."],
     bonus: ["遊", "Bonus plaisir", "Le japonais a aussi le droit d'être un jeu."]
   }[payload.category] || ["星", "Trace enregistrée", "Le chemin garde la mémoire de ce pas."];
   document.getElementById("celebrationSigil").textContent = copy[0];
-  document.getElementById("celebrationTitle").textContent = earned ? copy[1] : "Trace enregistrée";
+  document.getElementById("celebrationTitle").textContent = earned || isDuolingo ? copy[1] : "Trace enregistrée";
   document.getElementById("celebrationText").textContent = copy[2];
-  document.getElementById("celebrationXp").textContent = earned ? "+40 XP · 1 lanterne" : "Pas d'étoile, mais le pas compte";
-  document.getElementById("celebrationParticles").innerHTML = Array.from({ length: 18 }, (_, index) => {
+  document.getElementById("celebrationXp").textContent = isDuolingo ? "+5 XP · aucune lanterne" : earned ? "+40 XP · 1 lanterne" : "Pas d'étoile, mais le pas compte";
+  launchCelebrationParticles(isDuolingo ? 12 : 18);
+}
+
+function launchCelebrationParticles(count = 18) {
+  document.getElementById("celebrationParticles").innerHTML = Array.from({ length: count }, (_, index) => {
     const angle = index * 20;
     const distance = 100 + ((index % 4) * 24);
     const color = index % 3 === 0 ? "#5eb7aa" : index % 2 === 0 ? "#e66f43" : "#f8d98e";

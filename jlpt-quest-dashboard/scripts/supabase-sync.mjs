@@ -98,6 +98,7 @@ async function recordResult(accessToken, input) {
   if (input.anki && hasFacts(input.anki)) events.push(buildEvent(input.date, 'anki', input.anki));
   if (input.obi && hasFacts(input.obi)) events.push(buildEvent(input.date, 'obi', input.obi));
   if (input.listening && hasFacts(input.listening)) events.push(buildEvent(input.date, 'listening', input.listening));
+  if (input.duolingo && hasFacts(input.duolingo)) events.push(buildEvent(input.date, 'duolingo', input.duolingo));
   if (input.bonus?.earned) events.push(buildEvent(input.date, 'bonus', input.bonus));
   if (!events.length) return process.stdout.write('Aucun fait confirmé à synchroniser.\n');
   await rest('study_events?on_conflict=id', accessToken, {
