@@ -21,6 +21,7 @@ async function main() {
 
   await copy(path.join(japaneseDir, 'index.html'), path.join(publishDir, 'index.html'));
   await copy(path.join(japaneseDir, 'progression.json'), path.join(publishDir, 'progression.json'));
+  await copy(path.join(japaneseDir, 'anki-history.json'), path.join(publishDir, 'anki-history.json'));
 
   for (const name of ['index.html', 'app.js', 'supabase-config.js', 'manifest.webmanifest', 'service-worker.js', 'README.md', 'DEPLOYMENT.md', 'PROGRESSION_FORMAT.md']) {
     await copy(path.join(dashboardDir, name), path.join(publishDashboardDir, name));
@@ -42,7 +43,7 @@ async function main() {
     path.join(publishDashboardDir, 'supabase', 'migrations', '20260715_gamification.sql')
   );
   await copy(path.join(dashboardDir, 'vendor', 'supabase.min.js'), path.join(publishDashboardDir, 'vendor', 'supabase.min.js'));
-  for (const name of ['record-japanese-session.mjs', 'update-progression.mjs', 'publish-dashboard.mjs', 'supabase-sync.mjs']) {
+  for (const name of ['record-japanese-session.mjs', 'update-progression.mjs', 'publish-dashboard.mjs', 'supabase-sync.mjs', 'export-anki-history.mjs']) {
     await copy(path.join(scriptDir, name), path.join(publishDashboardDir, 'scripts', name));
   }
 

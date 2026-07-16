@@ -524,7 +524,7 @@
       .field.full { grid-column: 1; }
     }
 
-    /* V2: three focused game screens instead of one long dashboard. */
+    /* V2 foundation, refined in V3 around action, evidence and journey. */
     .app-nav { display: none; }
     .v2 { padding-bottom: 92px; }
     .v2 .shell { width: min(1180px, calc(100% - 28px)); padding-bottom: 20px; }
@@ -594,6 +594,8 @@
     .journey-title span { display: block; margin-top: 5px; color: var(--gold); font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
     .map-landmark { position: absolute; z-index: 5; display: grid; grid-template-columns: 43px auto; align-items: center; gap: 10px; min-width: 142px; padding: 9px 12px 9px 9px; border: 1px solid rgba(255,255,255,.2); border-radius: 17px; color: var(--paper); background: rgba(4,17,27,.78); box-shadow: 0 12px 34px rgba(0,0,0,.34); backdrop-filter: blur(13px); cursor: pointer; transform: translate(-50%, -50%); transition: transform .25s ease, border-color .25s ease; }
     .map-landmark:hover { border-color: rgba(248,217,142,.64); transform: translate(-50%, -54%); }
+    .map-landmark.is-static { cursor: default; }
+    .map-landmark.is-static:hover { border-color: rgba(255,255,255,.2); transform: translate(-50%, -50%); }
     .map-landmark .map-icon { width: 43px; height: 43px; display: grid; place-items: center; border-radius: 14px; color: #231b0d; background: linear-gradient(145deg, #ffe7a0, #d79745); font: 800 18px/1 "Shippori Mincho", serif; box-shadow: 0 0 20px rgba(231,189,104,.22); }
     .map-landmark strong, .map-landmark small { display: block; text-align: left; }
     .map-landmark strong { font-size: 12px; }
@@ -701,6 +703,88 @@
       .collection-dashboard { display: block; }
       .collection-side { margin-top: 14px; }
     }
+
+    /* V3: measured progress is distinct from the motivational game layer. */
+    .v3 .hero { min-height: 400px; }
+    .v3 .hero-copy { padding-top: 50px; }
+    .v3 .status-title { font-size: 11px; }
+    .v3 .progress-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 14px; }
+    .v3 .progress-kpi { position: relative; min-height: 128px; display: grid; grid-template-columns: 46px 1fr; align-items: center; gap: 13px; overflow: hidden; padding: 19px; border: 1px solid rgba(244,237,220,.11); border-radius: 23px; background: linear-gradient(145deg, rgba(18,47,58,.88), rgba(7,24,34,.95)); box-shadow: 0 16px 40px rgba(0,0,0,.2); }
+    .v3 .progress-kpi::after { content: ""; position: absolute; width: 90px; height: 90px; right: -38px; bottom: -45px; border-radius: 50%; background: radial-gradient(circle, rgba(231,189,104,.15), transparent 70%); }
+    .v3 .progress-kpi > span { width: 46px; height: 46px; display: grid; place-items: center; border: 1px solid rgba(248,217,142,.22); border-radius: 15px; color: var(--gold-bright); background: rgba(231,189,104,.08); font: 800 18px/1 "Shippori Mincho", serif; }
+    .v3 .progress-kpi small, .v3 .progress-kpi strong, .v3 .progress-kpi em { display: block; }
+    .v3 .progress-kpi small { color: var(--muted); font-size: 9px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+    .v3 .progress-kpi strong { margin-top: 3px; color: var(--paper); font: 700 25px/1.05 "Shippori Mincho", serif; }
+    .v3 .progress-kpi em { margin-top: 5px; color: #9fb5b8; font-size: 9px; font-style: normal; }
+    .v3 .activity-panel .panel-inner { padding: 25px 26px 20px; }
+    .v3 .progress-chart-head { align-items: center; margin-bottom: 8px; }
+    .v3 .chart-legend { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; color: var(--muted); font-size: 9px; font-weight: 800; text-transform: uppercase; }
+    .v3 .chart-legend span::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 5px; border-radius: 3px; background: var(--legend-color); }
+    .v3 .is-anki { --legend-color: #e66f43; }
+    .v3 .is-obi { --legend-color: #e7bd68; }
+    .v3 .is-listening { --legend-color: #5eb7aa; }
+    .v3 .is-duolingo { --legend-color: #8ea7d8; }
+    .v3 .activity-chart { height: 292px; display: grid; grid-template-columns: repeat(12, minmax(28px, 1fr)); align-items: end; gap: clamp(4px, 1.2vw, 12px); padding: 25px 5px 0; border-bottom: 1px solid rgba(244,237,220,.1); background-image: linear-gradient(rgba(244,237,220,.055) 1px, transparent 1px); background-size: 100% 25%; }
+    .v3 .month-column { height: 100%; min-width: 0; display: grid; grid-template-rows: 20px 1fr 24px; align-items: end; text-align: center; }
+    .v3 .month-value { min-height: 18px; color: #b9c8c8; font-size: 8px; font-weight: 800; }
+    .v3 .month-bar { width: min(34px, 78%); height: 100%; min-height: 1px; display: flex; flex-direction: column-reverse; justify-self: center; justify-content: flex-start; overflow: hidden; border-radius: 9px 9px 3px 3px; background: rgba(255,255,255,.025); box-shadow: inset 0 0 0 1px rgba(255,255,255,.04); }
+    .v3 .chart-segment { display: block; width: 100%; min-height: 0; background: var(--legend-color); box-shadow: inset 0 1px rgba(255,255,255,.18); }
+    .v3 .month-column > span { overflow: hidden; color: var(--muted); font-size: 8px; font-weight: 800; text-overflow: clip; text-transform: uppercase; }
+    .v3 .chart-caption { margin-top: 13px; color: #93a9ac; font-size: 10px; }
+    .v3 .progress-evidence-grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(290px, .65fr); gap: 14px; margin-top: 14px; }
+    .v3 .heatmap-panel .panel-inner, .v3 .coach-panel .panel-inner { height: 100%; padding: 23px; }
+    .v3 .heatmap-score { color: var(--gold); font-size: 11px; }
+    .v3 .activity-heatmap { display: grid; grid-template-rows: repeat(7, 12px); grid-auto-flow: column; grid-auto-columns: 12px; gap: 4px; overflow-x: auto; padding: 5px 2px 10px; scrollbar-width: thin; }
+    .v3 .heat-cell { width: 12px; height: 12px; border-radius: 3px; background: rgba(255,255,255,.055); }
+    .v3 .heat-cell.level-1 { background: #254f54; }
+    .v3 .heat-cell.level-2 { background: #367b76; }
+    .v3 .heat-cell.level-3 { background: #d29455; }
+    .v3 .heat-cell.level-4 { background: #f0c86f; box-shadow: 0 0 9px rgba(231,189,104,.23); }
+    .v3 .heat-cell.level-future { opacity: .15; }
+    .v3 .heatmap-legend { display: flex; align-items: center; justify-content: flex-end; gap: 4px; color: var(--muted); font-size: 8px; }
+    .v3 .heatmap-legend i { width: 10px; height: 10px; border-radius: 3px; background: rgba(255,255,255,.055); }
+    .v3 .heatmap-legend i:nth-of-type(2) { background: #254f54; }
+    .v3 .heatmap-legend i:nth-of-type(3) { background: #367b76; }
+    .v3 .heatmap-legend i:nth-of-type(4) { background: #f0c86f; }
+    .v3 .coach-panel { background: radial-gradient(circle at 90% 10%, rgba(231,189,104,.12), transparent 42%), linear-gradient(145deg, #102f39, #071923); }
+    .v3 .coach-panel h2 { margin-top: 7px; font-size: 26px; }
+    .v3 .coach-panel p { margin-top: 12px; color: #b8c8c7; font-size: 11px; line-height: 1.65; }
+    .v3 .coach-action { margin-top: 18px; padding: 14px; border: 1px solid rgba(248,217,142,.14); border-radius: 16px; background: rgba(3,14,22,.35); }
+    .v3 .coach-action span, .v3 .coach-action strong { display: block; }
+    .v3 .coach-action span { color: var(--gold); font-size: 8px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    .v3 .coach-action strong { margin-top: 5px; color: var(--paper); font-size: 11px; line-height: 1.5; }
+    .v3 .progress-panels { display: grid; gap: 14px; margin-top: 14px; }
+    .v3 .progress-details { display: grid; grid-template-columns: .8fr 1.35fr .8fr; align-items: start; gap: 14px; margin-top: 14px; }
+    .v3 .progress-details #logsPanel { max-height: 360px; overflow: auto; }
+    .v3 .journey-panels { grid-template-columns: minmax(0, .75fr) minmax(0, 1.25fr); }
+    .v3 #campaign { display: none; }
+    .v3 #collectionPanel .seal-grid { grid-template-columns: repeat(3, 1fr); }
+    .v3 #collectionPanel .seal { min-height: 130px; }
+
+    @media (max-width: 960px) {
+      .v3 .progress-kpis { grid-template-columns: repeat(2, 1fr); }
+      .v3 .progress-evidence-grid, .v3 .progress-details, .v3 .journey-panels { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 680px) {
+      .v3 .hero { min-height: 470px; }
+      .v3 .hero-copy { padding-top: 42px; }
+      .v3 .progress-kpis { gap: 7px; }
+      .v3 .progress-kpi { min-height: 106px; grid-template-columns: 38px 1fr; gap: 9px; padding: 13px; border-radius: 18px; }
+      .v3 .progress-kpi > span { width: 38px; height: 38px; border-radius: 12px; font-size: 15px; }
+      .v3 .progress-kpi strong { font-size: 20px; }
+      .v3 .progress-kpi em { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .v3 .activity-panel .panel-inner { padding: 19px 13px 15px; }
+      .v3 .chart-legend { display: none; }
+      .v3 .activity-chart { height: 230px; gap: 3px; padding-left: 0; padding-right: 0; }
+      .v3 .month-bar { width: 72%; border-radius: 6px 6px 2px 2px; }
+      .v3 .month-column > span { font-size: 7px; }
+      .v3 .progress-evidence-grid { margin-top: 8px; gap: 8px; }
+      .v3 .progress-panels, .v3 .progress-details { gap: 8px; margin-top: 8px; }
+      .v3 .activity-heatmap { grid-template-rows: repeat(7, 11px); grid-auto-columns: 11px; gap: 3px; }
+      .v3 .heat-cell { width: 11px; height: 11px; }
+      .v3 #collectionPanel .seal-grid { grid-template-columns: repeat(2, 1fr); }
+    }
   </style>
 </head>
 <body>
@@ -709,7 +793,7 @@
     <header class="topbar">
       <a class="brand" href="#top">
         <span class="mon">N5</span>
-        <span><strong>JLPT Quest</strong><small>Campagne personnelle</small></span>
+        <span><strong>JLPT Quest</strong><small>Accountability buddy</small></span>
       </a>
       <div class="top-actions">
         <button class="top-action" id="installButton" type="button" hidden>Installer</button>
@@ -733,8 +817,8 @@
       </div>
       <div class="hero-copy">
         <div class="eyebrow" id="chapterLabel">Chapitre actif</div>
-        <h1>Le sanctuaire <span>N5</span> attend.</h1>
-        <p class="lead">Chaque session allume une lanterne sur le chemin. Une étoile sauve la journée, deux font une journée solide. Pas de dette, juste le prochain pas.</p>
+        <h1>Ton prochain pas vers le <span>N5</span>.</h1>
+        <p class="lead">Une session réelle vaut plus qu’un plan parfait. Une étoile sauve la journée, deux font une journée solide.</p>
         <div class="hero-actions">
           <button class="button primary" id="heroRecordButton" type="button">Enregistrer une session</button>
           <a class="button" href="#journey" data-view-link="journey">Voir le chemin</a>
@@ -748,9 +832,9 @@
       <article class="status-card level-card">
         <div class="level-sigil" id="levelSigil">01</div>
         <div>
-          <div class="status-title">Progression du niveau <span id="xpText">0 / 100 XP</span></div>
-          <div class="xp-track" id="xpProgress" role="progressbar" aria-label="Progression du niveau" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="xpBar"></i></div>
-          <div class="xp-foot"><span>Chaque étoile vaut 40 XP</span><strong id="xpRemaining">100 XP restants</strong></div>
+          <div class="status-title">XP d’engagement <span id="xpText">0 / 100 XP</span></div>
+          <div class="xp-track" id="xpProgress" role="progressbar" aria-label="XP d’engagement" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="xpBar"></i></div>
+          <div class="xp-foot"><span>Récompense l’effort, pas le niveau de japonais</span><strong id="xpRemaining">100 XP restants</strong></div>
         </div>
       </article>
       <article class="status-card lantern-card">
@@ -901,8 +985,8 @@
   <button class="fab" id="quickAddButton" type="button"><span class="fab-label">Enregistrer une session</span></button>
   <nav class="app-nav" aria-label="Navigation principale">
     <button class="app-nav-button active" type="button" data-view="today" aria-current="page"><span>今</span><strong>Aujourd'hui</strong></button>
-    <button class="app-nav-button" type="button" data-view="journey"><span>道</span><strong>Chemin</strong></button>
-    <button class="app-nav-button" type="button" data-view="collection"><span>印</span><strong>Collection</strong></button>
+    <button class="app-nav-button" type="button" data-view="progress"><span>進</span><strong>Progression</strong></button>
+    <button class="app-nav-button" type="button" data-view="journey"><span>旅</span><strong>Voyage</strong></button>
   </nav>
 
   <dialog id="entryDialog">
@@ -984,8 +1068,7 @@
     <div id="celebrationParticles" aria-hidden="true"></div>
   </div>
 
-  <script src="vendor/supabase.min.js"></script>
-  <script src="supabase-config.js"></script>
-  <script src="app.js?v=11"></script>
+  <script src="supabase-config.js" defer></script>
+  <script src="app.js?v=12" defer></script>
 </body>
 </html>

@@ -1,8 +1,8 @@
-const CACHE = "jlpt-quest-v11";
+const CACHE = "jlpt-quest-v12";
 const SHELL = [
   "./",
   "./index.html",
-  "./app.js?v=11",
+  "./app.js?v=12",
   "./vendor/supabase.min.js",
   "./supabase-config.js",
   "./manifest.webmanifest",
@@ -13,7 +13,8 @@ const SHELL = [
   "./assets/kitsune-guide.webp",
   "./assets/n5-world-map-v2.jpg",
   "./assets/icon-192.png",
-  "./assets/icon-512.png"
+  "./assets/icon-512.png",
+  "../anki-history.json"
 ];
 
 self.addEventListener("install", event => {

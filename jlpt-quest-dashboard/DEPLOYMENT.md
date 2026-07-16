@@ -18,6 +18,7 @@ Le script copie uniquement :
 
 - `Japonais/index.html`
 - `Japonais/progression.json`
+- `Japonais/anki-history.json`
 - l'interface PWA, les assets finaux, la configuration publique Supabase, le schéma, la documentation et les scripts du dashboard
 
 Il crée un commit uniquement en présence de changements puis pousse `main`. GitHub Pages republie alors automatiquement la branche.

@@ -43,9 +43,12 @@ let installPrompt = null;
 let toastTimer = null;
 let celebrationTimer = null;
 let authMode = "login";
+let ankiHistory = { coverage: {}, baseline: {}, daily: [] };
+let currentEvents = [];
+let cloudInitPromise = null;
 
-function buildV2Shell() {
-  if (document.body.classList.contains("v2")) return;
+function buildV3Shell() {
+  if (document.body.classList.contains("v3")) return;
   const shell = document.querySelector(".shell");
   const layout = document.querySelector(".layout");
   const views = document.createElement("div");
@@ -69,6 +72,42 @@ function buildV2Shell() {
   todayStrip.append(document.getElementById("duolingoSpark"), document.getElementById("weekPanel"));
   todayView.append(todayGrid, todayStrip);
 
+  const progressView = document.createElement("section");
+  progressView.className = "app-view";
+  progressView.id = "progressView";
+  progressView.dataset.viewPanel = "progress";
+  progressView.hidden = true;
+  progressView.innerHTML = `
+    <header class="app-view-header">
+      <div><span class="view-kicker">Des preuves, pas du flou</span><h1>Progression</h1></div>
+      <p class="view-summary">Ton historique Anki réel, puis toutes les sessions que tu remontes ici.</p>
+    </header>
+    <section class="progress-kpis" id="progressKpis" aria-label="Indicateurs de progression"></section>
+    <section class="panel activity-panel">
+      <div class="panel-inner">
+        <div class="section-head progress-chart-head">
+          <div><div class="eyebrow">Implication dans le temps</div><h2>Ton rythme réel</h2></div>
+          <div class="chart-legend" aria-label="Légende"><span class="is-anki">Anki</span><span class="is-obi">Obi</span><span class="is-listening">Écoute</span><span class="is-duolingo">Duo</span></div>
+        </div>
+        <div class="activity-chart" id="activityChart"></div>
+        <p class="chart-caption" id="activityCaption"></p>
+      </div>
+    </section>
+    <div class="progress-evidence-grid">
+      <section class="panel heatmap-panel"><div class="panel-inner"><div class="section-head"><div><div class="eyebrow">Régularité</div><h2>26 semaines</h2></div><strong class="heatmap-score" id="heatmapScore"></strong></div><div class="activity-heatmap" id="activityHeatmap" role="img"></div><div class="heatmap-legend"><span>Repos</span><i></i><i></i><i></i><i></i><span>Engagé</span></div></div></section>
+      <section class="panel coach-panel"><div class="panel-inner"><div class="eyebrow">Lecture de Mimir</div><h2 id="coachVerdict">Le signal utile</h2><p id="coachInsight"></p><div class="coach-action"><span>Prochain levier</span><strong id="coachAction"></strong></div></div></section>
+    </div>`;
+
+  const evidencePanels = document.createElement("div");
+  evidencePanels.className = "progress-panels";
+  evidencePanels.append(document.getElementById("trainingPanel"), document.getElementById("skills"));
+  progressView.append(evidencePanels);
+
+  const progressDetails = document.createElement("div");
+  progressDetails.className = "progress-details";
+  progressDetails.append(document.getElementById("expeditionPanel"), document.getElementById("logsPanel"), document.getElementById("rulePanel"));
+  progressView.append(progressDetails);
+
   const journeyView = document.createElement("section");
   journeyView.className = "app-view";
   journeyView.id = "journeyView";
@@ -85,51 +124,29 @@ function buildV2Shell() {
       <button class="map-landmark map-anki" id="mapAnkiLandmark" type="button" data-map-category="anki"><span class="map-icon">復</span><span><strong>Montagne Anki</strong><small id="mapAnkiValue">Backlog</small></span></button>
       <button class="map-landmark map-obi" id="mapObiLandmark" type="button" data-map-category="obi"><span class="map-icon">文</span><span><strong>Temple Obi</strong><small id="mapObiValue">Leçon</small></span></button>
       <button class="map-landmark map-listening locked" id="mapListeningLandmark" type="button" data-map-category="listening"><span class="map-icon">聴</span><span><strong>Lac d'écoute</strong><small id="mapListeningValue">Minutes</small></span></button>
-      <button class="map-landmark map-sanctuary locked" id="mapSanctuaryLandmark" type="button" data-view-target="collection"><span class="map-icon">N5</span><span><strong>Sanctuaire</strong><small id="mapSanctuaryValue">Décembre</small></span></button>
+      <div class="map-landmark map-sanctuary locked is-static" id="mapSanctuaryLandmark"><span class="map-icon">N5</span><span><strong>Sanctuaire</strong><small id="mapSanctuaryValue">Décembre</small></span></div>
       <div class="map-mimir" id="mapMimir" aria-hidden="true"><img src="assets/kitsune-guide.webp" alt=""></div>
       <div class="map-progress-chip" id="mapProgressText">Le chemin s'éveille</div>
     </section>`;
   const journeyPanels = document.createElement("div");
   journeyPanels.className = "journey-panels";
   journeyPanels.append(
-    document.getElementById("trainingPanel"),
-    document.getElementById("skills"),
     document.getElementById("bossCard"),
+    document.getElementById("collectionPanel"),
     document.getElementById("campaign")
   );
   journeyView.append(journeyPanels);
 
-  const collectionView = document.createElement("section");
-  collectionView.className = "app-view";
-  collectionView.id = "collectionView";
-  collectionView.dataset.viewPanel = "collection";
-  collectionView.hidden = true;
-  collectionView.innerHTML = `
-    <header class="app-view-header">
-      <div><span class="view-kicker">Preuves accumulées</span><h1>Collection</h1></div>
-      <p class="view-summary">Les détails vivent ici. L'écran du jour reste calme.</p>
-    </header>`;
-  const collectionDashboard = document.createElement("div");
-  collectionDashboard.className = "collection-dashboard";
-  const collectionMain = document.createElement("div");
-  collectionMain.className = "collection-main";
-  collectionMain.append(document.getElementById("collectionPanel"), document.getElementById("logsPanel"));
-  const collectionSide = document.createElement("aside");
-  collectionSide.className = "collection-side";
-  collectionSide.append(document.getElementById("expeditionPanel"), document.getElementById("rulePanel"));
-  collectionDashboard.append(collectionMain, collectionSide);
-  collectionView.append(collectionDashboard);
-
-  views.append(todayView, journeyView, collectionView);
+  views.append(todayView, progressView, journeyView);
   shell.insertBefore(views, layout);
   layout.remove();
-  document.body.classList.add("v2");
-  const requestedView = ["today", "journey", "collection"].includes(location.hash.slice(1)) ? location.hash.slice(1) : "today";
+  document.body.classList.add("v2", "v3");
+  const requestedView = ["today", "progress", "journey"].includes(location.hash.slice(1)) ? location.hash.slice(1) : "today";
   setActiveView(requestedView, false);
 }
 
 function setActiveView(view, updateHash = true) {
-  const nextView = ["today", "journey", "collection"].includes(view) ? view : "today";
+  const nextView = ["today", "progress", "journey"].includes(view) ? view : "today";
   document.querySelectorAll("[data-view-panel]").forEach(panel => { panel.hidden = panel.dataset.viewPanel !== nextView; });
   document.querySelectorAll("[data-view]").forEach(button => {
     const active = button.dataset.view === nextView;
@@ -230,7 +247,7 @@ function render(data, live, syncText = "Progression synchronisée") {
   document.getElementById("mapSanctuaryValue").textContent = data.campaign.targetMonth;
   document.getElementById("mapListeningLandmark").classList.toggle("locked", Number(data.listening.weeklyMinutes) === 0);
   document.getElementById("mapSanctuaryLandmark").classList.toggle("locked", days > 0);
-  document.getElementById("mapProgressText").textContent = `${data.profile.lifetimeStars} étoiles · ${Math.round(mapPosition.progress * 100)}% révélé`;
+  document.getElementById("mapProgressText").textContent = `${data.profile.lifetimeStars} étoiles de quête · progression ludique`;
 
   const completeCount = data.milestones.filter(item => item.state === "complete").length;
   const pathPct = pct(Math.max(0, completeCount - 1), Math.max(1, data.milestones.length - 1));
@@ -258,6 +275,7 @@ function render(data, live, syncText = "Progression synchronisée") {
     ? "Le backlog est sous le seuil. Les nouvelles cartes peuvent revenir doucement, 3 à 5 maximum."
     : `Nouvelles cartes gelées jusqu'à ${data.anki.newCardsUnlockAt} reviews de retard. Il en reste ${reviewsToUnlock} à résorber, sans mode punition.`;
   renderGameSystems(data);
+  renderProgressInsights(data, currentEvents);
   document.getElementById("lastUpdate").textContent = `Mis à jour ${formatDateTime(data.updatedAt)}`;
 }
 
@@ -280,6 +298,147 @@ function renderWeek(week) {
   document.getElementById("weekBar").parentElement.setAttribute("aria-valuemin", "0");
   document.getElementById("weekBar").parentElement.setAttribute("aria-valuemax", "100");
   document.getElementById("weekBar").parentElement.setAttribute("aria-valuenow", String(progress));
+}
+
+function buildActivityRows(data, events = []) {
+  const rows = new Map();
+  const ensure = date => {
+    if (!rows.has(date)) rows.set(date, { date, anki: 0, obi: 0, listening: 0, duolingo: 0, reviews: 0 });
+    return rows.get(date);
+  };
+  for (const day of ankiHistory.daily || []) {
+    const row = ensure(day.date);
+    row.anki += Number(day.minutes || 0);
+    row.reviews += Number(day.reviews || 0);
+  }
+
+  let queued = [];
+  try { queued = JSON.parse(localStorage.getItem(pendingKey) || "[]"); } catch { queued = []; }
+  const allEvents = [...events, ...queued];
+  const historyCutoff = ankiHistory.coverage?.lastDate || "0000-00-00";
+  for (const event of allEvents) {
+    if (!event?.occurred_on || !["anki", "obi", "listening", "duolingo"].includes(event.category)) continue;
+    if (event.category === "anki" && event.occurred_on <= historyCutoff) continue;
+    const row = ensure(event.occurred_on);
+    row[event.category] += Number(event.minutes || 0);
+    if (event.category === "anki") row.reviews += Number(event.reviews || 0);
+  }
+
+  const today = data.today?.date;
+  if (today) {
+    const addFallback = (category, minutes, reviews = 0) => {
+      if (!minutes || allEvents.some(event => event.occurred_on === today && event.category === category)) return;
+      if (category === "anki" && today <= historyCutoff) return;
+      const row = ensure(today);
+      row[category] += Number(minutes || 0);
+      if (category === "anki") row.reviews += Number(reviews || 0);
+    };
+    addFallback("anki", data.anki?.minutes, data.anki?.reviewsToday);
+    addFallback("obi", data.obi?.minutes);
+    addFallback("listening", data.listening?.minutes);
+    addFallback("duolingo", data.duolingo?.minutes);
+  }
+  return [...rows.values()].sort((a, b) => a.date.localeCompare(b.date));
+}
+
+function renderProgressInsights(data, events = []) {
+  const rows = buildActivityRows(data, events);
+  const totalFor = row => row.anki + row.obi + row.listening + row.duolingo;
+  const totalMinutes = rows.reduce((sum, row) => sum + totalFor(row), 0);
+  const totalReviews = rows.reduce((sum, row) => sum + row.reviews, 0);
+  const activeDays = rows.filter(row => totalFor(row) > 0).length;
+  const now = new Date();
+  const currentWeekStart = startOfWeek(now);
+  const previousWeekStart = new Date(currentWeekStart);
+  previousWeekStart.setDate(previousWeekStart.getDate() - 7);
+  const currentStart = toIsoDate(currentWeekStart);
+  const previousStart = toIsoDate(previousWeekStart);
+  const currentMinutes = rows.filter(row => row.date >= currentStart).reduce((sum, row) => sum + totalFor(row), 0);
+  const previousMinutes = rows.filter(row => row.date >= previousStart && row.date < currentStart).reduce((sum, row) => sum + totalFor(row), 0);
+  const last28 = new Date(now);
+  last28.setDate(last28.getDate() - 27);
+  const activeLast28 = rows.filter(row => row.date >= toIsoDate(last28) && row.date <= toIsoDate(now) && totalFor(row) > 0).length;
+  const delta = previousMinutes ? Math.round(((currentMinutes - previousMinutes) / previousMinutes) * 100) : null;
+
+  const kpis = [
+    { mark: "時", label: "Temps cumulé", value: `${(totalMinutes / 60).toFixed(1).replace(".", ",")} h`, note: "Anki importé + app" },
+    { mark: "日", label: "Jours actifs", value: String(activeDays), note: `dont ${activeLast28} sur les 28 derniers` },
+    { mark: "復", label: "Reviews Anki", value: totalReviews.toLocaleString("fr-FR"), note: `depuis ${formatShortDate(ankiHistory.coverage?.firstDate || data.today.date)}` },
+    { mark: "今", label: "Cette semaine", value: `${Math.round(currentMinutes)} min`, note: delta === null ? "première semaine mesurée" : `${delta >= 0 ? "+" : ""}${delta}% vs précédente` }
+  ];
+  document.getElementById("progressKpis").innerHTML = kpis.map(kpi => `<article class="progress-kpi"><span>${kpi.mark}</span><div><small>${kpi.label}</small><strong>${kpi.value}</strong><em>${kpi.note}</em></div></article>`).join("");
+
+  renderMonthlyActivity(rows);
+  renderActivityHeatmap(rows, now);
+
+  const thisWeekDays = new Set(rows.filter(row => row.date >= currentStart && totalFor(row) > 0).map(row => row.date)).size;
+  const backlog = data.anki?.backlog;
+  let verdict = "La reprise est visible";
+  let insight = `${Math.round(currentMinutes)} minutes sur ${thisWeekDays} jour${thisWeekDays > 1 ? "s" : ""} actif${thisWeekDays > 1 ? "s" : ""} cette semaine. Le graphe ne juge pas les pauses, il montre juste où le rythme existe vraiment.`;
+  let action = "Une nouvelle session de 10 minutes suffit pour consolider la semaine.";
+  if (backlog !== null && Number(backlog) > 150) {
+    verdict = "Le bon combat reste Anki";
+    action = `Reviews uniquement jusqu'à 150 de backlog. Il en reste ${Number(backlog)} aujourd'hui, sans séance punitive.`;
+  } else if (Number(data.obi?.lessonsThisWeek) < Number(data.obi?.weeklyTarget)) {
+    action = `Obi ${data.obi.currentLesson}, reprise active courte. ${data.obi.lessonsThisWeek}/${data.obi.weeklyTarget} cette semaine.`;
+  } else if (Number(data.listening?.weeklyMinutes) < Number(data.listening?.weeklyTargetMinutes)) {
+    action = "10 minutes de Japanese with Shun, puis une seule phrase repérée.";
+  }
+  document.getElementById("coachVerdict").textContent = verdict;
+  document.getElementById("coachInsight").textContent = insight;
+  document.getElementById("coachAction").textContent = action;
+}
+
+function renderMonthlyActivity(rows) {
+  const now = new Date();
+  const months = [];
+  for (let offset = 11; offset >= 0; offset -= 1) {
+    const date = new Date(now.getFullYear(), now.getMonth() - offset, 1, 12);
+    const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+    months.push({ key, date, anki: 0, obi: 0, listening: 0, duolingo: 0, reviews: 0 });
+  }
+  const byMonth = new Map(months.map(month => [month.key, month]));
+  for (const row of rows) {
+    const month = byMonth.get(row.date.slice(0, 7));
+    if (!month) continue;
+    for (const category of ["anki", "obi", "listening", "duolingo"]) month[category] += row[category];
+    month.reviews += row.reviews;
+  }
+  const totals = months.map(month => month.anki + month.obi + month.listening + month.duolingo);
+  const max = Math.max(1, ...totals);
+  const labels = new Intl.DateTimeFormat("fr-FR", { month: "short" });
+  document.getElementById("activityChart").innerHTML = months.map((month, index) => {
+    const total = totals[index];
+    const segments = ["anki", "obi", "listening", "duolingo"].map(category => `<i class="chart-segment is-${category}" style="height:${(month[category] / max) * 100}%" title="${category}: ${Math.round(month[category])} min"></i>`).join("");
+    return `<div class="month-column" aria-label="${labels.format(month.date)} ${month.date.getFullYear()}, ${Math.round(total)} minutes, ${month.reviews} reviews"><div class="month-value">${total ? Math.round(total) : ""}</div><div class="month-bar">${segments}</div><span>${labels.format(month.date).replace(".", "")}</span></div>`;
+  }).join("");
+  const bestIndex = totals.indexOf(Math.max(...totals));
+  const best = months[bestIndex];
+  document.getElementById("activityCaption").textContent = `Historique exact du deck TANGO N5 depuis août 2025. Pic actuel : ${Math.round(totals[bestIndex])} min en ${labels.format(best.date)} ${best.date.getFullYear()}. Les autres disciplines apparaissent à partir de leur saisie dans l'app.`;
+}
+
+function renderActivityHeatmap(rows, now) {
+  const values = new Map(rows.map(row => [row.date, row.anki + row.obi + row.listening + row.duolingo]));
+  const end = new Date(now);
+  const endSunday = new Date(end);
+  endSunday.setDate(end.getDate() + ((7 - end.getDay()) % 7));
+  const start = new Date(endSunday);
+  start.setDate(endSunday.getDate() - ((26 * 7) - 1));
+  const cells = [];
+  let active = 0;
+  for (let index = 0; index < 26 * 7; index += 1) {
+    const date = new Date(start);
+    date.setDate(start.getDate() + index);
+    const iso = toIsoDate(date);
+    const minutes = iso > toIsoDate(now) ? null : Number(values.get(iso) || 0);
+    if (minutes > 0) active += 1;
+    const level = minutes === null ? "future" : minutes === 0 ? "0" : minutes < 10 ? "1" : minutes < 20 ? "2" : minutes < 35 ? "3" : "4";
+    cells.push(`<i class="heat-cell level-${level}" title="${formatLongDate(iso)} : ${minutes === null ? "à venir" : `${Math.round(minutes)} min`}"></i>`);
+  }
+  const heatmap = document.getElementById("activityHeatmap");
+  heatmap.innerHTML = cells.join("");
+  heatmap.setAttribute("aria-label", `${active} jours actifs sur les 26 dernières semaines affichées`);
+  document.getElementById("heatmapScore").textContent = `${active} jours actifs`;
 }
 
 function companionLine(starCount, energy) {
@@ -474,10 +633,12 @@ function renderGameSystems(data) {
   sparkButton.textContent = duolingo.doneToday ? "Étincelle allumée" : "Noter mon étincelle";
 
   const grammarProgress = pct(data.obi.currentLesson, data.obi.totalLessons);
+  const baseline = ankiHistory.baseline || {};
+  const vocabularyCoverage = baseline.cardsTotal ? pct(baseline.estimatedRetrievableCards, baseline.cardsTotal) : null;
   const skills = [
     { mark: "仮", name: "Kana", status: "Socle vérifié", progress: 100, evidence: "Hiragana et katakana acquis", className: "is-verified" },
     { mark: "文", name: "Grammaire", status: "Couverture", progress: grammarProgress, evidence: `${data.obi.currentLesson}/${data.obi.totalLessons} leçons Obi parcourues`, className: "" },
-    { mark: "語", name: "Vocabulaire", status: "Non mesuré", progress: null, evidence: `${data.anki.backlog ?? "—"} reviews en attente, pas une mesure de maîtrise`, className: "is-unmeasured" },
+    { mark: "語", name: "Vocabulaire", status: vocabularyCoverage === null ? "Non mesuré" : "Récupérable", progress: vocabularyCoverage, evidence: vocabularyCoverage === null ? `${data.anki.backlog ?? "—"} reviews en attente` : `${baseline.estimatedRetrievableCards}/${baseline.cardsTotal} cartes estimées récupérables`, className: vocabularyCoverage === null ? "is-unmeasured" : "" },
     { mark: "漢", name: "Kanji", status: "Non mesuré", progress: null, evidence: "Un futur mini-test débloquera une mesure fiable", className: "is-unmeasured" }
   ];
   document.getElementById("skillGrid").innerHTML = skills.map(skill => `
@@ -532,7 +693,7 @@ async function loadCloud() {
   setSync("syncing", "Synchronisation...");
   const [profileResult, eventsResult, scoresResult, questsResult, bossResult] = await Promise.all([
     client.from("profiles").select("*").eq("user_id", session.user.id).maybeSingle(),
-    client.from("study_events").select("*").order("occurred_on", { ascending: false }).order("created_at", { ascending: false }).limit(500),
+    client.from("study_events").select("*").order("occurred_on", { ascending: false }).order("created_at", { ascending: false }).limit(2000),
     client.from("daily_scores").select("*").order("occurred_on", { ascending: false }).limit(370),
     client.from("daily_quests").select("*").order("quest_date", { ascending: false }).limit(60),
     client.from("boss_attempts").select("*").order("attempted_at", { ascending: false }).limit(30)
@@ -544,11 +705,13 @@ async function loadCloud() {
   document.getElementById("importHistoryButton").hidden = !cloudIsEmpty;
   document.getElementById("restoreBanner").hidden = !cloudIsEmpty;
   if (cloudIsEmpty) {
+    currentEvents = [];
     render(baseData, true, "Compte relié");
     document.getElementById("restoreBanner").hidden = false;
     setSync("pending", "Progression à restaurer");
     return;
   }
+  currentEvents = eventsResult.data;
   render(deriveProgression(profileResult.data, eventsResult.data, scoresResult.data, questsResult.data, bossResult.error ? [] : bossResult.data), true);
 }
 
@@ -762,6 +925,7 @@ function updateCategoryFields() {
 
 async function submitAuth(event) {
   event.preventDefault();
+  await ensureCloudReady();
   if (authMode === "signup") return signUp();
   if (authMode === "recovery") return updatePassword();
   setAuthStatus("Connexion...");
@@ -827,6 +991,7 @@ async function deleteStudyEvent(id) {
 async function signOut() {
   await client.auth.signOut();
   document.getElementById("authDialog").close();
+  currentEvents = [];
   render(baseData, false, "Aperçu non connecté");
 }
 
@@ -861,6 +1026,7 @@ function openEntry(category = null) {
 function openAuth(message = "") {
   setAuthStatus(message);
   document.getElementById("authDialog").showModal();
+  ensureCloudReady().catch(() => setAuthStatus("La synchronisation ne répond pas encore. Réessaie dans un instant."));
 }
 
 function openBoss() {
@@ -1005,18 +1171,36 @@ async function loadBaseData() {
   }
 }
 
-async function boot() {
-  buildV2Shell();
-  bindUi();
-  updateCategoryFields();
-  document.getElementById("entryDate").value = toIsoDate();
-  baseData = await loadBaseData();
-  render(baseData, false, location.protocol === "file:" ? "Aperçu local" : "Aperçu non connecté");
-
-  if (!window.supabase || !window.JLPT_SUPABASE) {
-    showToast("La synchronisation Supabase n'a pas pu démarrer.");
-    return;
+async function loadAnkiHistory() {
+  try {
+    const response = await fetch(`../anki-history.json?ts=${Date.now()}`, { cache: "no-store" });
+    if (!response.ok) throw new Error("anki-history.json unavailable");
+    return await response.json();
+  } catch {
+    return { coverage: {}, baseline: {}, daily: [] };
   }
+}
+
+async function loadSupabaseLibrary() {
+  if (window.supabase) return;
+  await new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = "vendor/supabase.min.js";
+    script.async = true;
+    script.addEventListener("load", resolve, { once: true });
+    script.addEventListener("error", () => reject(new Error("Supabase indisponible")), { once: true });
+    document.head.append(script);
+  });
+}
+
+function ensureCloudReady() {
+  if (!cloudInitPromise) cloudInitPromise = initializeCloud();
+  return cloudInitPromise;
+}
+
+async function initializeCloud() {
+  await loadSupabaseLibrary();
+  if (!window.JLPT_SUPABASE) throw new Error("Configuration Supabase indisponible");
   client = window.supabase.createClient(window.JLPT_SUPABASE.url, window.JLPT_SUPABASE.publishableKey, {
     auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
   });
@@ -1031,10 +1215,20 @@ async function boot() {
     }
     await handleSession(nextSession);
   }, 0));
+}
+
+async function boot() {
+  buildV3Shell();
+  bindUi();
+  updateCategoryFields();
+  document.getElementById("entryDate").value = toIsoDate();
+  [baseData, ankiHistory] = await Promise.all([loadBaseData(), loadAnkiHistory()]);
+  render(baseData, false, location.protocol === "file:" ? "Aperçu local" : "Aperçu non connecté");
 
   if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
     navigator.serviceWorker.register("service-worker.js").catch(() => {});
   }
+  window.setTimeout(() => ensureCloudReady().catch(() => showToast("La synchronisation Supabase n'a pas pu démarrer.")), 1200);
 }
 
 function setSync(state, label) {
@@ -1054,6 +1248,7 @@ function parseDate(date) { return new Date(`${date}T12:00:00`); }
 function toIsoDate(date = new Date()) { return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`; }
 function startOfWeek(date) { const copy = new Date(date); const day = (copy.getDay() + 6) % 7; copy.setDate(copy.getDate() - day); copy.setHours(12, 0, 0, 0); return copy; }
 function formatShortDate(date) { return new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "short" }).format(parseDate(date)); }
+function formatLongDate(date) { return new Intl.DateTimeFormat("fr-FR", { weekday: "short", day: "numeric", month: "short", year: "numeric" }).format(parseDate(date)); }
 function formatDateTime(date) { return new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium", timeStyle: "short" }).format(new Date(date)); }
 function readableError(error) { return error?.message ? `Impossible pour l'instant : ${error.message}` : "Impossible pour l'instant. Réessaie dans un instant."; }
 function isNetworkError(error) { return !navigator.onLine || /fetch|network|connexion|réseau/i.test(error?.message || ""); }

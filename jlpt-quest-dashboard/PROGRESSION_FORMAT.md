@@ -2,6 +2,8 @@
 
 Le fichier canonique est `Japonais/progression.json`.
 
+Le graphique historique lit aussi `Japonais/anki-history.json`. Ce fichier est un export agrégé du journal Anki local, puis Supabase prend le relais pour les sessions remontées dans l'application. Les événements Anki antérieurs ou égaux à la date de fin de l'export sont ignorés dans la fusion pour éviter les doublons.
+
 ## Blocs
 
 - `profile` : niveau, XP du niveau courant, streak et étoiles cumulées.

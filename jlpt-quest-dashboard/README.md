@@ -6,22 +6,27 @@ Dashboard gamifié de Juliann pour le JLPT N5 de décembre 2026.
 
 Supabase est la source de vérité des sessions confirmées et des quêtes. `../progression.json` reste un export local lisible par les automations et le mode de secours hors connexion.
 
+`../anki-history.json` contient le socle historique agrégé du deck TANGO N5 : temps de réponse, reviews et jours actifs du 4 août 2025 au 15 juillet 2026. À partir de cette date, la vue Progression ajoute les événements saisis dans l'application sans compter deux fois Anki.
+
 L'application permet de créer un compte, puis d'enregistrer directement une session Anki, Obi, écoute, Duolingo ou bonus. Les étoiles sont calculées depuis le journal `study_events`.
 
 ## Couche jeu
 
 - Duolingo est une étincelle : `+5 XP` une fois par jour, sans étoile et sans sauver la journée. Sans compte, elle reste localement en attente puis se synchronise à la connexion.
 - Mimir évolue selon les étoiles cumulées et le décor change avec lui.
-- La carte N5 montre uniquement une couverture prouvée, sans inventer un pourcentage de vocabulaire ou de kanji.
+- La carte N5 est une progression ludique assumée, pas une mesure de maîtrise.
+- La couverture vocabulaire utilise l'estimation de cartes récupérables d'Anki. La grammaire utilise uniquement les leçons Obi parcourues. Les kanji restent non mesurés tant qu'il n'existe pas de preuve fiable.
 - L'expédition hebdomadaire résume étoiles, minutes, reviews et reprises Obi.
 - Les sceaux récompensent les jalons réels.
 - Un mini-boss N5 de cinq questions apparaît par quinzaine. Une réussite à `4/5` rapporte `25 XP`.
 
-## Navigation V2
+## Navigation V3
 
-- `Aujourd'hui` garde uniquement la scène, les trois lanternes, Mimir, Duolingo et la semaine.
-- `Chemin` transforme Anki, Obi, l'écoute et l'objectif N5 en lieux sur une carte illustrée.
-- `Collection` regroupe les sceaux, l'historique et les détails secondaires.
+- `Aujourd'hui` répond à une question : quelle action courte compte maintenant ?
+- `Progression` montre le temps cumulé, les reviews, les jours actifs, la comparaison hebdomadaire, douze mois d'implication et une heatmap sur vingt-six semaines.
+- `Voyage` porte uniquement la couche motivante : carte, Mimir, mini-boss et sceaux.
+
+L'XP est explicitement de l'XP d'engagement. Il ne prétend jamais mesurer le niveau de japonais.
 
 ## PWA
 
@@ -60,6 +65,14 @@ printf '%s' '{"date":"2026-07-16","duolingo":{"done":true,"minutes":4},"summary"
 
 node scripts/publish-dashboard.mjs
 ```
+
+Pour rafraîchir le socle Anki depuis la base locale :
+
+```bash
+node scripts/export-anki-history.mjs
+```
+
+Cet export ne contient aucun mot ni contenu de carte, seulement des agrégats quotidiens.
 
 ## Aperçu local
 
