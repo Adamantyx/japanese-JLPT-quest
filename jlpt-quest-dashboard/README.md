@@ -20,6 +20,18 @@ L'application permet de créer un compte, puis d'enregistrer directement une ses
 - Les sceaux récompensent les jalons réels.
 - Un mini-boss N5 de cinq questions apparaît par quinzaine. Une réussite à `4/5` rapporte `25 XP`.
 
+## Mimir
+
+Mimir n'est plus une phrase décorative. Son état est calculé localement depuis les données déjà présentes : activité récente, backlog Anki, quête du jour, étoiles, objectif Obi, écoute hebdomadaire, heure et week-end.
+
+- `Focus mémoire` privilégie Anki et reprend la durée proposée par la quête du matin.
+- `Mode reprise` réduit automatiquement la marche à dix minutes après une pause ou tard le soir.
+- `Focus structure` propose Obi quand Anki est entretenu mais que le cap hebdomadaire reste ouvert.
+- `Oreille ouverte` propose Japanese with Shun quand l'écoute manque.
+- `Fier du cap` protège une journée déjà solide contre la surenchère.
+
+Mimir est accessible depuis sa carte, la vue Progression, la carte du Voyage et un bouton flottant. Son action principale lance un focus chronométré. Le timer ne crée aucune session ni étoile : à la fin, l'utilisateur doit confirmer le résultat réel. Les raccourcis du brief ouvrent directement la saisie Anki, Obi ou écoute.
+
 ## Navigation V3
 
 - `Aujourd'hui` répond à une question : quelle action courte compte maintenant ?

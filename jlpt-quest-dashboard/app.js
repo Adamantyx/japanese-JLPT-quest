@@ -457,6 +457,7 @@ function deriveMimirState(data, events = []) {
   const weekend = [0, 6].includes(new Date().getDay());
   const backlog = data.anki?.backlog === null || data.anki?.backlog === undefined ? null : Number(data.anki.backlog);
   const starsToday = Number(data.today?.stars || 0);
+  const questMinutes = Number(String(data.today?.morningQuest || "").match(/\b(10|12|15|20|25)\b/)?.[1] || 10);
   const obiRemaining = Math.max(0, Number(data.obi?.weeklyTarget || 3) - Number(data.obi?.lessonsThisWeek || 0));
   const listeningRemaining = Math.max(0, Number(data.listening?.weeklyTargetMinutes || 30) - Number(data.listening?.weeklyMinutes || 0));
   const baseSignals = [
@@ -490,13 +491,14 @@ function deriveMimirState(data, events = []) {
 
   if (!data.anki?.doneToday && (backlog === null || backlog > 150)) return {
     ...shared,
+    minutes: questMinutes,
     mood: "focus",
     moodLabel: "Focus mémoire",
     title: "Le bon combat est clair",
-    speech: backlog === null ? "Anki d'abord. Dix minutes permettront aussi de mesurer le backlog réel." : `${backlog} reviews en attente. Reviews uniquement, dix minutes, puis tu juges ton énergie.`,
+    speech: backlog === null ? `Anki d'abord. ${questMinutes} minutes permettront aussi de mesurer le backlog réel.` : `${backlog} reviews en attente. Reviews uniquement, ${questMinutes} minutes, puis tu juges ton énergie.`,
     dialogSpeech: "Le backlog bloque les nouveaux mots, pas ta progression. Chaque courte session remet les anciennes connexions en circulation sans te punir.",
-    action: { type: "focus", category: "anki", mark: "復", label: "Démarrer Anki, 10 min" },
-    reactions: ["Je garde un œil sur le seuil de 150. Toi, garde seulement un œil sur la prochaine carte.", "Zéro nouvelle carte. Ce n'est pas une sanction, c'est de l'entretien intelligent.", "Dix minutes. Si ça roule, tant mieux. Si ça rame, les dix minutes comptent quand même."]
+    action: { type: "focus", category: "anki", mark: "復", label: `Démarrer Anki, ${questMinutes} min` },
+    reactions: ["Je garde un œil sur le seuil de 150. Toi, garde seulement un œil sur la prochaine carte.", "Zéro nouvelle carte. Ce n'est pas une sanction, c'est de l'entretien intelligent.", `${questMinutes} minutes. Si ça roule, tant mieux. Si ça rame, ce créneau compte quand même.`]
   };
 
   if (!data.obi?.doneToday && obiRemaining > 0) return {
