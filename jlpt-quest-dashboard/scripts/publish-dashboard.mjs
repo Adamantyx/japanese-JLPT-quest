@@ -25,7 +25,7 @@ async function main() {
   for (const name of ['index.html', 'app.js', 'supabase-config.js', 'manifest.webmanifest', 'service-worker.js', 'README.md', 'DEPLOYMENT.md', 'PROGRESSION_FORMAT.md']) {
     await copy(path.join(dashboardDir, name), path.join(publishDashboardDir, name));
   }
-  for (const name of ['campaign-path.webp', 'kitsune-guide.webp', 'icon-192.png', 'icon-512.png']) {
+  for (const name of ['campaign-path.webp', 'kitsune-guide.webp', 'n5-world-map-v2.jpg', 'icon-192.png', 'icon-512.png']) {
     await copy(path.join(dashboardDir, 'assets', name), path.join(publishDashboardDir, 'assets', name));
   }
   for (const name of ['campaign-path.jpg', 'kitsune-guide.png']) {

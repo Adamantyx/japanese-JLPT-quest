@@ -17,6 +17,12 @@ L'application permet de créer un compte, puis d'enregistrer directement une ses
 - Les sceaux récompensent les jalons réels.
 - Un mini-boss N5 de cinq questions apparaît par quinzaine. Une réussite à `4/5` rapporte `25 XP`.
 
+## Navigation V2
+
+- `Aujourd'hui` garde uniquement la scène, les trois lanternes, Mimir, Duolingo et la semaine.
+- `Chemin` transforme Anki, Obi, l'écoute et l'objectif N5 en lieux sur une carte illustrée.
+- `Collection` regroupe les sceaux, l'historique et les détails secondaires.
+
 ## PWA
 
 Le dashboard est installable depuis le navigateur. Le service worker garde l'interface en cache et les sessions saisies hors ligne sont mises en attente jusqu'au retour du réseau.

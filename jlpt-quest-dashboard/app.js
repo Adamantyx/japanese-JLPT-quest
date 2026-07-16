@@ -44,6 +44,114 @@ let toastTimer = null;
 let celebrationTimer = null;
 let authMode = "login";
 
+function buildV2Shell() {
+  if (document.body.classList.contains("v2")) return;
+  const shell = document.querySelector(".shell");
+  const layout = document.querySelector(".layout");
+  const views = document.createElement("div");
+  views.className = "app-views";
+
+  const todayView = document.createElement("section");
+  todayView.className = "app-view";
+  todayView.id = "todayView";
+  todayView.dataset.viewPanel = "today";
+  todayView.append(
+    document.getElementById("top"),
+    document.querySelector(".status-deck"),
+    document.getElementById("previewBanner"),
+    document.getElementById("restoreBanner")
+  );
+  const todayGrid = document.createElement("div");
+  todayGrid.className = "today-grid";
+  todayGrid.append(document.getElementById("quests"), document.getElementById("companionCard"));
+  const todayStrip = document.createElement("div");
+  todayStrip.className = "today-strip";
+  todayStrip.append(document.getElementById("duolingoSpark"), document.getElementById("weekPanel"));
+  todayView.append(todayGrid, todayStrip);
+
+  const journeyView = document.createElement("section");
+  journeyView.className = "app-view";
+  journeyView.id = "journeyView";
+  journeyView.dataset.viewPanel = "journey";
+  journeyView.hidden = true;
+  journeyView.innerHTML = `
+    <header class="app-view-header">
+      <div><span class="view-kicker">Carte vivante</span><h1>Le chemin</h1></div>
+      <p class="view-summary">Chaque donnée devient un lieu. Mimir avance quand les preuves s'accumulent.</p>
+    </header>
+    <section class="journey-world" id="journeyWorld" aria-label="Carte du voyage vers le JLPT N5">
+      <div class="journey-fog" aria-hidden="true"></div>
+      <div class="journey-title"><strong>Vers le N5</strong><span id="mapDaysText">Décembre 2026</span></div>
+      <button class="map-landmark map-anki" id="mapAnkiLandmark" type="button" data-map-category="anki"><span class="map-icon">復</span><span><strong>Montagne Anki</strong><small id="mapAnkiValue">Backlog</small></span></button>
+      <button class="map-landmark map-obi" id="mapObiLandmark" type="button" data-map-category="obi"><span class="map-icon">文</span><span><strong>Temple Obi</strong><small id="mapObiValue">Leçon</small></span></button>
+      <button class="map-landmark map-listening locked" id="mapListeningLandmark" type="button" data-map-category="listening"><span class="map-icon">聴</span><span><strong>Lac d'écoute</strong><small id="mapListeningValue">Minutes</small></span></button>
+      <button class="map-landmark map-sanctuary locked" id="mapSanctuaryLandmark" type="button" data-view-target="collection"><span class="map-icon">N5</span><span><strong>Sanctuaire</strong><small id="mapSanctuaryValue">Décembre</small></span></button>
+      <div class="map-mimir" id="mapMimir" aria-hidden="true"><img src="assets/kitsune-guide.webp" alt=""></div>
+      <div class="map-progress-chip" id="mapProgressText">Le chemin s'éveille</div>
+    </section>`;
+  const journeyPanels = document.createElement("div");
+  journeyPanels.className = "journey-panels";
+  journeyPanels.append(
+    document.getElementById("trainingPanel"),
+    document.getElementById("skills"),
+    document.getElementById("bossCard"),
+    document.getElementById("campaign")
+  );
+  journeyView.append(journeyPanels);
+
+  const collectionView = document.createElement("section");
+  collectionView.className = "app-view";
+  collectionView.id = "collectionView";
+  collectionView.dataset.viewPanel = "collection";
+  collectionView.hidden = true;
+  collectionView.innerHTML = `
+    <header class="app-view-header">
+      <div><span class="view-kicker">Preuves accumulées</span><h1>Collection</h1></div>
+      <p class="view-summary">Les détails vivent ici. L'écran du jour reste calme.</p>
+    </header>`;
+  const collectionDashboard = document.createElement("div");
+  collectionDashboard.className = "collection-dashboard";
+  const collectionMain = document.createElement("div");
+  collectionMain.className = "collection-main";
+  collectionMain.append(document.getElementById("collectionPanel"), document.getElementById("logsPanel"));
+  const collectionSide = document.createElement("aside");
+  collectionSide.className = "collection-side";
+  collectionSide.append(document.getElementById("expeditionPanel"), document.getElementById("rulePanel"));
+  collectionDashboard.append(collectionMain, collectionSide);
+  collectionView.append(collectionDashboard);
+
+  views.append(todayView, journeyView, collectionView);
+  shell.insertBefore(views, layout);
+  layout.remove();
+  document.body.classList.add("v2");
+  const requestedView = ["today", "journey", "collection"].includes(location.hash.slice(1)) ? location.hash.slice(1) : "today";
+  setActiveView(requestedView, false);
+}
+
+function setActiveView(view, updateHash = true) {
+  const nextView = ["today", "journey", "collection"].includes(view) ? view : "today";
+  document.querySelectorAll("[data-view-panel]").forEach(panel => { panel.hidden = panel.dataset.viewPanel !== nextView; });
+  document.querySelectorAll("[data-view]").forEach(button => {
+    const active = button.dataset.view === nextView;
+    button.classList.toggle("active", active);
+    if (active) button.setAttribute("aria-current", "page");
+    else button.removeAttribute("aria-current");
+  });
+  document.getElementById("quickAddButton").hidden = nextView !== "today";
+  if (updateHash) history.replaceState(null, "", `#${nextView}`);
+  window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+}
+
+function journeyPosition(starsCount) {
+  const progress = clamp(Number(starsCount) / 32, 0, 1);
+  const points = [{ x: 12, y: 82 }, { x: 28, y: 61 }, { x: 54, y: 66 }, { x: 73, y: 79 }, { x: 88, y: 24 }];
+  const scaled = progress * (points.length - 1);
+  const start = points[Math.min(points.length - 2, Math.floor(scaled))];
+  const end = points[Math.min(points.length - 1, Math.floor(scaled) + 1)];
+  const part = scaled - Math.floor(scaled);
+  return { x: start.x + ((end.x - start.x) * part), y: start.y + ((end.y - start.y) * part), progress };
+}
+
 function render(data, live, syncText = "Progression synchronisée") {
   currentData = data;
   const days = daysUntil(data.campaign.countdownDate);
@@ -109,6 +217,20 @@ function render(data, live, syncText = "Progression synchronisée") {
       <div class="bar" role="progressbar" aria-label="Progression ${esc(item.name)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(item.progress)}"><i style="--w:${item.progress}%"></i></div>
       <div class="dojo-foot"><span>${esc(item.foot[0])}</span><span>${esc(item.foot[1])}</span></div>
     </article>`).join("");
+
+  const mapPosition = journeyPosition(data.profile.lifetimeStars);
+  const mapMimir = document.getElementById("mapMimir");
+  mapMimir.style.setProperty("--map-x", `${mapPosition.x}%`);
+  mapMimir.style.setProperty("--map-y", `${mapPosition.y}%`);
+  document.getElementById("journeyWorld").style.setProperty("--reveal", `${18 + (mapPosition.progress * 76)}%`);
+  document.getElementById("mapDaysText").textContent = `${days} jours avant l'épreuve`;
+  document.getElementById("mapAnkiValue").textContent = hasBacklog ? `${backlog} en attente` : "À mesurer";
+  document.getElementById("mapObiValue").textContent = `${data.obi.currentLesson}/${data.obi.totalLessons}`;
+  document.getElementById("mapListeningValue").textContent = `${data.listening.weeklyMinutes}/${data.listening.weeklyTargetMinutes} min`;
+  document.getElementById("mapSanctuaryValue").textContent = data.campaign.targetMonth;
+  document.getElementById("mapListeningLandmark").classList.toggle("locked", Number(data.listening.weeklyMinutes) === 0);
+  document.getElementById("mapSanctuaryLandmark").classList.toggle("locked", days > 0);
+  document.getElementById("mapProgressText").textContent = `${data.profile.lifetimeStars} étoiles · ${Math.round(mapPosition.progress * 100)}% révélé`;
 
   const completeCount = data.milestones.filter(item => item.state === "complete").length;
   const pathPct = pct(Math.max(0, completeCount - 1), Math.max(1, data.milestones.length - 1));
@@ -815,6 +937,18 @@ function applyLocalBossAttempt(data) {
 }
 
 function bindUi() {
+  document.querySelectorAll("[data-view]").forEach(button => button.addEventListener("click", () => setActiveView(button.dataset.view)));
+  document.querySelectorAll("[data-view-link]").forEach(link => link.addEventListener("click", event => {
+    event.preventDefault();
+    setActiveView(link.dataset.viewLink);
+  }));
+  document.getElementById("journeyView").addEventListener("click", event => {
+    const quest = event.target.closest("[data-map-category]");
+    if (quest) openEntry(quest.dataset.mapCategory);
+    const target = event.target.closest("[data-view-target]");
+    if (target) setActiveView(target.dataset.viewTarget);
+  });
+  window.addEventListener("hashchange", () => setActiveView(location.hash.slice(1), false));
   document.getElementById("quickAddButton").addEventListener("click", () => openEntry());
   document.getElementById("heroRecordButton").addEventListener("click", () => openEntry());
   document.getElementById("previewLoginButton").addEventListener("click", () => openAuth());
@@ -872,6 +1006,7 @@ async function loadBaseData() {
 }
 
 async function boot() {
+  buildV2Shell();
   bindUi();
   updateCategoryFields();
   document.getElementById("entryDate").value = toIsoDate();

@@ -523,6 +523,184 @@
       .form-grid { grid-template-columns: 1fr; }
       .field.full { grid-column: 1; }
     }
+
+    /* V2: three focused game screens instead of one long dashboard. */
+    .app-nav { display: none; }
+    .v2 { padding-bottom: 92px; }
+    .v2 .shell { width: min(1180px, calc(100% - 28px)); padding-bottom: 20px; }
+    .v2 .layout, .v2 .footer { display: none; }
+    .v2 .app-views { display: block; }
+    .v2 .app-view { animation: riseIn .42s ease both; }
+    .v2 .app-view[hidden] { display: none; }
+    .v2 .app-view-header { display: flex; align-items: end; justify-content: space-between; gap: 18px; margin: 28px 4px 18px; }
+    .v2 .app-view-header h1 { margin-top: 5px; font-size: clamp(34px, 5vw, 58px); line-height: 1; }
+    .v2 .view-kicker { color: var(--gold); font-size: 11px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+    .v2 .view-summary { max-width: 34ch; color: var(--muted); font-size: 12px; text-align: right; }
+
+    .v2 .hero { min-height: 450px; border-radius: 32px; }
+    .v2 .hero-copy { width: min(560px, 58%); padding: 58px 0 100px 54px; }
+    .v2 .hero h1 { max-width: 9ch; font-size: clamp(47px, 6vw, 72px); }
+    .v2 .hero .lead { max-width: 46ch; display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+    .v2 .hero-stats { display: none; }
+    .v2 .countdown { width: 104px; top: 28px; right: 28px; }
+    .v2 .status-deck { grid-template-columns: 1.1fr .85fr .9fr; margin-top: 12px; }
+    .v2 .status-card { min-height: 104px; padding: 17px 19px; }
+    .v2 .next-card p, .v2 .xp-foot > span { display: none; }
+    .v2 .next-card strong { font-size: 17px; }
+    .v2 .preview-banner { padding: 12px 15px; }
+    .v2 .preview-banner p { display: none; }
+
+    .v2 .today-grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(310px, .65fr); gap: 14px; margin-top: 14px; }
+    .v2 .today-strip { display: grid; grid-template-columns: 1.2fr .8fr; gap: 14px; margin-top: 14px; }
+    .v2 #quests .panel-inner { padding: 24px; }
+    .v2 #quests .section-head { margin-bottom: 16px; }
+    .v2 #quests .section-note { max-width: 27ch; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .v2 #quests .quest-list { grid-template-columns: repeat(3, 1fr); gap: 9px; }
+    .v2 #quests .quest-card { grid-template-columns: 42px 1fr; align-content: center; min-height: 142px; padding: 14px; }
+    .v2 #quests .quest-icon { width: 42px; height: 42px; }
+    .v2 #quests .quest-copy span { display: -webkit-box; min-height: 32px; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; font-size: 11px; }
+    .v2 #quests .quest-meta { grid-column: 1 / -1; justify-content: space-between; }
+    .v2 #quests .reward { display: none; }
+    .v2 #quests .quest-state { padding: 6px 8px; }
+
+    .v2 #companionCard { min-height: 310px; }
+    .v2 #companionCard .companion-copy { padding: 22px 22px 0; }
+    .v2 #companionCard h2 { max-width: 8ch; font-size: 25px; }
+    .v2 #companionCard .evolution-box { top: 91px; left: 20px; right: 20px; }
+    .v2 #companionCard img { right: -4px; bottom: -10px; height: min(65%, 205px); }
+    .v2 #companionCard .speech { left: 18px; right: 18px; bottom: 16px; max-width: 230px; padding: 11px 12px; font-size: 11px; }
+    .v2 #duolingoSpark .panel-inner { padding: 19px 22px; }
+    .v2 #duolingoSpark .spark-copy p { display: none; }
+    .v2 #duolingoSpark .spark-orb { width: 58px; height: 58px; }
+    .v2 #weekPanel .panel-inner { padding: 19px 22px; }
+    .v2 #weekPanel h2 { font-size: 24px; }
+    .v2 #weekPanel .week-days { margin-top: 12px; }
+    .v2 #weekPanel .day { min-height: 55px; }
+
+    .app-nav { position: fixed; z-index: 22; left: 50%; bottom: max(18px, env(safe-area-inset-bottom)); display: grid; grid-template-columns: repeat(3, 1fr); width: min(430px, calc(100% - 96px)); padding: 6px; border: 1px solid rgba(244,237,220,.14); border-radius: 22px; background: rgba(4,16,25,.88); box-shadow: 0 20px 60px rgba(0,0,0,.5); backdrop-filter: blur(22px) saturate(125%); transform: translateX(-50%); }
+    .app-nav-button { min-height: 54px; display: grid; grid-template-columns: auto auto; align-items: center; justify-content: center; gap: 8px; padding: 0 13px; border: 0; border-radius: 17px; color: var(--muted); background: transparent; cursor: pointer; }
+    .app-nav-button span { font: 800 16px/1 "Shippori Mincho", serif; }
+    .app-nav-button strong { font-size: 11px; }
+    .app-nav-button.active { color: #251d0d; background: linear-gradient(135deg, var(--gold-bright), #dfa653); box-shadow: 0 8px 24px rgba(231,189,104,.2); }
+    .v2 .fab { width: 56px; min-height: 56px; right: 22px; bottom: max(18px, env(safe-area-inset-bottom)); padding: 0; font-size: 0; }
+    .v2 .fab::before { content: "+"; font-size: 27px; line-height: 1; }
+    .v2 .fab .fab-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+
+    .journey-world { position: relative; min-height: 650px; overflow: hidden; border: 1px solid rgba(244,237,220,.15); border-radius: 34px; background-image: linear-gradient(180deg, rgba(3,13,21,.12), rgba(3,13,21,.28)), url("assets/n5-world-map-v2.jpg"); background-position: center; background-size: cover; box-shadow: var(--shadow); isolation: isolate; }
+    .journey-world::after { content: ""; position: absolute; z-index: 1; inset: 0; pointer-events: none; background: linear-gradient(90deg, rgba(2,11,18,.18), transparent 34%, transparent 72%, rgba(2,11,18,.12)), linear-gradient(0deg, rgba(2,11,18,.45), transparent 24%); }
+    .journey-fog { position: absolute; z-index: 2; top: 0; right: 0; bottom: 0; left: var(--reveal, 32%); pointer-events: none; background: linear-gradient(90deg, transparent, rgba(8,31,43,.44) 15%, rgba(7,28,39,.76)); backdrop-filter: blur(3px) saturate(.72); transition: left 1.2s ease; }
+    .journey-title { position: absolute; z-index: 6; left: 28px; top: 25px; padding: 13px 16px; border: 1px solid rgba(255,255,255,.15); border-radius: 17px; background: rgba(4,16,25,.7); backdrop-filter: blur(14px); }
+    .journey-title strong { display: block; font: 700 25px/1 "Shippori Mincho", serif; }
+    .journey-title span { display: block; margin-top: 5px; color: var(--gold); font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+    .map-landmark { position: absolute; z-index: 5; display: grid; grid-template-columns: 43px auto; align-items: center; gap: 10px; min-width: 142px; padding: 9px 12px 9px 9px; border: 1px solid rgba(255,255,255,.2); border-radius: 17px; color: var(--paper); background: rgba(4,17,27,.78); box-shadow: 0 12px 34px rgba(0,0,0,.34); backdrop-filter: blur(13px); cursor: pointer; transform: translate(-50%, -50%); transition: transform .25s ease, border-color .25s ease; }
+    .map-landmark:hover { border-color: rgba(248,217,142,.64); transform: translate(-50%, -54%); }
+    .map-landmark .map-icon { width: 43px; height: 43px; display: grid; place-items: center; border-radius: 14px; color: #231b0d; background: linear-gradient(145deg, #ffe7a0, #d79745); font: 800 18px/1 "Shippori Mincho", serif; box-shadow: 0 0 20px rgba(231,189,104,.22); }
+    .map-landmark strong, .map-landmark small { display: block; text-align: left; }
+    .map-landmark strong { font-size: 12px; }
+    .map-landmark small { margin-top: 3px; color: #d8caa8; font-size: 10px; }
+    .map-landmark.locked { filter: saturate(.25); opacity: .72; }
+    .map-anki { left: 24%; top: 42%; }
+    .map-obi { left: 55%; top: 55%; }
+    .map-listening { left: 74%; top: 76%; }
+    .map-sanctuary { left: 87%; top: 19%; }
+    .map-mimir { position: absolute; z-index: 4; left: var(--map-x, 12%); top: var(--map-y, 80%); width: 92px; aspect-ratio: 1; overflow: hidden; border: 2px solid rgba(248,217,142,.7); border-radius: 50%; background: radial-gradient(circle, rgba(231,189,104,.26), rgba(5,18,28,.9)); box-shadow: 0 0 0 7px rgba(231,189,104,.08), 0 14px 34px rgba(0,0,0,.42); transform: translate(-50%, -50%); transition: left 1.2s ease, top 1.2s ease; animation: travelerBob 3.2s ease-in-out infinite; }
+    .map-mimir img { width: 140%; height: 140%; object-fit: cover; object-position: 57% 35%; transform: translate(-18%, -4%); }
+    .map-progress-chip { position: absolute; z-index: 6; right: 24px; bottom: 22px; padding: 11px 14px; border: 1px solid rgba(255,255,255,.15); border-radius: 999px; color: var(--gold-bright); background: rgba(4,16,25,.8); font-size: 11px; font-weight: 800; backdrop-filter: blur(12px); }
+    .journey-panels { display: grid; gap: 14px; margin-top: 14px; }
+    .v2 #campaign { display: none; }
+    .v2 #trainingPanel .panel-inner, .v2 #skills .panel-inner, .v2 #bossCard .panel-inner { padding: 22px; }
+    .v2 #trainingPanel .section-head, .v2 #skills .section-head { margin-bottom: 15px; }
+    .v2 #trainingPanel .section-note, .v2 #skills .section-note, .v2 #skills .skill-region p { display: none; }
+    .v2 #trainingPanel .dojo { min-height: 148px; }
+    .v2 #trainingPanel .dojo-value { margin-top: 12px; font-size: 27px; }
+    .v2 #trainingPanel .dojo-meta { min-height: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .v2 #skills .skill-region { min-height: 134px; }
+    .v2 #skills .skill-region .bar { margin-top: 15px; }
+    .v2 #skills .skill-evidence { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .v2 #bossCard .boss-copy p { display: none; }
+    .v2 #bossCard .boss-mark { width: 58px; height: 58px; float: left; margin: 0 16px 0 0; border-radius: 50%; font-size: 25px; box-shadow: 0 0 28px rgba(230,111,67,.24); }
+
+    .collection-dashboard { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(310px, .8fr); gap: 14px; }
+    .collection-main, .collection-side { display: grid; align-content: start; gap: 14px; }
+    .v2 #collectionPanel .panel-inner, .v2 #logsPanel .panel-inner, .v2 #expeditionPanel .panel-inner, .v2 #rulePanel .panel-inner { padding: 22px; }
+    .v2 #collectionPanel .section-head, .v2 #logsPanel .section-head { margin-bottom: 15px; }
+    .v2 #collectionPanel .section-note, .v2 #logsPanel .section-note { display: none; }
+    .v2 #collectionPanel .seal { min-height: 138px; }
+    .v2 #expeditionPanel h2 { font-size: 24px !important; }
+    .v2 #rulePanel h2 { font-size: 22px !important; }
+    .v2 #rulePanel p { font-size: 11px !important; }
+
+    @media (max-width: 960px) {
+      .v2 .today-grid, .v2 .collection-dashboard { grid-template-columns: 1fr; }
+      .v2 .today-strip { grid-template-columns: 1fr; }
+      .v2 #companionCard { min-height: 330px; }
+      .journey-world { min-height: 600px; }
+      .map-landmark { min-width: 126px; }
+      .map-anki { left: 25%; top: 38%; }
+      .map-obi { left: 52%; top: 57%; }
+      .map-listening { left: 73%; top: 76%; }
+    }
+
+    @media (max-width: 680px) {
+      .v2 { padding-bottom: 84px; }
+      .v2 .shell { width: min(100% - 14px, 1180px); }
+      .v2 .topbar { margin-bottom: 8px; }
+      .v2 .brand small, .v2 .sync { display: none; }
+      .v2 .hero { min-height: 520px; background-position: 67% center; }
+      .v2 .hero-copy { width: 100%; padding: 45px 22px 48px; }
+      .v2 .hero h1 { max-width: 7ch; font-size: clamp(43px, 14vw, 58px); }
+      .v2 .hero .lead { max-width: 28ch; font-size: 13px; -webkit-line-clamp: 3; }
+      .v2 .hero-actions .button:not(.primary) { display: none; }
+      .v2 .countdown { width: 84px; top: 20px; right: 16px; }
+      .v2 .status-deck { grid-template-columns: 1fr 1fr; }
+      .v2 .status-card { min-height: 94px; padding: 15px; }
+      .v2 .level-card { grid-column: 1 / -1; }
+      .v2 .next-card { grid-column: auto; }
+      .v2 .next-card p, .v2 .lantern-card .eyebrow { display: none; }
+      .v2 .preview-banner { grid-template-columns: 1fr auto; }
+      .v2 .preview-banner .mon { display: none; }
+      .v2 .preview-banner .button { grid-column: auto; min-width: 0; padding: 0 12px; }
+      .v2 .app-view-header { align-items: start; margin: 20px 3px 13px; }
+      .v2 .app-view-header h1 { font-size: 36px; }
+      .v2 .view-summary { display: none; }
+      .v2 #quests .quest-list { grid-template-columns: 1fr; }
+      .v2 #quests .quest-card { grid-template-columns: 42px 1fr auto; min-height: 78px; }
+      .v2 #quests .quest-copy span { min-height: 0; -webkit-line-clamp: 1; }
+      .v2 #quests .quest-meta { grid-column: auto; }
+      .v2 #quests .quest-state { font-size: 0; width: 29px; height: 29px; padding: 0; display: grid; place-items: center; }
+      .v2 #quests .quest-state::after { content: "›"; font-size: 18px; }
+      .v2 #quests .is-done .quest-state::after { content: "✓"; font-size: 13px; }
+      .v2 #companionCard { min-height: 310px; }
+      .v2 #duolingoSpark .spark-stats .mini-chip:not(.gold) { display: none; }
+      .v2 #weekPanel .day { min-height: 50px; }
+      .app-nav { bottom: max(8px, env(safe-area-inset-bottom)); width: calc(100% - 128px); border-radius: 19px; }
+      .app-nav-button { min-height: 50px; grid-template-columns: 1fr; gap: 2px; padding: 0 5px; }
+      .app-nav-button span { font-size: 15px; }
+      .app-nav-button strong { font-size: 9px; }
+      .v2 .fab { right: 10px; bottom: max(8px, env(safe-area-inset-bottom)); width: 52px; min-height: 52px; }
+      .journey-world { min-height: 650px; border-radius: 26px; background-position: 48% center; }
+      .journey-title { left: 14px; top: 14px; }
+      .journey-title strong { font-size: 20px; }
+      .map-landmark { grid-template-columns: 35px auto; min-width: 112px; padding: 7px 9px 7px 7px; border-radius: 14px; }
+      .map-landmark .map-icon { width: 35px; height: 35px; border-radius: 11px; font-size: 15px; }
+      .map-landmark strong { font-size: 10px; }
+      .map-landmark small { max-width: 66px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 8px; }
+      .map-anki { left: 24%; top: 31%; }
+      .map-obi { left: 47%; top: 55%; }
+      .map-listening { left: 74%; top: 76%; }
+      .map-sanctuary { left: 78%; top: 18%; }
+      .map-mimir { width: 68px; }
+      .map-progress-chip { right: 12px; bottom: 12px; font-size: 9px; }
+      .v2 #trainingPanel .dojo-grid, .v2 #skills .skill-grid { grid-template-columns: 1fr; }
+      .v2 #trainingPanel .dojo { min-height: 128px; }
+      .v2 #skills .skill-region { min-height: 118px; }
+      .v2 #bossCard .boss-layout { grid-template-columns: 1fr auto; }
+      .v2 #bossCard .boss-reward { display: none; }
+      .v2 #bossCard .boss-score { min-width: 92px; text-align: center; }
+      .v2 #bossCard .boss-score strong { font-size: 29px; }
+      .collection-dashboard { display: block; }
+      .collection-side { margin-top: 14px; }
+    }
   </style>
 </head>
 <body>
@@ -559,7 +737,7 @@
         <p class="lead">Chaque session allume une lanterne sur le chemin. Une étoile sauve la journée, deux font une journée solide. Pas de dette, juste le prochain pas.</p>
         <div class="hero-actions">
           <button class="button primary" id="heroRecordButton" type="button">Enregistrer une session</button>
-          <a class="button" href="#campaign">Explorer le chemin</a>
+          <a class="button" href="#journey" data-view-link="journey">Voir le chemin</a>
         </div>
       </div>
       <div class="countdown" id="countdown"><div><strong id="daysLeft">...</strong><span>jours avant décembre</span></div></div>
@@ -604,7 +782,7 @@
         <section class="panel" id="quests">
           <div class="panel-inner">
             <div class="section-head">
-              <div><div class="eyebrow">Aujourd'hui</div><h2>Le journal de quête</h2></div>
+              <div><div class="eyebrow">Aujourd'hui</div><h2>Trois lanternes</h2></div>
               <p class="section-note" id="todaySummary">Le matin propose. Le réel confirme.</p>
             </div>
             <div class="quest-list" id="questList"></div>
@@ -614,16 +792,16 @@
         <section class="panel spark-panel" id="duolingoSpark">
           <div class="panel-inner spark-layout">
             <div class="spark-orb" id="sparkOrb">火</div>
-            <div class="spark-copy"><div class="eyebrow">Déclencheur gamifié</div><h2>L'étincelle Duolingo</h2><p>Elle lance le mouvement, mais ne remplace jamais une lanterne Anki, Obi ou écoute.</p><div class="spark-stats" id="sparkStats"></div></div>
+            <div class="spark-copy"><div class="eyebrow">Bonus quotidien</div><h2>Étincelle Duolingo</h2><p>Un petit départ, pas la séance principale.</p><div class="spark-stats" id="sparkStats"></div></div>
             <button class="button" id="recordDuolingoButton" type="button">Noter mon étincelle</button>
           </div>
         </section>
 
-        <section class="panel">
+        <section class="panel" id="trainingPanel">
           <div class="panel-inner">
             <div class="section-head">
-              <div><div class="eyebrow">Trois disciplines</div><h2>Les dojos du voyageur</h2></div>
-              <p class="section-note">Anki construit la base. Obi donne la structure. L'écoute rend le japonais vivant.</p>
+              <div><div class="eyebrow">Progression réelle</div><h2>Tes trois piliers</h2></div>
+              <p class="section-note">Mémoire, structure, oreille.</p>
             </div>
             <div class="dojo-grid" id="dojoGrid"></div>
           </div>
@@ -631,7 +809,7 @@
 
         <section class="panel" id="skills">
           <div class="panel-inner">
-            <div class="section-head"><div><div class="eyebrow">Carte des compétences</div><h2>Les quatre provinces N5</h2></div><p class="section-note">Couverture et maîtrise sont séparées. Voir une notion n'est pas encore la posséder.</p></div>
+            <div class="section-head"><div><div class="eyebrow">Couverture</div><h2>Compétences N5</h2></div><p class="section-note">Ce qui est mesuré, et rien d'inventé.</p></div>
             <div class="skill-grid" id="skillGrid"></div>
           </div>
         </section>
@@ -650,9 +828,9 @@
           </div>
         </section>
 
-        <section class="panel">
+        <section class="panel" id="collectionPanel">
           <div class="panel-inner">
-            <div class="section-head"><div><div class="eyebrow">Collection</div><h2>Les sceaux du voyageur</h2></div><p class="section-note">Ils récompensent des preuves, jamais de simples intentions.</p></div>
+            <div class="section-head"><div><div class="eyebrow">Jalons</div><h2>Tes sceaux</h2></div><p class="section-note">Débloqués par des actions réelles.</p></div>
             <div class="seal-grid" id="sealGrid"></div>
           </div>
         </section>
@@ -664,11 +842,11 @@
           </div>
         </section>
 
-        <section class="panel">
+        <section class="panel" id="logsPanel">
           <div class="panel-inner">
             <div class="section-head">
-              <div><div class="eyebrow">Traces confirmées</div><h2>Le carnet de route</h2></div>
-              <p class="section-note">Aucune intention maquillée en victoire. Ici, uniquement ce qui a vraiment été fait.</p>
+              <div><div class="eyebrow">Historique</div><h2>Dernières sessions</h2></div>
+              <p class="section-note">Uniquement ce qui a été confirmé.</p>
             </div>
             <div class="logs" id="logs"></div>
           </div>
@@ -679,22 +857,22 @@
         <section class="panel companion" id="companionCard">
           <div class="companion-copy">
             <div class="companion-stage" id="companionStage">Éclaireur</div>
-            <h2>Mimir, gardien du chemin</h2>
+            <h2>Mimir</h2>
           </div>
           <div class="evolution-box"><div class="evolution-head"><span>Évolution</span><strong id="evolutionNext">3 étoiles restantes</strong></div><div class="bar"><i id="evolutionBar"></i></div></div>
           <img src="assets/kitsune-guide.webp" alt="Kitsune érudit portant le livre du voyageur N5" loading="lazy" decoding="async">
           <p class="speech" id="companionSpeech"></p>
         </section>
 
-        <section class="panel">
+        <section class="panel" id="expeditionPanel">
           <div class="panel-inner">
-            <div class="eyebrow">Rapport de camp</div><h2 style="margin-top:6px;font-size:27px">Expédition hebdo</h2>
+            <div class="eyebrow">7 derniers jours</div><h2 style="margin-top:6px;font-size:27px">Cette semaine</h2>
             <div class="expedition-list" id="expeditionList"></div>
             <div class="expedition-next"><span>Prochaine marche</span><strong id="expeditionNext">Une session de 10 minutes suffit.</strong></div>
           </div>
         </section>
 
-        <section class="panel week-panel">
+        <section class="panel week-panel" id="weekPanel">
           <div class="panel-inner">
             <div class="week-top">
               <div><div class="eyebrow">Cette semaine</div><h2>Les lanternes</h2></div>
@@ -705,10 +883,10 @@
           </div>
         </section>
 
-        <section class="panel">
+        <section class="panel" id="rulePanel">
           <div class="panel-inner">
-            <div class="eyebrow">Règle active</div>
-            <h2 style="margin-top:6px;font-size:25px">Le sas Anki</h2>
+            <div class="eyebrow">Règle Anki</div>
+            <h2 style="margin-top:6px;font-size:25px">Nouvelles cartes</h2>
             <p id="ankiRule" style="margin-top:11px;color:var(--mist);font-size:12px"></p>
           </div>
         </section>
@@ -721,6 +899,11 @@
     </footer>
   </main>
   <button class="fab" id="quickAddButton" type="button"><span class="fab-label">Enregistrer une session</span></button>
+  <nav class="app-nav" aria-label="Navigation principale">
+    <button class="app-nav-button active" type="button" data-view="today" aria-current="page"><span>今</span><strong>Aujourd'hui</strong></button>
+    <button class="app-nav-button" type="button" data-view="journey"><span>道</span><strong>Chemin</strong></button>
+    <button class="app-nav-button" type="button" data-view="collection"><span>印</span><strong>Collection</strong></button>
+  </nav>
 
   <dialog id="entryDialog">
     <div class="dialog-inner">
@@ -803,6 +986,6 @@
 
   <script src="vendor/supabase.min.js"></script>
   <script src="supabase-config.js"></script>
-  <script src="app.js?v=10"></script>
+  <script src="app.js?v=11"></script>
 </body>
 </html>
