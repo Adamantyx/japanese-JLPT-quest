@@ -349,10 +349,22 @@
     .companion::before { content: ""; position: absolute; inset: 18px; border: 1px solid rgba(231,189,104,.15); border-radius: 23px; }
     .companion-copy { position: relative; z-index: 3; padding: 25px 25px 0; }
     .companion h2 { margin-top: 5px; font-size: 28px; }
-    .companion-stage { color: var(--gold); font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
-    .companion img { position: absolute; z-index: 4; right: -8px; bottom: -15px; width: auto; height: min(67%, 315px); max-width: 85%; pointer-events: none; filter: drop-shadow(0 25px 28px rgba(0,0,0,.42)); transition: filter .4s ease; transform-origin: 50% 100%; animation: companionBreath 5.2s ease-in-out infinite; }
-    .companion[data-state="active"] img { filter: drop-shadow(0 25px 28px rgba(0,0,0,.42)) drop-shadow(0 0 22px rgba(231,189,104,.18)); }
+    .companion-stage { display: flex; align-items: center; gap: 7px; color: var(--gold); font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    .companion-stage i { padding: 4px 7px; border: 1px solid rgba(248,217,142,.2); border-radius: 999px; color: var(--paper); background: rgba(248,217,142,.08); font-size: 8px; font-style: normal; letter-spacing: .06em; }
+    .mimir-avatar-button { position: absolute; z-index: 4; right: -8px; bottom: -15px; width: min(70%, 315px); height: min(67%, 315px); padding: 0; border: 0; outline: 0; background: transparent; cursor: pointer; filter: drop-shadow(0 25px 28px rgba(0,0,0,.42)); transition: filter .4s ease; transform-origin: 50% 100%; animation: companionBreath 5.2s ease-in-out infinite; }
+    .mimir-avatar-button img { width: 100%; height: 100%; object-fit: contain; object-position: bottom right; pointer-events: none; }
+    .mimir-avatar-button:focus-visible { border-radius: 42%; box-shadow: 0 0 0 3px var(--gold); }
+    .companion[data-state="active"] .mimir-avatar-button, .companion[data-mood="celebrate"] .mimir-avatar-button { filter: drop-shadow(0 25px 28px rgba(0,0,0,.42)) drop-shadow(0 0 22px rgba(231,189,104,.24)); }
+    .companion[data-mood="focus"] { background: radial-gradient(circle at 70% 44%, rgba(230,111,67,.18), transparent 45%), linear-gradient(160deg, #183445, #081a27 72%); }
+    .companion[data-mood="listen"] { background: radial-gradient(circle at 70% 44%, rgba(94,183,170,.22), transparent 45%), linear-gradient(160deg, #123c43, #081a27 72%); }
+    .companion[data-mood="rescue"] { background: radial-gradient(circle at 70% 44%, rgba(142,167,216,.18), transparent 45%), linear-gradient(160deg, #182f49, #081a27 72%); }
+    .companion.is-reacting .mimir-avatar-button { animation: mimirReact .72s cubic-bezier(.2,.9,.2,1.2); }
     .speech { position: absolute; z-index: 4; left: 22px; right: 22px; bottom: 20px; max-width: 270px; padding: 14px 15px; border: 1px solid rgba(255,255,255,.15); border-radius: 17px 17px 17px 4px; background: rgba(5,18,28,.88); color: #d7dfda; font-size: 12px; backdrop-filter: blur(12px); }
+    .speech p { margin: 0; }
+    .mimir-card-actions { display: flex; gap: 6px; margin-top: 10px; }
+    .mimir-card-actions button { min-height: 31px; padding: 0 10px; border: 1px solid rgba(248,217,142,.2); border-radius: 10px; color: var(--gold-bright); background: rgba(231,189,104,.07); font: 800 9px/1 "DM Sans", sans-serif; cursor: pointer; }
+    .mimir-card-actions button:first-child { flex: 1; }
+    .mimir-card-actions button:last-child { width: 34px; padding: 0; }
 
     .week-panel .panel-inner { padding-bottom: 24px; }
     .week-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
@@ -383,6 +395,16 @@
     .top-action[hidden] { display: none; }
     .fab { position: fixed; z-index: 16; right: 24px; bottom: max(24px, env(safe-area-inset-bottom)); min-height: 54px; padding: 0 22px; border: 1px solid #f1ca7c; border-radius: 999px; color: #1b1b17; background: linear-gradient(135deg, var(--gold-bright), #dfa653); box-shadow: 0 18px 46px rgba(0,0,0,.42), 0 0 25px rgba(231,189,104,.18); font-weight: 800; cursor: pointer; }
     .fab:hover { transform: translateY(-2px); }
+    .mimir-beacon { position: fixed; z-index: 21; left: 22px; bottom: max(18px, env(safe-area-inset-bottom)); width: 62px; height: 62px; padding: 0; border: 1px solid rgba(248,217,142,.58); border-radius: 50%; background: radial-gradient(circle, #173c48, #071722 74%); box-shadow: 0 18px 46px rgba(0,0,0,.45), 0 0 28px rgba(231,189,104,.17); cursor: pointer; animation: beaconFloat 3.6s ease-in-out infinite; }
+    .mimir-beacon[hidden] { display: none; }
+    .mimir-beacon img { position: absolute; z-index: 2; width: 112%; height: 112%; left: -7%; top: -9%; object-fit: contain; pointer-events: none; }
+    .mimir-beacon-ring { position: absolute; inset: -7px; border: 1px solid rgba(248,217,142,.18); border-radius: 50%; animation: auraPulse 2.8s ease-out infinite; }
+    .mimir-beacon i { position: absolute; z-index: 4; right: 0; bottom: 3px; width: 13px; height: 13px; border: 3px solid #071722; border-radius: 50%; background: var(--gold); box-shadow: 0 0 13px var(--gold); }
+    .mimir-beacon strong { position: absolute; left: 70px; top: 50%; width: max-content; padding: 8px 11px; border: 1px solid rgba(244,237,220,.12); border-radius: 11px; color: var(--paper); background: rgba(5,18,28,.92); box-shadow: 0 10px 25px rgba(0,0,0,.28); font-size: 9px; opacity: 0; pointer-events: none; transform: translate(-8px,-50%); transition: opacity .2s ease, transform .2s ease; }
+    .mimir-beacon:hover strong, .mimir-beacon:focus-visible strong { opacity: 1; transform: translate(0,-50%); }
+    .mimir-beacon[data-mood="focus"] i { background: var(--persimmon); box-shadow: 0 0 13px var(--persimmon); }
+    .mimir-beacon[data-mood="listen"] i { background: var(--teal); box-shadow: 0 0 13px var(--teal); }
+    .mimir-beacon[data-mood="rescue"] i { background: #8ea7d8; box-shadow: 0 0 13px #8ea7d8; }
     dialog { width: min(560px, calc(100% - 24px)); max-height: min(760px, calc(100vh - 32px)); padding: 0; overflow: auto; border: 1px solid rgba(244,237,220,.15); border-radius: 28px; color: var(--paper); background: linear-gradient(145deg, #153142, #081a27 72%); box-shadow: 0 32px 90px rgba(0,0,0,.58); }
     dialog::backdrop { background: rgba(2,10,17,.78); backdrop-filter: blur(8px); }
     .dialog-inner { padding: 28px; }
@@ -411,6 +433,37 @@
     .account-card.visible { display: block; }
     .account-card strong, .account-card span { display: block; }
     .account-card span { margin-top: 4px; color: var(--muted); font-size: 11px; }
+    .mimir-dialog { width: min(520px, calc(100% - 20px)); overflow: hidden; }
+    .mimir-dialog-hero { position: relative; min-height: 235px; display: grid; grid-template-columns: 145px 1fr 38px; align-items: center; gap: 10px; overflow: hidden; padding: 18px 18px 14px 8px; background: radial-gradient(circle at 18% 54%, rgba(231,189,104,.2), transparent 30%), linear-gradient(145deg, #183b49, #081a27 72%); }
+    .mimir-dialog-hero > img { position: relative; z-index: 2; width: 155px; height: 205px; align-self: end; object-fit: contain; filter: drop-shadow(0 22px 24px rgba(0,0,0,.34)); animation: companionBreath 5s ease-in-out infinite; }
+    .mimir-dialog-hero > div:not(.mimir-dialog-aura) { position: relative; z-index: 3; }
+    .mimir-dialog-hero > div > span { color: var(--gold); font-size: 9px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+    .mimir-dialog-hero h2 { margin-top: 5px; font-size: 31px; }
+    .mimir-dialog-hero p { margin-top: 9px; color: #c4d2cf; font-size: 11px; line-height: 1.55; }
+    .mimir-dialog-hero .icon-button { position: relative; z-index: 4; align-self: start; }
+    .mimir-dialog-aura { position: absolute; left: 66px; top: 112px; width: 190px; height: 190px; border: 1px solid rgba(248,217,142,.14); border-radius: 50%; box-shadow: 0 0 60px rgba(231,189,104,.13), inset 0 0 50px rgba(94,183,170,.08); transform: translate(-50%,-50%); animation: dialogAura 3.6s ease-in-out infinite; }
+    .mimir-dialog-hero[data-mood="focus"] { background: radial-gradient(circle at 18% 54%, rgba(230,111,67,.2), transparent 30%), linear-gradient(145deg, #243a43, #081a27 72%); }
+    .mimir-dialog-hero[data-mood="listen"] { background: radial-gradient(circle at 18% 54%, rgba(94,183,170,.23), transparent 30%), linear-gradient(145deg, #164148, #081a27 72%); }
+    .mimir-dialog-hero[data-mood="rescue"] { background: radial-gradient(circle at 18% 54%, rgba(142,167,216,.22), transparent 30%), linear-gradient(145deg, #1b354e, #081a27 72%); }
+    .mimir-dialog-body { padding: 19px; }
+    .mimir-signals { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+    .mimir-signal { min-height: 78px; padding: 11px; border: 1px solid var(--line); border-radius: 14px; background: rgba(255,255,255,.025); }
+    .mimir-signal span, .mimir-signal strong { display: block; }
+    .mimir-signal span { color: var(--muted); font-size: 8px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; }
+    .mimir-signal strong { margin-top: 5px; font-size: 12px; }
+    .mimir-main-action { width: 100%; min-height: 68px; display: grid; grid-template-columns: 42px 1fr auto; align-items: center; gap: 11px; margin-top: 10px; padding: 10px 13px; border: 1px solid rgba(248,217,142,.32); border-radius: 16px; color: #211b0e; text-align: left; background: linear-gradient(135deg, var(--gold-bright), #dba653); box-shadow: 0 12px 30px rgba(0,0,0,.22); cursor: pointer; }
+    .mimir-main-action > span { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 12px; background: rgba(36,28,14,.12); font: 800 17px/1 "Shippori Mincho", serif; }
+    .mimir-main-action small, .mimir-main-action strong { display: block; }
+    .mimir-main-action small { opacity: .68; font-size: 8px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+    .mimir-main-action strong { margin-top: 2px; font-size: 12px; }
+    .mimir-main-action > i { font-size: 22px; font-style: normal; }
+    .mimir-main-action:disabled, .coach-action:disabled, .mimir-card-actions button:disabled { cursor: default; filter: saturate(.55); opacity: .78; }
+    .mimir-cancel-focus { width: 100%; min-height: 36px; margin-top: 6px; border: 0; color: var(--muted); background: transparent; font-size: 10px; cursor: pointer; }
+    .mimir-beacon.is-timing .mimir-beacon-ring { border-color: rgba(248,217,142,.48); animation-duration: 1.15s; }
+    .mimir-beacon.is-timing strong { opacity: 1; transform: translate(0,-50%); }
+    .mimir-quick-actions { display: grid; grid-template-columns: repeat(3,1fr); gap: 7px; margin-top: 9px; }
+    .mimir-quick-actions button { min-height: 42px; border: 1px solid var(--line); border-radius: 12px; color: var(--mist); background: rgba(255,255,255,.025); font-weight: 800; cursor: pointer; }
+    .mimir-contract { margin-top: 12px; color: #70888d; font-size: 9px; text-align: center; }
     .toast { position: fixed; z-index: 30; left: 50%; bottom: max(88px, calc(env(safe-area-inset-bottom) + 88px)); width: max-content; max-width: calc(100% - 28px); padding: 12px 16px; border: 1px solid rgba(94,183,170,.34); border-radius: 999px; color: #d9f2e8; background: rgba(5,18,28,.94); box-shadow: 0 18px 45px rgba(0,0,0,.4); opacity: 0; pointer-events: none; transform: translate(-50%, 12px); transition: opacity .2s ease, transform .2s ease; }
     .toast.visible { opacity: 1; transform: translate(-50%, 0); }
     .celebration { position: fixed; z-index: 45; inset: 0; display: grid; place-items: center; overflow: hidden; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity .2s ease, visibility .2s ease; }
@@ -423,6 +476,7 @@
     .celebration-card p { margin-top: 7px; color: var(--mist); }
     .celebration-xp { display: inline-block; margin-top: 14px; color: var(--gold-bright); font-weight: 800; letter-spacing: .08em; }
     .celebration-particle { position: absolute; left: 50%; top: 50%; width: 7px; height: 7px; border-radius: 50%; background: var(--particle-color, var(--gold)); box-shadow: 0 0 10px var(--particle-color, var(--gold)); animation: particleBurst 1.15s var(--particle-delay, 0s) cubic-bezier(.1,.65,.3,1) both; }
+    .celebration-mimir { position: absolute; z-index: 3; width: 118px; height: 150px; right: -48px; bottom: -24px; object-fit: contain; filter: drop-shadow(0 16px 18px rgba(0,0,0,.38)); transform: rotate(7deg); }
     .category-only[hidden] { display: none; }
     .status-deck { animation: riseIn .65s .08s ease both; }
     .layout .panel { animation: riseIn .65s .14s ease both; }
@@ -443,6 +497,10 @@
     @keyframes sparkFloat { 0%, 100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-5px) rotate(2deg); } }
     @keyframes orbitRune { 0%, 100% { transform: translate(0,0) rotate(0); opacity: .55; } 50% { transform: translate(-12px,8px) rotate(180deg); opacity: 1; } }
     @keyframes riseIn { from { opacity: 0; transform: translateY(13px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes mimirReact { 0% { transform: translateY(0) rotate(0) scale(1); } 30% { transform: translateY(-11px) rotate(-3deg) scale(1.035); } 58% { transform: translateY(1px) rotate(2deg) scale(.99); } 100% { transform: translateY(0) rotate(0) scale(1); } }
+    @keyframes beaconFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+    @keyframes auraPulse { 0%, 100% { opacity: .35; transform: scale(.9); } 50% { opacity: .9; transform: scale(1.08); } }
+    @keyframes dialogAura { 0%, 100% { opacity: .35; transform: translate(-50%,-50%) scale(.9); } 50% { opacity: .9; transform: translate(-50%,-50%) scale(1.08); } }
     @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; } }
 
     @media (max-width: 960px) {
@@ -567,7 +625,7 @@
     .v2 #companionCard .companion-copy { padding: 22px 22px 0; }
     .v2 #companionCard h2 { max-width: 8ch; font-size: 25px; }
     .v2 #companionCard .evolution-box { top: 91px; left: 20px; right: 20px; }
-    .v2 #companionCard img { right: -4px; bottom: -10px; height: min(65%, 205px); }
+    .v2 #companionCard .mimir-avatar-button { right: -4px; bottom: -10px; width: min(65%, 205px); height: min(65%, 205px); }
     .v2 #companionCard .speech { left: 18px; right: 18px; bottom: 16px; max-width: 230px; padding: 11px 12px; font-size: 11px; }
     .v2 #duolingoSpark .panel-inner { padding: 19px 22px; }
     .v2 #duolingoSpark .spark-copy p { display: none; }
@@ -605,7 +663,8 @@
     .map-obi { left: 55%; top: 55%; }
     .map-listening { left: 74%; top: 76%; }
     .map-sanctuary { left: 87%; top: 19%; }
-    .map-mimir { position: absolute; z-index: 4; left: var(--map-x, 12%); top: var(--map-y, 80%); width: 92px; aspect-ratio: 1; overflow: hidden; border: 2px solid rgba(248,217,142,.7); border-radius: 50%; background: radial-gradient(circle, rgba(231,189,104,.26), rgba(5,18,28,.9)); box-shadow: 0 0 0 7px rgba(231,189,104,.08), 0 14px 34px rgba(0,0,0,.42); transform: translate(-50%, -50%); transition: left 1.2s ease, top 1.2s ease; animation: travelerBob 3.2s ease-in-out infinite; }
+    .map-mimir { position: absolute; z-index: 4; left: var(--map-x, 12%); top: var(--map-y, 80%); width: 92px; aspect-ratio: 1; overflow: hidden; padding: 0; border: 2px solid rgba(248,217,142,.7); border-radius: 50%; background: radial-gradient(circle, rgba(231,189,104,.26), rgba(5,18,28,.9)); box-shadow: 0 0 0 7px rgba(231,189,104,.08), 0 14px 34px rgba(0,0,0,.42); cursor: pointer; transform: translate(-50%, -50%); transition: left 1.2s ease, top 1.2s ease, box-shadow .25s ease; animation: travelerBob 3.2s ease-in-out infinite; }
+    .map-mimir:hover, .map-mimir:focus-visible { box-shadow: 0 0 0 9px rgba(231,189,104,.13), 0 14px 34px rgba(0,0,0,.42), 0 0 28px rgba(231,189,104,.3); }
     .map-mimir img { width: 140%; height: 140%; object-fit: cover; object-position: 57% 35%; transform: translate(-18%, -4%); }
     .map-progress-chip { position: absolute; z-index: 6; right: 24px; bottom: 22px; padding: 11px 14px; border: 1px solid rgba(255,255,255,.15); border-radius: 999px; color: var(--gold-bright); background: rgba(4,16,25,.8); font-size: 11px; font-weight: 800; backdrop-filter: blur(12px); }
     .journey-panels { display: grid; gap: 14px; margin-top: 14px; }
@@ -746,13 +805,17 @@
     .v3 .heatmap-legend i:nth-of-type(2) { background: #254f54; }
     .v3 .heatmap-legend i:nth-of-type(3) { background: #367b76; }
     .v3 .heatmap-legend i:nth-of-type(4) { background: #f0c86f; }
-    .v3 .coach-panel { background: radial-gradient(circle at 90% 10%, rgba(231,189,104,.12), transparent 42%), linear-gradient(145deg, #102f39, #071923); }
+    .v3 .coach-panel { position: relative; overflow: hidden; background: radial-gradient(circle at 90% 10%, rgba(231,189,104,.12), transparent 42%), linear-gradient(145deg, #102f39, #071923); }
+    .v3 .coach-mimir { position: absolute; right: -6px; top: -8px; width: 105px; height: 118px; pointer-events: none; }
+    .v3 .coach-mimir img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 12px 16px rgba(0,0,0,.3)); animation: companionBreath 5.5s ease-in-out infinite; }
+    .v3 .coach-mimir span { position: absolute; right: 9px; bottom: 0; padding: 4px 7px; border: 1px solid rgba(248,217,142,.18); border-radius: 999px; color: var(--gold); background: rgba(5,18,28,.82); font-size: 7px; font-weight: 800; text-transform: uppercase; }
     .v3 .coach-panel h2 { margin-top: 7px; font-size: 26px; }
-    .v3 .coach-panel p { margin-top: 12px; color: #b8c8c7; font-size: 11px; line-height: 1.65; }
-    .v3 .coach-action { margin-top: 18px; padding: 14px; border: 1px solid rgba(248,217,142,.14); border-radius: 16px; background: rgba(3,14,22,.35); }
+    .v3 .coach-panel p { max-width: calc(100% - 58px); margin-top: 12px; color: #b8c8c7; font-size: 11px; line-height: 1.65; }
+    .v3 .coach-action { position: relative; width: 100%; display: block; margin-top: 18px; padding: 14px 34px 14px 14px; border: 1px solid rgba(248,217,142,.14); border-radius: 16px; color: inherit; text-align: left; background: rgba(3,14,22,.35); cursor: pointer; }
     .v3 .coach-action span, .v3 .coach-action strong { display: block; }
     .v3 .coach-action span { color: var(--gold); font-size: 8px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
     .v3 .coach-action strong { margin-top: 5px; color: var(--paper); font-size: 11px; line-height: 1.5; }
+    .v3 .coach-action i { position: absolute; right: 14px; top: 50%; color: var(--gold); font-size: 20px; font-style: normal; transform: translateY(-50%); }
     .v3 .progress-panels { display: grid; gap: 14px; margin-top: 14px; }
     .v3 .progress-details { display: grid; grid-template-columns: .8fr 1.35fr .8fr; align-items: start; gap: 14px; margin-top: 14px; }
     .v3 .progress-details #logsPanel { max-height: 360px; overflow: auto; }
@@ -784,6 +847,15 @@
       .v3 .activity-heatmap { grid-template-rows: repeat(7, 11px); grid-auto-columns: 11px; gap: 3px; }
       .v3 .heat-cell { width: 11px; height: 11px; }
       .v3 #collectionPanel .seal-grid { grid-template-columns: repeat(2, 1fr); }
+      .mimir-beacon { left: 9px; bottom: max(8px, env(safe-area-inset-bottom)); width: 52px; height: 52px; }
+      .mimir-beacon strong { display: none; }
+      .mimir-dialog-hero { min-height: 215px; grid-template-columns: 118px 1fr 34px; padding: 14px 13px 10px 3px; }
+      .mimir-dialog-hero > img { width: 128px; height: 184px; }
+      .mimir-dialog-hero h2 { font-size: 26px; }
+      .mimir-dialog-body { padding: 14px; }
+      .mimir-signals { gap: 5px; }
+      .mimir-signal { min-height: 72px; padding: 9px; }
+      .mimir-signal strong { font-size: 10px; }
     }
   </style>
 </head>
@@ -940,12 +1012,12 @@
       <aside class="stack side-stack">
         <section class="panel companion" id="companionCard">
           <div class="companion-copy">
-            <div class="companion-stage" id="companionStage">Éclaireur</div>
+            <div class="companion-stage"><span id="companionStage">Éclaireur</span><i id="companionMood">En veille</i></div>
             <h2>Mimir</h2>
           </div>
           <div class="evolution-box"><div class="evolution-head"><span>Évolution</span><strong id="evolutionNext">3 étoiles restantes</strong></div><div class="bar"><i id="evolutionBar"></i></div></div>
-          <img src="assets/kitsune-guide.webp" alt="Kitsune érudit portant le livre du voyageur N5" loading="lazy" decoding="async">
-          <p class="speech" id="companionSpeech"></p>
+          <button class="mimir-avatar-button" id="mimirAvatarButton" type="button" aria-label="Faire réagir Mimir"><img src="assets/kitsune-guide.webp" alt="Kitsune érudit portant le livre du voyageur N5" loading="lazy" decoding="async"></button>
+          <div class="speech"><p id="companionSpeech"></p><div class="mimir-card-actions"><button id="mimirPrimaryAction" type="button">Prochain pas</button><button id="mimirBriefButton" type="button" aria-label="Ouvrir le brief complet de Mimir">•••</button></div></div>
         </section>
 
         <section class="panel" id="expeditionPanel">
@@ -982,6 +1054,7 @@
       <span id="lastUpdate">Dernière mise à jour...</span>
     </footer>
   </main>
+  <button class="mimir-beacon" id="mimirBeacon" type="button" aria-label="Ouvrir Mimir" hidden><span class="mimir-beacon-ring"></span><img src="assets/kitsune-guide.webp" alt=""><i id="mimirBeaconDot"></i><strong id="mimirBeaconLabel">Mimir observe</strong></button>
   <button class="fab" id="quickAddButton" type="button"><span class="fab-label">Enregistrer une session</span></button>
   <nav class="app-nav" aria-label="Navigation principale">
     <button class="app-nav-button active" type="button" data-view="today" aria-current="page"><span>今</span><strong>Aujourd'hui</strong></button>
@@ -1025,6 +1098,22 @@
     </div>
   </dialog>
 
+  <dialog id="mimirDialog" class="mimir-dialog">
+    <div class="mimir-dialog-hero" id="mimirDialogHero">
+      <div class="mimir-dialog-aura" aria-hidden="true"></div>
+      <img src="assets/kitsune-guide.webp" alt="Mimir, compagnon de progression">
+      <div><span id="mimirDialogMood">En veille</span><h2 id="mimirDialogTitle">Ton brief</h2><p id="mimirDialogSpeech"></p></div>
+      <button class="icon-button" type="button" data-close-dialog="mimirDialog" aria-label="Fermer">×</button>
+    </div>
+    <div class="mimir-dialog-body">
+      <div class="mimir-signals" id="mimirSignals"></div>
+      <button class="mimir-main-action" id="mimirDialogAction" type="button"><span id="mimirDialogActionMark">復</span><div><small>Ma recommandation</small><strong id="mimirDialogActionLabel">Faire 10 min d'Anki</strong></div><i>›</i></button>
+      <button class="mimir-cancel-focus" id="mimirCancelFocus" type="button" hidden>Annuler le focus</button>
+      <div class="mimir-quick-actions" aria-label="Enregistrer une session"><button type="button" data-mimir-category="anki">復 Anki</button><button type="button" data-mimir-category="obi">文 Obi</button><button type="button" data-mimir-category="listening">聴 Écoute</button></div>
+      <p class="mimir-contract">Je réagis uniquement à tes données confirmées. Pas de dette inventée, pas de fausse maîtrise.</p>
+    </div>
+  </dialog>
+
   <dialog id="bossDialog">
     <div class="dialog-inner">
       <div class="dialog-head"><div><div class="eyebrow">Mini-boss N5</div><h2>Épreuve des fondations</h2></div><button class="icon-button" type="button" data-close-dialog="bossDialog" aria-label="Fermer">×</button></div>
@@ -1060,6 +1149,7 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <div class="celebration" id="celebration" role="status" aria-live="polite" aria-atomic="true">
     <div class="celebration-card">
+      <img class="celebration-mimir" src="assets/kitsune-guide.webp" alt="" aria-hidden="true">
       <div class="celebration-sigil" id="celebrationSigil">星</div>
       <h2 id="celebrationTitle">Lanterne allumée</h2>
       <p id="celebrationText">Le chemin reste visible.</p>
@@ -1069,6 +1159,6 @@
   </div>
 
   <script src="supabase-config.js" defer></script>
-  <script src="app.js?v=12" defer></script>
+  <script src="app.js?v=13" defer></script>
 </body>
 </html>

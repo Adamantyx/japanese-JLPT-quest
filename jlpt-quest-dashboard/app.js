@@ -46,6 +46,11 @@ let authMode = "login";
 let ankiHistory = { coverage: {}, baseline: {}, daily: [] };
 let currentEvents = [];
 let cloudInitPromise = null;
+let currentMimirState = null;
+let mimirReactionIndex = 0;
+let mimirReactionTimer = null;
+let mimirFocusTimer = null;
+let mimirFocus = readMimirFocus();
 
 function buildV3Shell() {
   if (document.body.classList.contains("v3")) return;
@@ -95,7 +100,7 @@ function buildV3Shell() {
     </section>
     <div class="progress-evidence-grid">
       <section class="panel heatmap-panel"><div class="panel-inner"><div class="section-head"><div><div class="eyebrow">Régularité</div><h2>26 semaines</h2></div><strong class="heatmap-score" id="heatmapScore"></strong></div><div class="activity-heatmap" id="activityHeatmap" role="img"></div><div class="heatmap-legend"><span>Repos</span><i></i><i></i><i></i><i></i><span>Engagé</span></div></div></section>
-      <section class="panel coach-panel"><div class="panel-inner"><div class="eyebrow">Lecture de Mimir</div><h2 id="coachVerdict">Le signal utile</h2><p id="coachInsight"></p><div class="coach-action"><span>Prochain levier</span><strong id="coachAction"></strong></div></div></section>
+      <section class="panel coach-panel"><div class="panel-inner"><div class="coach-mimir"><img src="assets/kitsune-guide.webp" alt="" loading="lazy"><span id="coachMood">En veille</span></div><div class="eyebrow">Lecture de Mimir</div><h2 id="coachVerdict">Le signal utile</h2><p id="coachInsight"></p><button class="coach-action" id="coachActionButton" type="button"><span>Prochain levier</span><strong id="coachAction"></strong><i>›</i></button></div></section>
     </div>`;
 
   const evidencePanels = document.createElement("div");
@@ -125,7 +130,7 @@ function buildV3Shell() {
       <button class="map-landmark map-obi" id="mapObiLandmark" type="button" data-map-category="obi"><span class="map-icon">文</span><span><strong>Temple Obi</strong><small id="mapObiValue">Leçon</small></span></button>
       <button class="map-landmark map-listening locked" id="mapListeningLandmark" type="button" data-map-category="listening"><span class="map-icon">聴</span><span><strong>Lac d'écoute</strong><small id="mapListeningValue">Minutes</small></span></button>
       <div class="map-landmark map-sanctuary locked is-static" id="mapSanctuaryLandmark"><span class="map-icon">N5</span><span><strong>Sanctuaire</strong><small id="mapSanctuaryValue">Décembre</small></span></div>
-      <div class="map-mimir" id="mapMimir" aria-hidden="true"><img src="assets/kitsune-guide.webp" alt=""></div>
+      <button class="map-mimir" id="mapMimir" type="button" aria-label="Ouvrir le brief de Mimir"><img src="assets/kitsune-guide.webp" alt=""></button>
       <div class="map-progress-chip" id="mapProgressText">Le chemin s'éveille</div>
     </section>`;
   const journeyPanels = document.createElement("div");
@@ -155,6 +160,7 @@ function setActiveView(view, updateHash = true) {
     else button.removeAttribute("aria-current");
   });
   document.getElementById("quickAddButton").hidden = nextView !== "today";
+  document.getElementById("mimirBeacon").hidden = nextView === "today" && !mimirFocus;
   if (updateHash) history.replaceState(null, "", `#${nextView}`);
   window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
 }
@@ -262,7 +268,6 @@ function render(data, live, syncText = "Progression synchronisée") {
   const stage = data.profile.lifetimeStars >= 16 ? "Messager du sanctuaire" : data.profile.lifetimeStars >= 8 ? "Gardien des lanternes" : "Éclaireur du chemin";
   document.getElementById("companionStage").textContent = `${stage} · ${data.profile.lifetimeStars} étoiles`;
   document.getElementById("companionCard").dataset.state = data.today.stars >= 2 ? "active" : "rest";
-  document.getElementById("companionSpeech").textContent = companionLine(data.today.stars, data.today.energy);
 
   renderWeek(data.week);
   document.getElementById("logs").innerHTML = data.recentLogs.length
@@ -276,6 +281,7 @@ function render(data, live, syncText = "Progression synchronisée") {
     : `Nouvelles cartes gelées jusqu'à ${data.anki.newCardsUnlockAt} reviews de retard. Il en reste ${reviewsToUnlock} à résorber, sans mode punition.`;
   renderGameSystems(data);
   renderProgressInsights(data, currentEvents);
+  renderMimir(data, currentEvents);
   document.getElementById("lastUpdate").textContent = `Mis à jour ${formatDateTime(data.updatedAt)}`;
 }
 
@@ -441,11 +447,127 @@ function renderActivityHeatmap(rows, now) {
   document.getElementById("heatmapScore").textContent = `${active} jours actifs`;
 }
 
-function companionLine(starCount, energy) {
-  if (starCount >= 3) return `Trois lanternes. Très belle journée, ${energy ? energy.toLowerCase() : "capitaine"}. On garde le feu, pas besoin d'en rajouter.`;
-  if (starCount >= 2) return "Deux étoiles, journée solide. Les bases reprennent leur place, sans séance héroïque.";
-  if (starCount === 1) return "Une étoile suffit pour que le chemin reste visible. La journée est sauvée.";
-  return "Le chemin n'a pas disparu. Une session de dix minutes suffit pour rallumer la première lanterne.";
+function deriveMimirState(data, events = []) {
+  const rows = buildActivityRows(data, events);
+  const today = toIsoDate();
+  const activeRows = rows.filter(row => row.date <= today && (row.anki + row.obi + row.listening + row.duolingo) > 0);
+  const lastActive = activeRows.at(-1)?.date || null;
+  const daysSinceActive = lastActive ? Math.max(0, Math.round((parseDate(today) - parseDate(lastActive)) / 86400000)) : 99;
+  const hour = new Date().getHours();
+  const weekend = [0, 6].includes(new Date().getDay());
+  const backlog = data.anki?.backlog === null || data.anki?.backlog === undefined ? null : Number(data.anki.backlog);
+  const starsToday = Number(data.today?.stars || 0);
+  const obiRemaining = Math.max(0, Number(data.obi?.weeklyTarget || 3) - Number(data.obi?.lessonsThisWeek || 0));
+  const listeningRemaining = Math.max(0, Number(data.listening?.weeklyTargetMinutes || 30) - Number(data.listening?.weeklyMinutes || 0));
+  const baseSignals = [
+    { label: "Dernier pas", value: daysSinceActive === 0 ? "Aujourd'hui" : daysSinceActive === 1 ? "Hier" : `Il y a ${daysSinceActive} j` },
+    { label: "Backlog Anki", value: backlog === null ? "À mesurer" : `${backlog} reviews` },
+    { label: "Semaine", value: `${data.week?.stars || 0}/${data.week?.target || 8} étoiles` }
+  ];
+  const shared = { signals: baseSignals, minutes: 10, lastActive, daysSinceActive };
+
+  if (starsToday >= 2) return {
+    ...shared,
+    mood: "celebrate",
+    moodLabel: "Fier du cap",
+    title: "Journée solide",
+    speech: "Deux lanternes ou plus. Le meilleur prochain pas, c'est de ne pas transformer une bonne journée en punition.",
+    dialogSpeech: "Tu as déjà entretenu la mémoire et la structure. Je garde le feu, toi tu peux respirer. L'écoute reste un bonus si elle te fait plaisir.",
+    action: listeningRemaining > 0 ? { type: "focus", category: "listening", mark: "聴", label: "Bonus écoute, 10 min" } : { type: "view", value: "progress", mark: "進", label: "Voir le signal de la semaine" },
+    reactions: ["Oui, j'ai vu les deux lanternes. Pas besoin d'en allumer douze pour me convaincre.", "Le feu tient. Le repos fait aussi partie du système.", "Journée solide enregistrée. On ne négocie pas avec les faits."]
+  };
+
+  if (daysSinceActive >= 3 || (hour >= 21 && starsToday === 0)) return {
+    ...shared,
+    mood: "rescue",
+    moodLabel: "Mode reprise",
+    title: "On réduit la marche",
+    speech: daysSinceActive >= 3 ? `${daysSinceActive} jours sans trace confirmée. Je ne réclame rien : dix minutes pour reprendre contact.` : "La journée est presque finie. Dix minutes maximum, juste pour garder le fil.",
+    dialogSpeech: "Aucune dette à rembourser. Je te propose le geste qui coûte le moins et protège le mieux la reprise : ouvrir Anki et faire uniquement des reviews.",
+    action: { type: "focus", category: "anki", mark: "復", label: "Reprendre contact, 10 min" },
+    reactions: ["Je ne compte pas les jours pour te juger. Je les compte pour raccourcir la marche.", "Pas de rattrapage héroïque. Ouvre, réponds, arrête au bout de dix minutes.", "La montagne adore faire du cinéma. Dix minutes, et elle redevient juste une pile de cartes."]
+  };
+
+  if (!data.anki?.doneToday && (backlog === null || backlog > 150)) return {
+    ...shared,
+    mood: "focus",
+    moodLabel: "Focus mémoire",
+    title: "Le bon combat est clair",
+    speech: backlog === null ? "Anki d'abord. Dix minutes permettront aussi de mesurer le backlog réel." : `${backlog} reviews en attente. Reviews uniquement, dix minutes, puis tu juges ton énergie.`,
+    dialogSpeech: "Le backlog bloque les nouveaux mots, pas ta progression. Chaque courte session remet les anciennes connexions en circulation sans te punir.",
+    action: { type: "focus", category: "anki", mark: "復", label: "Démarrer Anki, 10 min" },
+    reactions: ["Je garde un œil sur le seuil de 150. Toi, garde seulement un œil sur la prochaine carte.", "Zéro nouvelle carte. Ce n'est pas une sanction, c'est de l'entretien intelligent.", "Dix minutes. Si ça roule, tant mieux. Si ça rame, les dix minutes comptent quand même."]
+  };
+
+  if (!data.obi?.doneToday && obiRemaining > 0) return {
+    ...shared,
+    mood: "focus",
+    moodLabel: "Focus structure",
+    title: `Obi ${data.obi.currentLesson} t'attend`,
+    speech: `${obiRemaining} reprise${obiRemaining > 1 ? "s" : ""} Obi pour atteindre le cap hebdo. Revoir avant d'avancer reste parfaitement valable.`,
+    dialogSpeech: `Tu n'as pas besoin de terminer une vidéo de 24 minutes. Dix minutes attentives et un rappel actif suffisent pour consolider la leçon ${data.obi.currentLesson}.`,
+    action: { type: "focus", category: "obi", mark: "文", label: `Continuer Obi ${data.obi.currentLesson}, 10 min` },
+    reactions: ["Une vidéo peut durer 24 minutes. Ta reprise, elle, a le droit d'en durer dix.", "Avant d'avancer, rappelle-toi une idée de la dernière partie. C'est là que la structure s'installe.", "Obi construit la charpente. Anki garde les pièces disponibles."]
+  };
+
+  if (listeningRemaining > 0) return {
+    ...shared,
+    mood: "listen",
+    moodLabel: "Oreille ouverte",
+    title: "Place au japonais vivant",
+    speech: `${listeningRemaining} minutes restent sur le cap hebdo. Une écoute globale, puis une seule phrase repérée.`,
+    dialogSpeech: "Japanese with Shun suffit. Première écoute pour comprendre l'idée, seconde avec le transcript japonais. Une phrase, pas une autopsie complète.",
+    action: { type: "focus", category: "listening", mark: "聴", label: "Démarrer l'écoute, 10 min" },
+    reactions: ["Tu n'as pas besoin de tout comprendre pour entraîner ton oreille.", "Une phrase reconnue vaut mieux que dix minutes passées à traduire chaque syllabe.", "Le japonais doit aussi devenir un son familier, pas seulement une pile de cartes."]
+  };
+
+  return {
+    ...shared,
+    mood: weekend ? "rest" : "celebrate",
+    moodLabel: weekend ? "Entretien calme" : "Cap tenu",
+    title: weekend ? "Week-end léger" : "Le système tourne",
+    speech: weekend ? "Reviews et immersion plaisir seulement. Les nouvelles cartes peuvent attendre lundi." : "Les trois piliers ont reçu leur part. Regarde le chemin ou ferme l'app, les deux sont valables.",
+    dialogSpeech: "Je n'ai pas besoin de te créer une mission artificielle. Le système est entretenu, et c'est précisément le but.",
+    action: { type: "view", value: "progress", mark: "進", label: "Voir ma progression" },
+    reactions: ["Un bon système sait aussi quand se taire.", "Le calme n'est pas une rupture de série.", "一歩一歩. Oui, même quand le prochain pas est demain."]
+  };
+}
+
+function renderMimir(data, events = []) {
+  const state = deriveMimirState(data, events);
+  currentMimirState = state;
+  const companion = document.getElementById("companionCard");
+  companion.dataset.mood = state.mood;
+  document.getElementById("companionMood").textContent = state.moodLabel;
+  document.getElementById("companionSpeech").textContent = state.speech;
+  document.getElementById("mimirPrimaryAction").textContent = state.action.label;
+  bindMimirAction(document.getElementById("mimirPrimaryAction"), state.action);
+
+  const beacon = document.getElementById("mimirBeacon");
+  beacon.dataset.mood = state.mood;
+  document.getElementById("mimirBeaconLabel").textContent = state.title;
+  document.getElementById("mapMimir").dataset.mood = state.mood;
+  document.getElementById("coachMood").textContent = state.moodLabel;
+  document.getElementById("coachVerdict").textContent = state.title;
+  document.getElementById("coachInsight").textContent = state.dialogSpeech;
+  document.getElementById("coachAction").textContent = state.action.label;
+  bindMimirAction(document.getElementById("coachActionButton"), state.action);
+
+  const hero = document.getElementById("mimirDialogHero");
+  hero.dataset.mood = state.mood;
+  document.getElementById("mimirDialogMood").textContent = state.moodLabel;
+  document.getElementById("mimirDialogTitle").textContent = state.title;
+  document.getElementById("mimirDialogSpeech").textContent = state.dialogSpeech;
+  document.getElementById("mimirSignals").innerHTML = state.signals.map(signal => `<div class="mimir-signal"><span>${esc(signal.label)}</span><strong>${esc(signal.value)}</strong></div>`).join("");
+  document.getElementById("mimirDialogActionMark").textContent = state.action.mark;
+  document.getElementById("mimirDialogActionLabel").textContent = state.action.label;
+  bindMimirAction(document.getElementById("mimirDialogAction"), state.action);
+  updateMimirFocusUi();
+}
+
+function bindMimirAction(element, action) {
+  element.dataset.mimirActionType = action.type;
+  element.dataset.mimirActionValue = action.category || action.value || "";
 }
 
 function deriveProgression(profile, events, scores, quests, bossAttempts = []) {
@@ -1102,6 +1224,113 @@ function applyLocalBossAttempt(data) {
   return next;
 }
 
+function readMimirFocus() {
+  try {
+    const focus = JSON.parse(sessionStorage.getItem("jlpt-mimir-focus-v1") || "null");
+    return focus?.endAt > Date.now() ? focus : null;
+  } catch {
+    return null;
+  }
+}
+
+function openMimirDialog() {
+  reactMimir();
+  const dialog = document.getElementById("mimirDialog");
+  if (!dialog.open) dialog.showModal();
+}
+
+function reactMimir() {
+  if (!currentMimirState) return;
+  const companion = document.getElementById("companionCard");
+  companion.classList.remove("is-reacting");
+  requestAnimationFrame(() => companion.classList.add("is-reacting"));
+  const reactions = currentMimirState.reactions || [currentMimirState.speech];
+  document.getElementById("companionSpeech").textContent = reactions[mimirReactionIndex % reactions.length];
+  mimirReactionIndex += 1;
+  clearTimeout(mimirReactionTimer);
+  mimirReactionTimer = setTimeout(() => {
+    companion.classList.remove("is-reacting");
+    if (!mimirFocus && currentMimirState) document.getElementById("companionSpeech").textContent = currentMimirState.speech;
+  }, 4200);
+}
+
+function handleMimirAction(element) {
+  const type = element.dataset.mimirActionType;
+  const value = element.dataset.mimirActionValue;
+  if (type === "view") {
+    if (document.getElementById("mimirDialog").open) document.getElementById("mimirDialog").close();
+    setActiveView(value || "progress");
+    return;
+  }
+  if (type === "focus" && value) startMimirFocus(value, currentMimirState?.action?.label || "Focus japonais");
+}
+
+function startMimirFocus(category, label) {
+  if (mimirFocus) return;
+  const durationMinutes = Number(currentMimirState?.minutes || 10);
+  mimirFocus = { category, label, durationMinutes, endAt: Date.now() + (durationMinutes * 60000) };
+  sessionStorage.setItem("jlpt-mimir-focus-v1", JSON.stringify(mimirFocus));
+  if (document.getElementById("mimirDialog").open) document.getElementById("mimirDialog").close();
+  showToast(`Mimir garde ${durationMinutes} minutes. Le timer n'enregistre rien tout seul.`);
+  updateMimirFocusUi();
+}
+
+function updateMimirFocusUi() {
+  clearInterval(mimirFocusTimer);
+  const focusButtons = document.querySelectorAll('[data-mimir-action-type="focus"]');
+  document.getElementById("mimirCancelFocus").hidden = !mimirFocus;
+  if (!mimirFocus) {
+    focusButtons.forEach(button => { button.disabled = false; });
+    return;
+  }
+  const tick = () => {
+    const remaining = Math.max(0, mimirFocus.endAt - Date.now());
+    const totalSeconds = Math.ceil(remaining / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = String(totalSeconds % 60).padStart(2, "0");
+    const timerLabel = `${minutes}:${seconds}`;
+    focusButtons.forEach(button => {
+      button.disabled = true;
+      if (button.id === "mimirPrimaryAction") button.textContent = `Mimir garde le temps · ${timerLabel}`;
+    });
+    document.getElementById("mimirDialogActionLabel").textContent = `Focus en cours · ${timerLabel}`;
+    document.getElementById("mimirBeaconLabel").textContent = `${timerLabel} · ${categoryName(mimirFocus.category)}`;
+    document.getElementById("companionSpeech").textContent = `Je garde le temps : ${timerLabel}. Toi, reste seulement avec la prochaine étape.`;
+    const beacon = document.getElementById("mimirBeacon");
+    beacon.hidden = false;
+    beacon.classList.add("is-timing");
+    if (remaining <= 0) finishMimirFocus();
+  };
+  tick();
+  if (mimirFocus) mimirFocusTimer = setInterval(tick, 1000);
+}
+
+function cancelMimirFocus() {
+  if (!mimirFocus) return;
+  mimirFocus = null;
+  sessionStorage.removeItem("jlpt-mimir-focus-v1");
+  clearInterval(mimirFocusTimer);
+  document.getElementById("mimirBeacon").classList.remove("is-timing");
+  renderMimir(currentData, currentEvents);
+  showToast("Focus annulé. Rien n'a été enregistré.");
+}
+
+function finishMimirFocus() {
+  if (!mimirFocus) return;
+  const category = mimirFocus.category;
+  mimirFocus = null;
+  sessionStorage.removeItem("jlpt-mimir-focus-v1");
+  clearInterval(mimirFocusTimer);
+  document.getElementById("mimirBeacon").classList.remove("is-timing");
+  if (currentMimirState) renderMimir(currentData, currentEvents);
+  showToast("Les 10 minutes sont passées. Confirme maintenant ce que tu as réellement fait.");
+  openEntry(category);
+}
+
+function categoryName(category) {
+  return { anki: "Anki", obi: "Obi", listening: "Écoute" }[category] || "Japonais";
+}
+
 function bindUi() {
   document.querySelectorAll("[data-view]").forEach(button => button.addEventListener("click", () => setActiveView(button.dataset.view)));
   document.querySelectorAll("[data-view-link]").forEach(link => link.addEventListener("click", event => {
@@ -1121,6 +1350,18 @@ function bindUi() {
   document.getElementById("restoreProgressButton").addEventListener("click", importStarterHistory);
   document.getElementById("accountButton").addEventListener("click", () => openAuth());
   document.getElementById("recordDuolingoButton").addEventListener("click", () => openEntry("duolingo"));
+  document.getElementById("mimirAvatarButton").addEventListener("click", reactMimir);
+  document.getElementById("mimirBriefButton").addEventListener("click", openMimirDialog);
+  document.getElementById("mimirBeacon").addEventListener("click", openMimirDialog);
+  document.getElementById("mapMimir").addEventListener("click", openMimirDialog);
+  document.getElementById("mimirCancelFocus").addEventListener("click", cancelMimirFocus);
+  for (const id of ["mimirPrimaryAction", "mimirDialogAction", "coachActionButton"]) {
+    document.getElementById(id).addEventListener("click", event => handleMimirAction(event.currentTarget));
+  }
+  document.querySelectorAll("[data-mimir-category]").forEach(button => button.addEventListener("click", () => {
+    document.getElementById("mimirDialog").close();
+    openEntry(button.dataset.mimirCategory);
+  }));
   document.getElementById("startBossButton").addEventListener("click", openBoss);
   document.getElementById("bossForm").addEventListener("submit", submitBoss);
   document.getElementById("questList").addEventListener("click", event => {
