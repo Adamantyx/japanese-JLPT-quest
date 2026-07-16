@@ -563,6 +563,7 @@ function renderMimir(data, events = []) {
   document.getElementById("mimirDialogActionLabel").textContent = state.action.label;
   bindMimirAction(document.getElementById("mimirDialogAction"), state.action);
   updateMimirFocusUi();
+  syncMimirBeaconVisibility();
 }
 
 function bindMimirAction(element, action) {
@@ -1313,6 +1314,11 @@ function cancelMimirFocus() {
   document.getElementById("mimirBeacon").classList.remove("is-timing");
   renderMimir(currentData, currentEvents);
   showToast("Focus annulé. Rien n'a été enregistré.");
+}
+
+function syncMimirBeaconVisibility() {
+  const todayVisible = !document.getElementById("todayView").hidden;
+  document.getElementById("mimirBeacon").hidden = todayVisible && !mimirFocus;
 }
 
 function finishMimirFocus() {

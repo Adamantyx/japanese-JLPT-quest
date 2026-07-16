@@ -1,6 +1,6 @@
 {
   "schemaVersion": 3,
-  "updatedAt": "2026-07-15T22:55:00+02:00",
+  "updatedAt": "2026-07-16T06:22:27.888Z",
   "profile": {
     "name": "Juliann",
     "rank": "Voyageur N5",
@@ -18,30 +18,30 @@
     "tagline": "一歩一歩"
   },
   "today": {
-    "date": "2026-07-15",
-    "status": "solid",
-    "stars": 2,
-    "morningQuest": "12 à 15 min d'Anki, reviews uniquement.",
-    "eveningQuest": "Continuer la leçon Obi 45 sans pression de la finir.",
-    "confirmedSummary": "16 reviews en 12 min, puis 10 min actives sur Obi 45.",
-    "energy": "Relancé"
+    "date": "2026-07-16",
+    "status": "planned",
+    "stars": 0,
+    "morningQuest": "15 min d'Anki, reviews uniquement, zéro nouvelle carte.",
+    "eveningQuest": "5 à 10 min d'Obi 45 en rappel actif léger si l'élan reste.",
+    "confirmedSummary": "",
+    "energy": ""
   },
   "anki": {
-    "doneToday": true,
-    "minutes": 12,
-    "reviewsToday": 16,
+    "doneToday": false,
+    "minutes": 0,
+    "reviewsToday": 0,
     "due": 326,
     "backlog": 310,
     "newCardsEnabled": false,
     "newCardsUnlockAt": 150
   },
   "obi": {
-    "doneToday": true,
-    "activeRecall": true,
+    "doneToday": false,
+    "activeRecall": false,
     "currentLesson": 45,
     "totalLessons": 82,
     "lessonTitle": "Aimer, détester et préférer",
-    "minutes": 10,
+    "minutes": 0,
     "lessonsThisWeek": 1,
     "weeklyTarget": 3
   },
