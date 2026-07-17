@@ -1547,6 +1547,9 @@ function bindUi() {
 }
 
 async function loadBaseData() {
+  if (location.protocol === "file:" && window.JLPT_BASE_DATA) {
+    return applyPendingPreviewEvents(applyLocalBossAttempt(structuredClone(window.JLPT_BASE_DATA)));
+  }
   try {
     const response = await fetch(`../progression.json?ts=${Date.now()}`, { cache: "no-store" });
     if (!response.ok) throw new Error("progression.json unavailable");

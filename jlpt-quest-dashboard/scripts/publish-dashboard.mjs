@@ -12,6 +12,7 @@ const publishDashboardDir = path.join(publishDir, 'jlpt-quest-dashboard');
 
 async function main() {
   await assertPublishRepo();
+  await writeLocalProgressionBundle();
   await fs.mkdir(path.join(publishDashboardDir, 'assets'), { recursive: true });
   await fs.mkdir(path.join(publishDashboardDir, 'fonts'), { recursive: true });
   await fs.mkdir(path.join(publishDashboardDir, 'scripts'), { recursive: true });
@@ -21,6 +22,7 @@ async function main() {
 
   await copy(path.join(japaneseDir, 'index.html'), path.join(publishDir, 'index.html'));
   await copy(path.join(japaneseDir, 'progression.json'), path.join(publishDir, 'progression.json'));
+  await copy(path.join(japaneseDir, 'progression-data.js'), path.join(publishDir, 'progression-data.js'));
   await copy(path.join(japaneseDir, 'anki-history.json'), path.join(publishDir, 'anki-history.json'));
 
   for (const name of ['index.html', 'app.js', 'supabase-config.js', 'manifest.webmanifest', 'service-worker.js', 'README.md', 'DEPLOYMENT.md', 'PROGRESSION_FORMAT.md']) {
@@ -58,6 +60,15 @@ async function main() {
   runGit(['commit', '-m', `Update JLPT quest ${date}`]);
   runGit(['push', 'origin', 'main']);
   process.stdout.write('Dashboard committed and pushed.\n');
+}
+
+async function writeLocalProgressionBundle() {
+  const progression = JSON.parse(await fs.readFile(path.join(japaneseDir, 'progression.json'), 'utf8'));
+  await fs.writeFile(
+    path.join(japaneseDir, 'progression-data.js'),
+    `window.JLPT_BASE_DATA = ${JSON.stringify(progression, null, 2)};\n`,
+    'utf8'
+  );
 }
 
 async function assertPublishRepo() {

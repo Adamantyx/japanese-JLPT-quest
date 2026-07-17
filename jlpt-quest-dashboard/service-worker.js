@@ -1,8 +1,8 @@
-const CACHE = "jlpt-quest-v14";
+const CACHE = "jlpt-quest-v15";
 const SHELL = [
   "./",
   "./index.html",
-  "./app.js?v=14",
+  "./app.js?v=15",
   "./vendor/supabase.min.js",
   "./supabase-config.js",
   "./manifest.webmanifest",
@@ -14,7 +14,8 @@ const SHELL = [
   "./assets/n5-world-map-v2.jpg",
   "./assets/icon-192.png",
   "./assets/icon-512.png",
-  "../anki-history.json"
+  "../anki-history.json",
+  "../progression-data.js"
 ];
 
 self.addEventListener("install", event => {
