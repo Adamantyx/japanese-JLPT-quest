@@ -52,6 +52,8 @@ let mimirReactionTimer = null;
 let mimirFocusTimer = null;
 let mimirFocus = readMimirFocus();
 let lastRenderedLevel = null;
+let activityViewMode = "weekly";
+let activityCursorDate = toIsoDate(new Date());
 
 function buildV3Shell() {
   if (document.body.classList.contains("v3")) return;
@@ -95,8 +97,19 @@ function buildV3Shell() {
           <div><div class="eyebrow">Implication dans le temps</div><h2>Ton rythme réel</h2></div>
           <div class="chart-legend" aria-label="Légende"><span class="is-anki">Anki</span><span class="is-obi">Obi</span><span class="is-listening">Écoute</span><span class="is-duolingo">Duo</span></div>
         </div>
+        <div class="activity-toolbar" role="tablist" aria-label="Mode de lecture du rythme">
+          <button class="activity-toggle" id="activityDailyButton" type="button" data-mode="daily">Jour</button>
+          <button class="activity-toggle" id="activityWeeklyButton" type="button" data-mode="weekly">Semaine</button>
+          <button class="activity-toggle" id="activityCalendarButton" type="button" data-mode="calendar">Calendrier</button>
+          <div class="activity-nav">
+            <button class="activity-step" id="activityPrevButton" type="button" aria-label="Reculer dans le temps">‹</button>
+            <span id="activityCursorLabel">—</span>
+            <button class="activity-step" id="activityNextButton" type="button" aria-label="Avancer dans le temps">›</button>
+          </div>
+        </div>
         <div class="activity-chart" id="activityChart"></div>
         <p class="chart-caption" id="activityCaption"></p>
+        <div class="activity-calendar" id="activityCalendar" hidden></div>
       </div>
     </section>
     <div class="progress-evidence-grid">
@@ -389,7 +402,7 @@ function renderProgressInsights(data, events = []) {
   ];
   document.getElementById("progressKpis").innerHTML = kpis.map(kpi => `<article class="progress-kpi"><span>${kpi.mark}</span><div><small>${kpi.label}</small><strong>${kpi.value}</strong><em>${kpi.note}</em></div></article>`).join("");
 
-  renderMonthlyActivity(rows);
+  renderActivityExplorer(rows, now);
   renderActivityHeatmap(rows, now);
 
   const thisWeekDays = new Set(rows.filter(row => row.date >= currentStart && totalFor(row) > 0).map(row => row.date)).size;
@@ -410,32 +423,99 @@ function renderProgressInsights(data, events = []) {
   document.getElementById("coachAction").textContent = action;
 }
 
-function renderMonthlyActivity(rows) {
-  const now = new Date();
-  const months = [];
-  for (let offset = 11; offset >= 0; offset -= 1) {
-    const date = new Date(now.getFullYear(), now.getMonth() - offset, 1, 12);
-    const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
-    months.push({ key, date, anki: 0, obi: 0, listening: 0, duolingo: 0, reviews: 0 });
+function renderActivityExplorer(rows, now) {
+  const byDate = new Map(rows.map(row => [row.date, row]));
+  const cursor = parseDate(activityCursorDate);
+  const currentIso = toIsoDate(now);
+  const chart = document.getElementById("activityChart");
+  const caption = document.getElementById("activityCaption");
+  const calendar = document.getElementById("activityCalendar");
+  const cursorLabel = document.getElementById("activityCursorLabel");
+  const dailyButton = document.getElementById("activityDailyButton");
+  const weeklyButton = document.getElementById("activityWeeklyButton");
+  const calendarButton = document.getElementById("activityCalendarButton");
+  const prevButton = document.getElementById("activityPrevButton");
+  const nextButton = document.getElementById("activityNextButton");
+  const dayNames = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
+  const totalFor = row => row.anki + row.obi + row.listening + row.duolingo;
+
+  dailyButton.classList.toggle("is-active", activityViewMode === "daily");
+  weeklyButton.classList.toggle("is-active", activityViewMode === "weekly");
+  calendarButton.classList.toggle("is-active", activityViewMode === "calendar");
+  chart.hidden = activityViewMode === "calendar";
+  calendar.hidden = activityViewMode !== "calendar";
+
+  const shiftDate = (days = 0, months = 0) => {
+    const next = new Date(cursor);
+    if (days) next.setDate(next.getDate() + days);
+    if (months) next.setMonth(next.getMonth() + months);
+    activityCursorDate = toIsoDate(next);
+  };
+
+  let days = [];
+  let label = "";
+  let max = 1;
+
+  if (activityViewMode === "weekly") {
+    const start = startOfWeek(cursor);
+    days = Array.from({ length: 7 }, (_, index) => {
+      const date = new Date(start);
+      date.setDate(start.getDate() + index);
+      const iso = toIsoDate(date);
+      return { iso, date, row: byDate.get(iso) || { anki: 0, obi: 0, listening: 0, duolingo: 0, reviews: 0 } };
+    });
+    max = Math.max(1, ...days.map(day => totalFor(day.row)));
+    label = `Semaine du ${formatShortDate(toIsoDate(start))}`;
+  } else {
+    const start = new Date(cursor);
+    start.setDate(start.getDate() - 3);
+    days = Array.from({ length: 7 }, (_, index) => {
+      const date = new Date(start);
+      date.setDate(start.getDate() + index);
+      const iso = toIsoDate(date);
+      return { iso, date, row: byDate.get(iso) || { anki: 0, obi: 0, listening: 0, duolingo: 0, reviews: 0 } };
+    });
+    max = Math.max(1, ...days.map(day => totalFor(day.row)));
+    label = `Autour du ${formatShortDate(activityCursorDate)}`;
   }
-  const byMonth = new Map(months.map(month => [month.key, month]));
-  for (const row of rows) {
-    const month = byMonth.get(row.date.slice(0, 7));
-    if (!month) continue;
-    for (const category of ["anki", "obi", "listening", "duolingo"]) month[category] += row[category];
-    month.reviews += row.reviews;
+
+  if (activityViewMode !== "calendar") {
+    chart.innerHTML = days.map(day => {
+      const total = totalFor(day.row);
+      const segments = ["anki", "obi", "listening", "duolingo"].map(category => `<i class="chart-segment is-${category}" style="height:${max ? (day.row[category] / max) * 100 : 0}%"></i>`).join("");
+      const weekIndex = (new Date(`${day.iso}T12:00:00`).getDay() + 6) % 7;
+      return `<button class="month-column${day.iso === activityCursorDate ? " is-selected" : ""}${day.iso === currentIso ? " is-today" : ""}" type="button" data-activity-day="${day.iso}" aria-label="${formatLongDate(day.iso)}, ${Math.round(total)} minutes, ${day.row.reviews} reviews"><div class="month-value">${total ? Math.round(total) : ""}</div><div class="month-bar">${segments}</div><span>${activityViewMode === "weekly" ? dayNames[weekIndex] : formatShortDate(day.iso).replace(".", "")}</span></button>`;
+    }).join("");
+    caption.textContent = `${label}. ${days.some(day => day.iso === currentIso) ? "Aujourd’hui est visible dans la fenêtre." : "Tu peux te déplacer dans le temps avec les flèches."}`;
+    cursorLabel.textContent = activityViewMode === "weekly" ? label : `Jour sélectionné : ${formatShortDate(activityCursorDate)}`;
+  } else {
+    const monthStart = new Date(cursor.getFullYear(), cursor.getMonth(), 1, 12);
+    const monthEnd = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 0, 12);
+    const gridStart = new Date(monthStart);
+    gridStart.setDate(monthStart.getDate() - ((monthStart.getDay() + 6) % 7));
+    const gridEnd = new Date(monthEnd);
+    gridEnd.setDate(monthEnd.getDate() + (6 - ((monthEnd.getDay() + 6) % 7)));
+    const cells = [];
+    for (const name of dayNames) cells.push(`<div class="calendar-head">${name}</div>`);
+    for (let date = new Date(gridStart); date <= gridEnd; date.setDate(date.getDate() + 1)) {
+      const iso = toIsoDate(date);
+      const row = byDate.get(iso) || { anki: 0, obi: 0, listening: 0, duolingo: 0 };
+      const minutes = totalFor(row);
+      cells.push(`<button class="calendar-day${iso === activityCursorDate ? " is-selected" : ""}${iso === currentIso ? " is-today" : ""}${date.getMonth() !== cursor.getMonth() ? " is-outside" : ""}${minutes > 0 ? " has-activity" : ""}" type="button" data-activity-day="${iso}" aria-label="${formatLongDate(iso)}, ${Math.round(minutes)} minutes"><span>${date.getDate()}</span><i class="dot"></i></button>`);
+    }
+    calendar.innerHTML = cells.join("");
+    caption.textContent = `${new Intl.DateTimeFormat("fr-FR", { month: "long", year: "numeric" }).format(cursor)}. Clique un jour pour voir ce qu’il y a dedans.`;
+    cursorLabel.textContent = new Intl.DateTimeFormat("fr-FR", { month: "long", year: "numeric" }).format(cursor);
   }
-  const totals = months.map(month => month.anki + month.obi + month.listening + month.duolingo);
-  const max = Math.max(1, ...totals);
-  const labels = new Intl.DateTimeFormat("fr-FR", { month: "short" });
-  document.getElementById("activityChart").innerHTML = months.map((month, index) => {
-    const total = totals[index];
-    const segments = ["anki", "obi", "listening", "duolingo"].map(category => `<i class="chart-segment is-${category}" style="height:${(month[category] / max) * 100}%" title="${category}: ${Math.round(month[category])} min"></i>`).join("");
-    return `<div class="month-column" aria-label="${labels.format(month.date)} ${month.date.getFullYear()}, ${Math.round(total)} minutes, ${month.reviews} reviews"><div class="month-value">${total ? Math.round(total) : ""}</div><div class="month-bar">${segments}</div><span>${labels.format(month.date).replace(".", "")}</span></div>`;
-  }).join("");
-  const bestIndex = totals.indexOf(Math.max(...totals));
-  const best = months[bestIndex];
-  document.getElementById("activityCaption").textContent = `Historique exact du deck TANGO N5 depuis août 2025. Pic actuel : ${Math.round(totals[bestIndex])} min en ${labels.format(best.date)} ${best.date.getFullYear()}. Les autres disciplines apparaissent à partir de leur saisie dans l'app.`;
+
+  prevButton.onclick = () => {
+    shiftDate(activityViewMode === "calendar" ? 0 : activityViewMode === "weekly" ? -7 : -1, activityViewMode === "calendar" ? -1 : 0);
+    renderActivityExplorer(rows, now);
+  };
+  nextButton.onclick = () => {
+    shiftDate(activityViewMode === "calendar" ? 0 : activityViewMode === "weekly" ? 7 : 1, activityViewMode === "calendar" ? 1 : 0);
+    renderActivityExplorer(rows, now);
+  };
 }
 
 function renderActivityHeatmap(rows, now) {
@@ -1401,6 +1481,30 @@ function bindUi() {
   document.getElementById("questList").addEventListener("click", event => {
     const quest = event.target.closest("[data-entry-category]");
     if (quest) openEntry(quest.dataset.entryCategory);
+  });
+  document.getElementById("activityChart").addEventListener("click", event => {
+    const button = event.target.closest("[data-activity-day]");
+    if (!button) return;
+    activityCursorDate = button.dataset.activityDay;
+    renderProgressInsights(currentData, currentEvents);
+  });
+  document.getElementById("activityCalendar").addEventListener("click", event => {
+    const button = event.target.closest("[data-activity-day]");
+    if (!button) return;
+    activityCursorDate = button.dataset.activityDay;
+    renderProgressInsights(currentData, currentEvents);
+  });
+  document.getElementById("activityDailyButton").addEventListener("click", () => {
+    activityViewMode = "daily";
+    renderProgressInsights(currentData, currentEvents);
+  });
+  document.getElementById("activityWeeklyButton").addEventListener("click", () => {
+    activityViewMode = "weekly";
+    renderProgressInsights(currentData, currentEvents);
+  });
+  document.getElementById("activityCalendarButton").addEventListener("click", () => {
+    activityViewMode = "calendar";
+    renderProgressInsights(currentData, currentEvents);
   });
   document.getElementById("logs").addEventListener("click", event => {
     const button = event.target.closest("[data-delete-event]");

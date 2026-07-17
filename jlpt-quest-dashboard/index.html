@@ -359,6 +359,15 @@
     .mimir-avatar-button img { width: 100%; height: 100%; object-fit: contain; object-position: bottom right; pointer-events: none; }
     .mimir-avatar-button:focus-visible { border-radius: 42%; box-shadow: 0 0 0 3px var(--gold); }
     .companion[data-state="active"] .mimir-avatar-button, .companion[data-mood="celebrate"] .mimir-avatar-button { filter: drop-shadow(0 25px 28px rgba(0,0,0,.42)) drop-shadow(0 0 22px rgba(231,189,104,.24)); }
+    .companion[data-evolution="scout"] { background: radial-gradient(circle at 50% 42%, rgba(94,183,170,.13), transparent 48%), linear-gradient(160deg, #122d3c, #081a27 72%); }
+    .companion[data-evolution="guardian"] { background: radial-gradient(circle at 50% 42%, rgba(231,189,104,.14), transparent 46%), linear-gradient(160deg, #173343, #081a27 72%); }
+    .companion[data-evolution="guardian"] .mimir-avatar-button img { filter: saturate(1.04) contrast(1.02); }
+    .companion[data-evolution="messenger"] { background: radial-gradient(circle at 50% 42%, rgba(248,217,142,.18), transparent 44%), linear-gradient(160deg, #1a3148, #081a27 72%); }
+    .companion[data-evolution="messenger"] .mimir-avatar-button { filter: drop-shadow(0 25px 28px rgba(0,0,0,.42)) drop-shadow(0 0 26px rgba(231,189,104,.32)); }
+    .companion[data-evolution="messenger"]::after { content: ""; position: absolute; inset: 36px auto auto 28px; width: 72px; height: 72px; border-radius: 50%; background: radial-gradient(circle, rgba(248,217,142,.28), transparent 70%); animation: auraPulse 3.3s ease-in-out infinite; }
+    .companion[data-evolution="sage"] { background: radial-gradient(circle at 50% 42%, rgba(121,197,183,.2), transparent 42%), linear-gradient(160deg, #14384b, #081a27 72%); }
+    .companion[data-evolution="sage"] .mimir-avatar-button { filter: drop-shadow(0 25px 28px rgba(0,0,0,.42)) drop-shadow(0 0 30px rgba(94,183,170,.34)); }
+    .companion[data-evolution="sage"]::after { content: ""; position: absolute; inset: 28px 24px auto auto; width: 96px; height: 96px; border-radius: 50%; background: radial-gradient(circle, rgba(94,183,170,.25), transparent 70%); animation: auraPulse 3.8s ease-in-out infinite; }
     .companion[data-mood="focus"] { background: radial-gradient(circle at 70% 44%, rgba(230,111,67,.18), transparent 45%), linear-gradient(160deg, #183445, #081a27 72%); }
     .companion[data-mood="listen"] { background: radial-gradient(circle at 70% 44%, rgba(94,183,170,.22), transparent 45%), linear-gradient(160deg, #123c43, #081a27 72%); }
     .companion[data-mood="rescue"] { background: radial-gradient(circle at 70% 44%, rgba(142,167,216,.18), transparent 45%), linear-gradient(160deg, #182f49, #081a27 72%); }
@@ -799,6 +808,21 @@
     .v3 .chart-segment { display: block; width: 100%; min-height: 0; background: var(--legend-color); box-shadow: inset 0 1px rgba(255,255,255,.18); }
     .v3 .month-column > span { overflow: hidden; color: var(--muted); font-size: 8px; font-weight: 800; text-overflow: clip; text-transform: uppercase; }
     .v3 .chart-caption { margin-top: 13px; color: #93a9ac; font-size: 10px; }
+    .v3 .activity-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin: 8px 0 10px; }
+    .v3 .activity-toggle, .v3 .activity-step { border: 1px solid rgba(244,237,220,.12); border-radius: 999px; color: var(--mist); background: rgba(5,18,28,.6); font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+    .v3 .activity-toggle { padding: 8px 12px; }
+    .v3 .activity-toggle.is-active { color: var(--ink); border-color: rgba(248,217,142,.55); background: linear-gradient(135deg, var(--gold-bright), #dfa653); }
+    .v3 .activity-nav { display: flex; align-items: center; gap: 8px; margin-left: auto; color: var(--muted); font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+    .v3 .activity-step { width: 28px; height: 28px; display: grid; place-items: center; padding: 0; color: var(--paper); }
+    .v3 .activity-calendar { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; margin-top: 10px; }
+    .v3 .calendar-head, .v3 .calendar-day { min-height: 34px; display: grid; place-items: center; border-radius: 10px; }
+    .v3 .calendar-head { color: var(--muted); font-size: 8px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; background: rgba(255,255,255,.02); }
+    .v3 .calendar-day { position: relative; border: 1px solid rgba(244,237,220,.07); background: rgba(255,255,255,.025); color: var(--mist); font-size: 10px; font-weight: 700; }
+    .v3 .calendar-day.is-outside { opacity: .38; }
+    .v3 .calendar-day.is-today { border-color: rgba(248,217,142,.32); }
+    .v3 .calendar-day.is-selected { border-color: rgba(248,217,142,.65); box-shadow: 0 0 0 1px rgba(248,217,142,.16), 0 0 18px rgba(231,189,104,.14); }
+    .v3 .calendar-day .dot { position: absolute; left: 50%; bottom: 5px; width: 6px; height: 6px; border-radius: 50%; transform: translateX(-50%); background: rgba(255,255,255,.12); }
+    .v3 .calendar-day.has-activity .dot { background: #f0c86f; box-shadow: 0 0 9px rgba(231,189,104,.26); }
     .v3 .progress-evidence-grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(290px, .65fr); gap: 14px; margin-top: 14px; }
     .v3 .heatmap-panel .panel-inner, .v3 .coach-panel .panel-inner { height: 100%; padding: 23px; }
     .v3 .heatmap-score { color: var(--gold); font-size: 11px; }
@@ -848,9 +872,13 @@
       .v3 .progress-kpi em { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
       .v3 .activity-panel .panel-inner { padding: 19px 13px 15px; }
       .v3 .chart-legend { display: none; }
+      .v3 .activity-toolbar { gap: 6px; }
+      .v3 .activity-nav { width: 100%; justify-content: space-between; margin-left: 0; }
       .v3 .activity-chart { height: 230px; gap: 3px; padding-left: 0; padding-right: 0; }
       .v3 .month-bar { width: 72%; border-radius: 6px 6px 2px 2px; }
       .v3 .month-column > span { font-size: 7px; }
+      .v3 .activity-calendar { gap: 4px; }
+      .v3 .calendar-day, .v3 .calendar-head { min-height: 28px; border-radius: 8px; }
       .v3 .progress-evidence-grid { margin-top: 8px; gap: 8px; }
       .v3 .progress-panels, .v3 .progress-details { gap: 8px; margin-top: 8px; }
       .v3 .activity-heatmap { grid-template-rows: repeat(7, 11px); grid-auto-columns: 11px; gap: 3px; }
