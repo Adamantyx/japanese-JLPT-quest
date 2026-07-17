@@ -51,6 +51,7 @@ let mimirReactionIndex = 0;
 let mimirReactionTimer = null;
 let mimirFocusTimer = null;
 let mimirFocus = readMimirFocus();
+let lastRenderedLevel = null;
 
 function buildV3Shell() {
   if (document.body.classList.contains("v3")) return;
@@ -199,11 +200,25 @@ function render(data, live, syncText = "Progression synchronisée") {
 
   const xpProgress = pct(data.profile.xp, data.profile.xpNext);
   const xpRemaining = Math.max(0, Number(data.profile.xpNext) - Number(data.profile.xp));
+  const previousLevel = lastRenderedLevel;
   document.getElementById("levelSigil").textContent = String(data.profile.level).padStart(2, "0");
+  document.getElementById("levelTitle").textContent = `${data.profile.rank} · ${levelTitle(data.profile.level)}`;
+  document.getElementById("levelNote").textContent = levelNote(data.profile.level, xpRemaining, data.profile.xpNext);
   animateNumber(document.getElementById("xpText"), data.profile.xp, value => `${value} / ${data.profile.xpNext} XP`, 900);
   document.getElementById("xpBar").style.setProperty("--w", `${xpProgress}%`);
   document.getElementById("xpProgress").setAttribute("aria-valuenow", String(xpProgress));
   document.getElementById("xpRemaining").textContent = `${xpRemaining} XP restant${xpRemaining > 1 ? "s" : ""}`;
+  if (previousLevel !== null && Number(data.profile.level) > Number(previousLevel)) {
+    const sigil = document.getElementById("levelSigil");
+    sigil.classList.remove("level-up");
+    void sigil.offsetWidth;
+    sigil.classList.add("level-up");
+    window.clearTimeout(celebrationTimer);
+    celebrationTimer = window.setTimeout(() => sigil.classList.remove("level-up"), 900);
+    launchCelebrationParticles();
+    showToast(`Niveau ${data.profile.level} débloqué. Le camp monte d’un cran.`);
+  }
+  lastRenderedLevel = Number(data.profile.level);
   document.getElementById("todayLanterns").innerHTML = Array.from({ length: 4 }, (_, index) => `<span class="lantern ${index < Number(data.today.stars) ? "lit" : ""}" style="--delay:${index * 0.14}s"></span>`).join("");
   document.getElementById("todayLanterns").setAttribute("aria-label", `${data.today.stars} étoile${Number(data.today.stars) > 1 ? "s" : ""} sur 4 aujourd'hui`);
   document.getElementById("lanternCaption").textContent = data.today.stars >= 2
@@ -742,6 +757,17 @@ function companionEvolution(starsCount) {
   const current = [...stages].reverse().find(stage => Number(starsCount) >= stage.threshold) || stages[0];
   const next = stages[stages.indexOf(current) + 1] || null;
   return { current, next };
+}
+
+function levelTitle(level) {
+  const titles = ["Premier pas", "Apprenti", "Voyageur", "Gardien", "Sentinelle", "Sage"];
+  return titles[Math.min(titles.length - 1, Math.max(0, Number(level) - 1))];
+}
+
+function levelNote(level, xpRemaining, xpNext) {
+  const title = levelTitle(level);
+  if (xpRemaining <= 0) return `${title} atteint. Nouveau palier débloqué.`;
+  return `${title} de niveau ${String(level).padStart(2, "0")}, encore ${xpRemaining} XP avant le prochain palier de ${xpNext}.`;
 }
 
 function renderGameSystems(data) {
