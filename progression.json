@@ -1,14 +1,14 @@
 {
   "schemaVersion": 3,
-  "updatedAt": "2026-07-17T06:39:27.554Z",
+  "updatedAt": "2026-07-17T18:56:34.089Z",
   "profile": {
     "name": "Juliann",
     "rank": "Voyageur N5",
-    "level": 3,
-    "xp": 182,
-    "xpNext": 250,
-    "streakDays": 2,
-    "lifetimeStars": 5
+    "level": 4,
+    "xp": 262,
+    "xpNext": 350,
+    "streakDays": 1,
+    "lifetimeStars": 7
   },
   "campaign": {
     "target": "JLPT N5",
@@ -19,16 +19,16 @@
   },
   "today": {
     "date": "2026-07-17",
-    "status": "planned",
-    "stars": 0,
+    "status": "solid",
+    "stars": 2,
     "morningQuest": "15 min d'Anki, reviews uniquement, zéro nouvelle carte.",
-    "eveningQuest": "5 à 10 min d'Obi 45 en rappel actif léger si l'élan reste.",
-    "confirmedSummary": "",
-    "energy": ""
+    "eveningQuest": "Obi 45 terminé. Prochaine marche : ouvrir Obi 46.",
+    "confirmedSummary": "Anki 15 min, puis Obi 45 terminé.",
+    "energy": "RAS"
   },
   "anki": {
-    "doneToday": false,
-    "minutes": 0,
+    "doneToday": true,
+    "minutes": 15,
     "reviewsToday": 0,
     "due": 326,
     "backlog": 310,
@@ -36,14 +36,15 @@
     "newCardsUnlockAt": 150
   },
   "obi": {
-    "doneToday": false,
+    "doneToday": true,
     "activeRecall": false,
-    "currentLesson": 45,
+    "currentLesson": 46,
     "totalLessons": 82,
-    "lessonTitle": "Aimer, détester et préférer",
+    "lessonTitle": "Prochaine leçon à ouvrir",
     "minutes": 0,
-    "lessonsThisWeek": 1,
-    "weeklyTarget": 3
+    "lessonsThisWeek": 2,
+    "weeklyTarget": 3,
+    "lastCompletedLesson": 45
   },
   "listening": {
     "doneToday": false,
@@ -69,10 +70,10 @@
   },
   "week": {
     "start": "2026-07-13",
-    "stars": 2,
+    "stars": 4,
     "target": 8,
     "bonusStars": 0,
-    "totalMinutes": 22,
+    "totalMinutes": 37,
     "reviews": 16,
     "days": [
       {
@@ -84,6 +85,16 @@
         "duolingoEarned": false,
         "totalMinutes": 22,
         "reviews": 16
+      },
+      {
+        "date": "2026-07-17",
+        "label": "ven",
+        "stars": 2,
+        "confirmed": true,
+        "bonusEarned": false,
+        "duolingoEarned": false,
+        "totalMinutes": 15,
+        "reviews": 0
       }
     ]
   },
@@ -114,6 +125,18 @@
     }
   ],
   "recentLogs": [
+    {
+      "date": "2026-07-17",
+      "label": "Anki",
+      "value": "15 min",
+      "confirmed": true
+    },
+    {
+      "date": "2026-07-17",
+      "label": "Obi 45",
+      "value": "leçon terminée",
+      "confirmed": true
+    },
     {
       "date": "2026-07-15",
       "label": "Anki",

@@ -356,17 +356,34 @@
     .companion-stage { display: flex; align-items: center; gap: 7px; color: var(--gold); font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
     .companion-stage i { padding: 4px 7px; border: 1px solid rgba(248,217,142,.2); border-radius: 999px; color: var(--paper); background: rgba(248,217,142,.08); font-size: 8px; font-style: normal; letter-spacing: .06em; }
     .mimir-avatar-button { position: absolute; z-index: 4; right: -8px; bottom: -15px; width: min(70%, 315px); height: min(67%, 315px); padding: 0; border: 0; outline: 0; background: transparent; cursor: pointer; filter: drop-shadow(0 25px 28px rgba(0,0,0,.42)); transition: filter .4s ease; transform-origin: 50% 100%; animation: companionBreath 5.2s ease-in-out infinite; }
-    .mimir-avatar-button img { width: 100%; height: 100%; object-fit: contain; object-position: bottom right; pointer-events: none; }
+    .mimir-avatar-button::before { content: ""; position: absolute; z-index: 0; right: 4%; bottom: 8%; width: 82%; aspect-ratio: 1; border: 1px solid rgba(248,217,142,.18); border-radius: 50%; background: radial-gradient(circle, rgba(94,183,170,.12), transparent 68%); transition: border-color .4s ease, background .4s ease, box-shadow .4s ease, transform .4s ease; }
+    .mimir-avatar-button::after { content: "歩"; position: absolute; z-index: 3; right: 10%; top: 15%; width: 45px; height: 45px; display: grid; place-items: center; border: 1px solid rgba(248,217,142,.35); border-radius: 50% 50% 50% 14px; color: #1d2018; background: linear-gradient(145deg, #f9dd92, #bf8143); box-shadow: 0 8px 24px rgba(0,0,0,.35), 0 0 22px rgba(231,189,104,.28); font: 800 18px/1 "Shippori Mincho", serif; transform: rotate(-8deg); transition: transform .4s ease, background .4s ease, box-shadow .4s ease; }
+    .mimir-avatar-button img { position: relative; z-index: 2; width: 100%; height: 100%; object-fit: contain; object-position: bottom right; pointer-events: none; transition: filter .5s ease, transform .5s ease; }
+    .mimir-evolution-name { position: absolute; z-index: 5; right: 10%; bottom: 12%; max-width: 135px; padding: 6px 9px; border: 1px solid rgba(248,217,142,.22); border-radius: 999px; color: var(--gold-bright); background: rgba(5,18,28,.86); font-size: 8px; font-weight: 800; letter-spacing: .06em; text-align: center; text-transform: uppercase; backdrop-filter: blur(8px); }
     .mimir-avatar-button:focus-visible { border-radius: 42%; box-shadow: 0 0 0 3px var(--gold); }
     .companion[data-state="active"] .mimir-avatar-button, .companion[data-mood="celebrate"] .mimir-avatar-button { filter: drop-shadow(0 25px 28px rgba(0,0,0,.42)) drop-shadow(0 0 22px rgba(231,189,104,.24)); }
     .companion[data-evolution="scout"] { background: radial-gradient(circle at 50% 42%, rgba(94,183,170,.13), transparent 48%), linear-gradient(160deg, #122d3c, #081a27 72%); }
     .companion[data-evolution="guardian"] { background: radial-gradient(circle at 50% 42%, rgba(231,189,104,.14), transparent 46%), linear-gradient(160deg, #173343, #081a27 72%); }
-    .companion[data-evolution="guardian"] .mimir-avatar-button img { filter: saturate(1.04) contrast(1.02); }
+    .companion[data-evolution="guardian"] .mimir-avatar-button::before { border-color: rgba(248,217,142,.5); background: conic-gradient(from 20deg, rgba(248,217,142,.05), rgba(248,217,142,.34), rgba(230,111,67,.12), rgba(248,217,142,.05)); box-shadow: inset 0 0 35px rgba(231,189,104,.14), 0 0 34px rgba(231,189,104,.2); transform: rotate(8deg) scale(1.02); }
+    .companion[data-evolution="guardian"] .mimir-avatar-button::after { content: "灯"; background: linear-gradient(145deg, #fff0b2, #d29043); box-shadow: 0 8px 24px rgba(0,0,0,.35), 0 0 30px rgba(248,217,142,.52); transform: rotate(4deg) scale(1.08); }
+    .companion[data-evolution="guardian"] .mimir-avatar-button img { filter: saturate(1.12) contrast(1.05) sepia(.08); transform: translateY(-2px) scale(1.025); }
     .companion[data-evolution="messenger"] { background: radial-gradient(circle at 50% 42%, rgba(248,217,142,.18), transparent 44%), linear-gradient(160deg, #1a3148, #081a27 72%); }
     .companion[data-evolution="messenger"] .mimir-avatar-button { filter: drop-shadow(0 25px 28px rgba(0,0,0,.42)) drop-shadow(0 0 26px rgba(231,189,104,.32)); }
+    .companion[data-evolution="messenger"] .mimir-avatar-button::before { border-color: rgba(230,111,67,.58); background: repeating-conic-gradient(from 10deg, rgba(230,111,67,.32) 0 8deg, transparent 8deg 34deg); box-shadow: inset 0 0 42px rgba(230,111,67,.16), 0 0 38px rgba(230,111,67,.22); transform: rotate(-8deg) scale(1.04); }
+    .companion[data-evolution="messenger"] .mimir-avatar-button::after { content: "使"; color: #ffe9cf; background: linear-gradient(145deg, #e87848, #7b3030); box-shadow: 0 8px 24px rgba(0,0,0,.35), 0 0 30px rgba(230,111,67,.48); transform: rotate(-12deg) scale(1.12); }
+    .companion[data-evolution="messenger"] .mimir-avatar-button img { filter: saturate(1.2) contrast(1.08) hue-rotate(-8deg); transform: translateY(-4px) scale(1.04); }
     .companion[data-evolution="messenger"]::after { content: ""; position: absolute; inset: 36px auto auto 28px; width: 72px; height: 72px; border-radius: 50%; background: radial-gradient(circle, rgba(248,217,142,.28), transparent 70%); animation: auraPulse 3.3s ease-in-out infinite; }
     .companion[data-evolution="sage"] { background: radial-gradient(circle at 50% 42%, rgba(121,197,183,.2), transparent 42%), linear-gradient(160deg, #14384b, #081a27 72%); }
     .companion[data-evolution="sage"] .mimir-avatar-button { filter: drop-shadow(0 25px 28px rgba(0,0,0,.42)) drop-shadow(0 0 30px rgba(94,183,170,.34)); }
+    .companion[data-evolution="sage"] .mimir-avatar-button::before { border-color: rgba(121,197,183,.68); background: conic-gradient(from 0deg, rgba(94,183,170,.08), rgba(121,197,183,.42), rgba(248,217,142,.24), rgba(94,183,170,.08)); box-shadow: inset 0 0 48px rgba(94,183,170,.2), 0 0 44px rgba(94,183,170,.3); transform: rotate(12deg) scale(1.08); }
+    .companion[data-evolution="sage"] .mimir-avatar-button::after { content: "智"; color: #09242a; background: linear-gradient(145deg, #b9eee2, #5eb7aa); box-shadow: 0 8px 24px rgba(0,0,0,.35), 0 0 34px rgba(94,183,170,.58); transform: rotate(8deg) scale(1.16); }
+    .companion[data-evolution="sage"] .mimir-avatar-button img { filter: saturate(1.08) contrast(1.08) hue-rotate(8deg) brightness(1.06); transform: translateY(-6px) scale(1.055); }
+    body[data-mimir-evolution="guardian"] .mimir-beacon, body[data-mimir-evolution="guardian"] .map-mimir { border-color: rgba(248,217,142,.82); box-shadow: 0 0 0 7px rgba(231,189,104,.12), 0 14px 34px rgba(0,0,0,.42), 0 0 26px rgba(231,189,104,.3); }
+    body[data-mimir-evolution="messenger"] .mimir-beacon, body[data-mimir-evolution="messenger"] .map-mimir { border-color: rgba(230,111,67,.82); box-shadow: 0 0 0 7px rgba(230,111,67,.12), 0 14px 34px rgba(0,0,0,.42), 0 0 28px rgba(230,111,67,.32); }
+    body[data-mimir-evolution="sage"] .mimir-beacon, body[data-mimir-evolution="sage"] .map-mimir { border-color: rgba(121,197,183,.9); box-shadow: 0 0 0 7px rgba(94,183,170,.14), 0 14px 34px rgba(0,0,0,.42), 0 0 32px rgba(94,183,170,.38); }
+    body[data-mimir-evolution="guardian"] .coach-mimir img, body[data-mimir-evolution="guardian"] .mimir-dialog-hero > img { filter: drop-shadow(0 12px 18px rgba(231,189,104,.34)) saturate(1.12) sepia(.08); }
+    body[data-mimir-evolution="messenger"] .coach-mimir img, body[data-mimir-evolution="messenger"] .mimir-dialog-hero > img { filter: drop-shadow(0 12px 20px rgba(230,111,67,.36)) saturate(1.2) hue-rotate(-8deg); }
+    body[data-mimir-evolution="sage"] .coach-mimir img, body[data-mimir-evolution="sage"] .mimir-dialog-hero > img { filter: drop-shadow(0 12px 22px rgba(94,183,170,.4)) saturate(1.08) hue-rotate(8deg) brightness(1.06); }
     .companion[data-evolution="sage"]::after { content: ""; position: absolute; inset: 28px 24px auto auto; width: 96px; height: 96px; border-radius: 50%; background: radial-gradient(circle, rgba(94,183,170,.25), transparent 70%); animation: auraPulse 3.8s ease-in-out infinite; }
     .companion[data-mood="focus"] { background: radial-gradient(circle at 70% 44%, rgba(230,111,67,.18), transparent 45%), linear-gradient(160deg, #183445, #081a27 72%); }
     .companion[data-mood="listen"] { background: radial-gradient(circle at 70% 44%, rgba(94,183,170,.22), transparent 45%), linear-gradient(160deg, #123c43, #081a27 72%); }
@@ -1057,7 +1074,7 @@
             <h2>Mimir</h2>
           </div>
           <div class="evolution-box"><div class="evolution-head"><span>Évolution</span><strong id="evolutionNext">3 étoiles restantes</strong></div><div class="bar"><i id="evolutionBar"></i></div></div>
-          <button class="mimir-avatar-button" id="mimirAvatarButton" type="button" aria-label="Faire réagir Mimir"><img src="assets/kitsune-guide.webp" alt="Kitsune érudit portant le livre du voyageur N5" loading="lazy" decoding="async"></button>
+          <button class="mimir-avatar-button" id="mimirAvatarButton" type="button" aria-label="Faire réagir Mimir"><span class="mimir-evolution-name" id="mimirEvolutionName">Éclaireur du chemin</span><span id="mimirEvolutionMark" hidden>歩</span><img src="assets/kitsune-guide.webp" alt="Kitsune érudit portant le livre du voyageur N5" loading="lazy" decoding="async"></button>
           <div class="speech"><p id="companionSpeech"></p><div class="mimir-card-actions"><button id="mimirPrimaryAction" type="button">Prochain pas</button><button id="mimirBriefButton" type="button" aria-label="Ouvrir le brief complet de Mimir">•••</button></div></div>
         </section>
 
@@ -1200,6 +1217,6 @@
   </div>
 
   <script src="supabase-config.js" defer></script>
-  <script src="app.js?v=13" defer></script>
+  <script src="app.js?v=14" defer></script>
 </body>
 </html>

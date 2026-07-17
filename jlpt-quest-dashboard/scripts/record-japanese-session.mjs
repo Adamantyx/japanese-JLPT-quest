@@ -69,8 +69,17 @@ function recordResult(current, input) {
   anki.doneToday = Number(anki.minutes || 0) >= 10;
   anki.newCardsEnabled = Number(anki.backlog) <= Number(anki.newCardsUnlockAt);
 
-  const obi = { ...next.obi, ...(input.obi || {}) };
-  obi.doneToday = Boolean(obi.activeRecall || input.obi?.lessonCompleted);
+  const obiInput = input.obi || {};
+  const obi = { ...next.obi, ...obiInput };
+  const completedLesson = Number(obiInput.completedLesson ?? obiInput.currentLesson ?? next.obi.currentLesson);
+  obi.doneToday = Boolean(obi.activeRecall || obiInput.lessonCompleted);
+  if (obiInput.lessonCompleted && Number.isFinite(completedLesson)) {
+    obi.lastCompletedLesson = completedLesson;
+    obi.currentLesson = Math.min(Number(obi.totalLessons || completedLesson + 1), completedLesson + 1);
+    if (!obiInput.lessonTitle) obi.lessonTitle = "Prochaine leçon à ouvrir";
+  }
+  delete obi.completedLesson;
+  delete obi.lessonCompleted;
 
   const listening = { ...next.listening, ...(input.listening || {}) };
   listening.doneToday = Number(listening.minutes || 0) >= 10;
@@ -101,6 +110,9 @@ function recordResult(current, input) {
     confirmedSummary: input.summary || next.today.confirmedSummary,
     energy: input.energy || next.today.energy,
   };
+  if (obiInput.lessonCompleted && Number.isFinite(completedLesson)) {
+    next.today.eveningQuest = `Obi ${completedLesson} terminé. Prochaine marche : ouvrir Obi ${obi.currentLesson}.`;
+  }
 
   next.profile.lifetimeStars = Number(next.profile.lifetimeStars || 0) + earnedDelta;
   next.profile.xp = Number(next.profile.xp || 0) + (earnedDelta * 40) + (duolingoEarned ? 5 : 0);
@@ -143,8 +155,12 @@ function buildLogs(input, stars) {
     logs.push({ date: input.date, label: 'Anki', value: `${input.anki.minutes || 0} min${reviews}`, confirmed: true });
   }
   if (input.obi?.activeRecall || input.obi?.lessonCompleted) {
-    const lesson = input.obi.currentLesson ? `Obi ${input.obi.currentLesson}` : 'Obi';
-    logs.push({ date: input.date, label: lesson, value: `${input.obi.minutes || 0} min actives`, confirmed: true });
+    const lessonNumber = input.obi.completedLesson ?? input.obi.currentLesson;
+    const lesson = lessonNumber ? `Obi ${lessonNumber}` : 'Obi';
+    const value = input.obi.lessonCompleted && !Number(input.obi.minutes || 0)
+      ? 'leçon terminée'
+      : `${input.obi.minutes || 0} min actives${input.obi.lessonCompleted ? ', leçon terminée' : ''}`;
+    logs.push({ date: input.date, label: lesson, value, confirmed: true });
   }
   if (Number(input.listening?.minutes || 0) > 0) {
     logs.push({ date: input.date, label: 'Écoute', value: `${input.listening.minutes} min attentives`, confirmed: true });

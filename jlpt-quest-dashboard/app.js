@@ -827,16 +827,19 @@ function worldStage(starsCount) {
   return "night";
 }
 
-function companionEvolution(starsCount) {
+function companionEvolution(profile) {
   const stages = [
-    { key: "scout", title: "Éclaireur du chemin", threshold: 0 },
-    { key: "guardian", title: "Gardien des lanternes", threshold: 8 },
-    { key: "messenger", title: "Messager du sanctuaire", threshold: 16 },
-    { key: "sage", title: "Sage des fondations", threshold: 32 }
+    { key: "scout", title: "Éclaireur du chemin", level: 1, mark: "歩" },
+    { key: "guardian", title: "Gardien des lanternes", level: 3, mark: "灯" },
+    { key: "messenger", title: "Messager du sanctuaire", level: 5, mark: "使" },
+    { key: "sage", title: "Sage des fondations", level: 7, mark: "智" }
   ];
-  const current = [...stages].reverse().find(stage => Number(starsCount) >= stage.threshold) || stages[0];
+  const current = [...stages].reverse().find(stage => Number(profile.level) >= stage.level) || stages[0];
   const next = stages[stages.indexOf(current) + 1] || null;
-  return { current, next };
+  const levelSpan = next ? next.level - current.level : 1;
+  const levelFraction = clamp(Number(profile.xp) / Math.max(1, Number(profile.xpNext)), 0, 1);
+  const progress = next ? clamp(((Number(profile.level) - current.level + levelFraction) / levelSpan) * 100) : 100;
+  return { current, next, progress };
 }
 
 function levelTitle(level) {
@@ -880,12 +883,15 @@ function renderGameSystems(data) {
       <span class="skill-evidence">${skill.evidence}</span>
     </article>`).join("");
 
-  const evolution = companionEvolution(data.profile.lifetimeStars);
-  const evolutionProgress = evolution.next ? pct(Number(data.profile.lifetimeStars) - evolution.current.threshold, evolution.next.threshold - evolution.current.threshold) : 100;
+  const evolution = companionEvolution(data.profile);
+  const evolutionProgress = evolution.progress;
+  document.body.dataset.mimirEvolution = evolution.current.key;
   document.getElementById("companionCard").dataset.evolution = evolution.current.key;
-  document.getElementById("companionStage").textContent = `${evolution.current.title} · ${data.profile.lifetimeStars} étoiles`;
+  document.getElementById("companionStage").textContent = `${evolution.current.title} · niveau ${data.profile.level}`;
+  document.getElementById("mimirEvolutionMark").textContent = evolution.current.mark;
+  document.getElementById("mimirEvolutionName").textContent = evolution.current.title;
   document.getElementById("evolutionBar").style.setProperty("--w", `${evolutionProgress}%`);
-  document.getElementById("evolutionNext").textContent = evolution.next ? `${evolution.next.threshold - Number(data.profile.lifetimeStars)} étoiles avant ${evolution.next.title}` : "Évolution maximale actuelle";
+  document.getElementById("evolutionNext").textContent = evolution.next ? `Forme suivante au niveau ${evolution.next.level}` : "Forme maximale actuelle";
 
   const seals = [
     { icon: "火", name: "Premier feu", text: "Première étoile confirmée", unlocked: data.profile.lifetimeStars >= 1 },
