@@ -1,6 +1,6 @@
 window.JLPT_BASE_DATA = {
   "schemaVersion": 3,
-  "updatedAt": "2026-07-17T18:56:34.089Z",
+  "updatedAt": "2026-07-18T07:35:48.495Z",
   "profile": {
     "name": "Juliann",
     "rank": "Voyageur N5",
@@ -18,17 +18,17 @@ window.JLPT_BASE_DATA = {
     "tagline": "一歩一歩"
   },
   "today": {
-    "date": "2026-07-17",
-    "status": "solid",
-    "stars": 2,
+    "date": "2026-07-18",
+    "status": "planned",
+    "stars": 0,
     "morningQuest": "15 min d'Anki, reviews uniquement, zéro nouvelle carte.",
-    "eveningQuest": "Obi 45 terminé. Prochaine marche : ouvrir Obi 46.",
-    "confirmedSummary": "Anki 15 min, puis Obi 45 terminé.",
-    "energy": "RAS"
+    "eveningQuest": "Obi 46, 10 à 15 min de rappel actif sur la leçon précédente.",
+    "confirmedSummary": "",
+    "energy": ""
   },
   "anki": {
-    "doneToday": true,
-    "minutes": 15,
+    "doneToday": false,
+    "minutes": 0,
     "reviewsToday": 0,
     "due": 326,
     "backlog": 310,
@@ -36,7 +36,7 @@ window.JLPT_BASE_DATA = {
     "newCardsUnlockAt": 150
   },
   "obi": {
-    "doneToday": true,
+    "doneToday": false,
     "activeRecall": false,
     "currentLesson": 46,
     "totalLessons": 82,
