@@ -54,6 +54,7 @@ let mimirFocus = readMimirFocus();
 let lastRenderedLevel = null;
 let activityViewMode = "weekly";
 let activityCursorDate = toIsoDate(new Date());
+let activityHasExplicitSelection = false;
 
 function buildV3Shell() {
   if (document.body.classList.contains("v3")) return;
@@ -108,7 +109,7 @@ function buildV3Shell() {
           <div class="chart-legend" aria-label="Légende"><span class="is-anki">Anki</span><span class="is-obi">Obi</span><span class="is-listening">Écoute</span><span class="is-duolingo">Duo</span></div>
         </div>
         <div class="activity-toolbar" role="tablist" aria-label="Mode de lecture du rythme">
-          <button class="activity-toggle" id="activityDailyButton" type="button" data-mode="daily">Jour</button>
+          <button class="activity-toggle" id="activityDailyButton" type="button" data-mode="daily">7 jours</button>
           <button class="activity-toggle" id="activityWeeklyButton" type="button" data-mode="weekly">Semaine</button>
           <button class="activity-toggle" id="activityCalendarButton" type="button" data-mode="calendar">Calendrier</button>
           <div class="activity-nav">
@@ -120,6 +121,7 @@ function buildV3Shell() {
         <div class="activity-chart" id="activityChart"></div>
         <p class="chart-caption" id="activityCaption"></p>
         <div class="activity-calendar" id="activityCalendar" hidden></div>
+        <section class="activity-detail" id="activityDetail" aria-live="polite"></section>
       </div>
     </section>
     <div class="progress-evidence-grid">
@@ -435,11 +437,11 @@ function renderProgressInsights(data, events = []) {
 
 function renderActivityExplorer(rows, now) {
   const byDate = new Map(rows.map(row => [row.date, row]));
-  const cursor = parseDate(activityCursorDate);
   const currentIso = toIsoDate(now);
   const chart = document.getElementById("activityChart");
   const caption = document.getElementById("activityCaption");
   const calendar = document.getElementById("activityCalendar");
+  const detail = document.getElementById("activityDetail");
   const cursorLabel = document.getElementById("activityCursorLabel");
   const dailyButton = document.getElementById("activityDailyButton");
   const weeklyButton = document.getElementById("activityWeeklyButton");
@@ -447,11 +449,27 @@ function renderActivityExplorer(rows, now) {
   const prevButton = document.getElementById("activityPrevButton");
   const nextButton = document.getElementById("activityNextButton");
   const dayNames = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
-  const totalFor = row => row.anki + row.obi + row.listening + row.duolingo;
+  const emptyRow = { anki: 0, obi: 0, listening: 0, duolingo: 0, reviews: 0 };
+  const totalFor = row => Number(row.anki || 0) + Number(row.obi || 0) + Number(row.listening || 0) + Number(row.duolingo || 0);
+  const categories = [
+    { key: "anki", label: "Anki", color: "#e66f43" },
+    { key: "obi", label: "Obi", color: "#e7bd68" },
+    { key: "listening", label: "Écoute", color: "#5eb7aa" },
+    { key: "duolingo", label: "Duo", color: "#8ea7d8" }
+  ];
+
+  if (!activityHasExplicitSelection) {
+    const latestActive = rows.filter(row => row.date <= currentIso && totalFor(row) > 0).sort((a, b) => a.date.localeCompare(b.date)).at(-1);
+    if (latestActive) activityCursorDate = latestActive.date;
+  }
+  const cursor = parseDate(activityCursorDate);
 
   dailyButton.classList.toggle("is-active", activityViewMode === "daily");
   weeklyButton.classList.toggle("is-active", activityViewMode === "weekly");
   calendarButton.classList.toggle("is-active", activityViewMode === "calendar");
+  dailyButton.setAttribute("aria-selected", String(activityViewMode === "daily"));
+  weeklyButton.setAttribute("aria-selected", String(activityViewMode === "weekly"));
+  calendarButton.setAttribute("aria-selected", String(activityViewMode === "calendar"));
   chart.hidden = activityViewMode === "calendar";
   calendar.hidden = activityViewMode !== "calendar";
 
@@ -472,7 +490,7 @@ function renderActivityExplorer(rows, now) {
       const date = new Date(start);
       date.setDate(start.getDate() + index);
       const iso = toIsoDate(date);
-      return { iso, date, row: byDate.get(iso) || { anki: 0, obi: 0, listening: 0, duolingo: 0, reviews: 0 } };
+      return { iso, date, row: byDate.get(iso) || emptyRow };
     });
     max = Math.max(1, ...days.map(day => totalFor(day.row)));
     label = `Semaine du ${formatShortDate(toIsoDate(start))}`;
@@ -483,7 +501,7 @@ function renderActivityExplorer(rows, now) {
       const date = new Date(start);
       date.setDate(start.getDate() + index);
       const iso = toIsoDate(date);
-      return { iso, date, row: byDate.get(iso) || { anki: 0, obi: 0, listening: 0, duolingo: 0, reviews: 0 } };
+      return { iso, date, row: byDate.get(iso) || emptyRow };
     });
     max = Math.max(1, ...days.map(day => totalFor(day.row)));
     label = `Autour du ${formatShortDate(activityCursorDate)}`;
@@ -492,11 +510,11 @@ function renderActivityExplorer(rows, now) {
   if (activityViewMode !== "calendar") {
     chart.innerHTML = days.map(day => {
       const total = totalFor(day.row);
-      const segments = ["anki", "obi", "listening", "duolingo"].map(category => `<i class="chart-segment is-${category}" style="height:${max ? (day.row[category] / max) * 100 : 0}%"></i>`).join("");
+      const segments = categories.filter(category => Number(day.row[category.key] || 0) > 0).map(category => `<i class="is-${category.key}" style="flex:${Number(day.row[category.key])}"></i>`).join("");
       const weekIndex = (new Date(`${day.iso}T12:00:00`).getDay() + 6) % 7;
-      return `<button class="month-column${day.iso === activityCursorDate ? " is-selected" : ""}${day.iso === currentIso ? " is-today" : ""}" type="button" data-activity-day="${day.iso}" aria-label="${formatLongDate(day.iso)}, ${Math.round(total)} minutes, ${day.row.reviews} reviews"><div class="month-value">${total ? Math.round(total) : ""}</div><div class="month-bar">${segments}</div><span>${activityViewMode === "weekly" ? dayNames[weekIndex] : formatShortDate(day.iso).replace(".", "")}</span></button>`;
+      return `<button class="activity-day-card${day.iso === activityCursorDate ? " is-selected" : ""}${day.iso === currentIso ? " is-today" : ""}${total ? " has-activity" : ""}" type="button" data-activity-day="${day.iso}" aria-label="${formatLongDate(day.iso)}, ${Math.round(total)} minutes, ${day.row.reviews} reviews"><span class="activity-day-date">${activityViewMode === "weekly" ? dayNames[weekIndex] : formatShortDate(day.iso).replace(".", "")}</span><strong>${total ? `${Math.round(total)} min` : "Repos"}</strong><div class="activity-day-visual">${total ? `<span class="activity-day-fill" style="height:${Math.max(18, (total / max) * 100)}%">${segments}</span>` : "<i>·</i>"}</div><small>${day.row.reviews ? `${day.row.reviews} reviews` : total ? "Session notée" : ""}</small></button>`;
     }).join("");
-    caption.textContent = `${label}. ${days.some(day => day.iso === currentIso) ? "Aujourd’hui est visible dans la fenêtre." : "Tu peux te déplacer dans le temps avec les flèches."}`;
+    caption.textContent = `${label}. Choisis un jour, le détail s'affiche juste dessous.`;
     cursorLabel.textContent = activityViewMode === "weekly" ? label : `Jour sélectionné : ${formatShortDate(activityCursorDate)}`;
   } else {
     const monthStart = new Date(cursor.getFullYear(), cursor.getMonth(), 1, 12);
@@ -509,20 +527,30 @@ function renderActivityExplorer(rows, now) {
     for (const name of dayNames) cells.push(`<div class="calendar-head">${name}</div>`);
     for (let date = new Date(gridStart); date <= gridEnd; date.setDate(date.getDate() + 1)) {
       const iso = toIsoDate(date);
-      const row = byDate.get(iso) || { anki: 0, obi: 0, listening: 0, duolingo: 0 };
+      const row = byDate.get(iso) || emptyRow;
       const minutes = totalFor(row);
-      cells.push(`<button class="calendar-day${iso === activityCursorDate ? " is-selected" : ""}${iso === currentIso ? " is-today" : ""}${date.getMonth() !== cursor.getMonth() ? " is-outside" : ""}${minutes > 0 ? " has-activity" : ""}" type="button" data-activity-day="${iso}" aria-label="${formatLongDate(iso)}, ${Math.round(minutes)} minutes"><span>${date.getDate()}</span><i class="dot"></i></button>`);
+      const active = categories.filter(category => Number(row[category.key] || 0) > 0);
+      const signature = active.length ? `linear-gradient(90deg, ${active.map(category => category.color).join(", ")})` : "transparent";
+      cells.push(`<button class="calendar-day${iso === activityCursorDate ? " is-selected" : ""}${iso === currentIso ? " is-today" : ""}${date.getMonth() !== cursor.getMonth() ? " is-outside" : ""}${minutes > 0 ? " has-activity" : ""}" type="button" data-activity-day="${iso}" style="--activity-signature:${signature}" aria-label="${formatLongDate(iso)}, ${Math.round(minutes)} minutes"><span>${date.getDate()}</span><strong>${minutes ? `${Math.round(minutes)}m` : ""}</strong><i class="calendar-signal"></i></button>`);
     }
     calendar.innerHTML = cells.join("");
     caption.textContent = `${new Intl.DateTimeFormat("fr-FR", { month: "long", year: "numeric" }).format(cursor)}. Clique un jour pour voir ce qu’il y a dedans.`;
     cursorLabel.textContent = new Intl.DateTimeFormat("fr-FR", { month: "long", year: "numeric" }).format(cursor);
   }
 
+  const selected = byDate.get(activityCursorDate) || emptyRow;
+  const selectedTotal = totalFor(selected);
+  const selectedCategories = categories.filter(category => Number(selected[category.key] || 0) > 0);
+  const breakdown = selectedCategories.map(category => `<span class="activity-pill is-${category.key}"><i></i>${category.label} ${Math.round(selected[category.key])} min</span>`).join("");
+  detail.innerHTML = `<div class="activity-detail-head"><span>Jour sélectionné</span><strong>${formatLongDate(activityCursorDate)}</strong></div><div class="activity-detail-summary"><b>${selectedTotal ? `${Math.round(selectedTotal)} min` : "Aucune séance"}</b><span>${selected.reviews ? `${selected.reviews} reviews Anki` : selectedTotal ? "Session confirmée" : "Jour de repos ou non renseigné"}</span></div><div class="activity-detail-breakdown">${breakdown || "<span class=\"activity-detail-empty\">Rien à décoder ici. Tu peux simplement repartir sur une courte séance quand tu veux.</span>"}</div>`;
+
   prevButton.onclick = () => {
+    activityHasExplicitSelection = true;
     shiftDate(activityViewMode === "calendar" ? 0 : activityViewMode === "weekly" ? -7 : -1, activityViewMode === "calendar" ? -1 : 0);
     renderActivityExplorer(rows, now);
   };
   nextButton.onclick = () => {
+    activityHasExplicitSelection = true;
     shiftDate(activityViewMode === "calendar" ? 0 : activityViewMode === "weekly" ? 7 : 1, activityViewMode === "calendar" ? 1 : 0);
     renderActivityExplorer(rows, now);
   };
@@ -1504,14 +1532,18 @@ function bindUi() {
   document.getElementById("activityChart").addEventListener("click", event => {
     const button = event.target.closest("[data-activity-day]");
     if (!button) return;
+    activityHasExplicitSelection = true;
     activityCursorDate = button.dataset.activityDay;
     renderProgressInsights(currentData, currentEvents);
+    if (window.matchMedia("(max-width: 680px)").matches) document.getElementById("activityDetail").scrollIntoView({ behavior: "smooth", block: "center" });
   });
   document.getElementById("activityCalendar").addEventListener("click", event => {
     const button = event.target.closest("[data-activity-day]");
     if (!button) return;
+    activityHasExplicitSelection = true;
     activityCursorDate = button.dataset.activityDay;
     renderProgressInsights(currentData, currentEvents);
+    if (window.matchMedia("(max-width: 680px)").matches) document.getElementById("activityDetail").scrollIntoView({ behavior: "smooth", block: "center" });
   });
   document.getElementById("activityDailyButton").addEventListener("click", () => {
     activityViewMode = "daily";
