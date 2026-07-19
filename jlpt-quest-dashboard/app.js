@@ -1445,8 +1445,7 @@ function cancelMimirFocus() {
 }
 
 function syncMimirBeaconVisibility() {
-  const todayVisible = !document.getElementById("todayView").hidden;
-  document.getElementById("mimirBeacon").hidden = todayVisible && !mimirFocus;
+  document.getElementById("mimirBeacon").hidden = !mimirFocus;
 }
 
 function finishMimirFocus() {

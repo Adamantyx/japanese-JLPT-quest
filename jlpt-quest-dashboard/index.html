@@ -427,7 +427,7 @@
     .fab:hover { transform: translateY(-2px); }
     .mimir-beacon { position: fixed; z-index: 21; left: 22px; bottom: max(18px, env(safe-area-inset-bottom)); width: 62px; height: 62px; padding: 0; border: 1px solid rgba(248,217,142,.58); border-radius: 50%; background: radial-gradient(circle, #173c48, #071722 74%); box-shadow: 0 18px 46px rgba(0,0,0,.45), 0 0 28px rgba(231,189,104,.17); cursor: pointer; animation: beaconFloat 3.6s ease-in-out infinite; }
     .mimir-beacon[hidden] { display: none; }
-    .mimir-beacon img { position: absolute; z-index: 2; width: 112%; height: 112%; left: -7%; top: -9%; object-fit: contain; pointer-events: none; }
+    .mimir-beacon img { position: absolute; z-index: 2; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 51% 22%; pointer-events: none; }
     .mimir-beacon-ring { position: absolute; inset: -7px; border: 1px solid rgba(248,217,142,.18); border-radius: 50%; animation: auraPulse 2.8s ease-out infinite; }
     .mimir-beacon i { position: absolute; z-index: 4; right: 0; bottom: 3px; width: 13px; height: 13px; border: 3px solid #071722; border-radius: 50%; background: var(--gold); box-shadow: 0 0 13px var(--gold); }
     .mimir-beacon strong { position: absolute; left: 70px; top: 50%; width: max-content; padding: 8px 11px; border: 1px solid rgba(244,237,220,.12); border-radius: 11px; color: var(--paper); background: rgba(5,18,28,.92); box-shadow: 0 10px 25px rgba(0,0,0,.28); font-size: 9px; opacity: 0; pointer-events: none; transform: translate(-8px,-50%); transition: opacity .2s ease, transform .2s ease; }
@@ -770,7 +770,7 @@
     .map-sanctuary { left: 87%; top: 19%; }
     .map-mimir { position: absolute; z-index: 4; left: var(--map-x, 12%); top: var(--map-y, 80%); width: 92px; aspect-ratio: 1; overflow: hidden; padding: 0; border: 2px solid rgba(248,217,142,.7); border-radius: 50%; background: radial-gradient(circle, rgba(231,189,104,.26), rgba(5,18,28,.9)); box-shadow: 0 0 0 7px rgba(231,189,104,.08), 0 14px 34px rgba(0,0,0,.42); cursor: pointer; transform: translate(-50%, -50%); transition: left 1.2s ease, top 1.2s ease, box-shadow .25s ease; animation: travelerBob 3.2s ease-in-out infinite; }
     .map-mimir:hover, .map-mimir:focus-visible { box-shadow: 0 0 0 9px rgba(231,189,104,.13), 0 14px 34px rgba(0,0,0,.42), 0 0 28px rgba(231,189,104,.3); }
-    .map-mimir img { width: 140%; height: 140%; object-fit: cover; object-position: 57% 35%; transform: translate(-18%, -4%); }
+    .map-mimir img { width: 100%; height: 100%; object-fit: cover; object-position: 51% 22%; transform: none; }
     .map-progress-chip { position: absolute; z-index: 6; right: 24px; bottom: 22px; padding: 11px 14px; border: 1px solid rgba(255,255,255,.15); border-radius: 999px; color: var(--gold-bright); background: rgba(4,16,25,.8); font-size: 11px; font-weight: 800; backdrop-filter: blur(12px); }
     .journey-panels { display: grid; gap: 14px; margin-top: 14px; }
     .v2 #campaign { display: none; }
@@ -889,7 +889,7 @@
     .v3 .is-listening { --legend-color: #5eb7aa; }
     .v3 .is-duolingo { --legend-color: #8ea7d8; }
     .v3 .activity-chart { height: 292px; display: grid; grid-template-columns: repeat(12, minmax(28px, 1fr)); align-items: end; gap: clamp(4px, 1.2vw, 12px); padding: 25px 5px 0; border-bottom: 1px solid rgba(244,237,220,.1); background-image: linear-gradient(rgba(244,237,220,.055) 1px, transparent 1px); background-size: 100% 25%; }
-    .v3 .month-column { height: 100%; min-width: 0; display: grid; grid-template-rows: 20px 1fr 24px; align-items: end; text-align: center; }
+    .v3 .month-column { height: 100%; min-width: 0; display: grid; grid-template-rows: 20px 1fr 24px; align-items: end; padding: 0; border: 0; color: inherit; text-align: center; background: transparent; cursor: pointer; appearance: none; }
     .v3 .month-value { min-height: 18px; color: #b9c8c8; font-size: 8px; font-weight: 800; }
     .v3 .month-bar { width: min(34px, 78%); height: 100%; min-height: 1px; display: flex; flex-direction: column-reverse; justify-self: center; justify-content: flex-start; overflow: hidden; border-radius: 9px 9px 3px 3px; background: rgba(255,255,255,.025); box-shadow: inset 0 0 0 1px rgba(255,255,255,.04); }
     .v3 .chart-segment { display: block; width: 100%; min-height: 0; background: var(--legend-color); box-shadow: inset 0 1px rgba(255,255,255,.18); }
@@ -1334,6 +1334,6 @@
 
   <script src="../progression-data.js"></script>
   <script src="supabase-config.js" defer></script>
-  <script src="app.js?v=17" defer></script>
+  <script src="app.js?v=18" defer></script>
 </body>
 </html>
