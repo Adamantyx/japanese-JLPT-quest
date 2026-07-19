@@ -1,14 +1,14 @@
 {
   "schemaVersion": 3,
-  "updatedAt": "2026-07-18T07:35:48.495Z",
+  "updatedAt": "2026-07-19T08:44:27Z",
   "profile": {
     "name": "Juliann",
     "rank": "Voyageur N5",
     "level": 4,
-    "xp": 262,
+    "xp": 307,
     "xpNext": 350,
-    "streakDays": 1,
-    "lifetimeStars": 7
+    "streakDays": 2,
+    "lifetimeStars": 8
   },
   "campaign": {
     "target": "JLPT N5",
@@ -19,16 +19,16 @@
   },
   "today": {
     "date": "2026-07-18",
-    "status": "planned",
-    "stars": 0,
+    "status": "saved",
+    "stars": 1,
     "morningQuest": "15 min d'Anki, reviews uniquement, zéro nouvelle carte.",
     "eveningQuest": "Obi 46, 10 à 15 min de rappel actif sur la leçon précédente.",
-    "confirmedSummary": "",
+    "confirmedSummary": "Anki et Duolingo confirmés.",
     "energy": ""
   },
   "anki": {
-    "doneToday": false,
-    "minutes": 0,
+    "doneToday": true,
+    "minutes": 10,
     "reviewsToday": 0,
     "due": 326,
     "backlog": 310,
@@ -54,12 +54,12 @@
     "weeklyTargetMinutes": 30
   },
   "duolingo": {
-    "doneToday": false,
-    "minutes": 0,
-    "sparksToday": 0,
-    "daysThisWeek": 0,
-    "streakDays": 0,
-    "xpToday": 0
+    "doneToday": true,
+    "minutes": 5,
+    "sparksToday": 1,
+    "daysThisWeek": 1,
+    "streakDays": 1,
+    "xpToday": 5
   },
   "boss": {
     "cycle": "2026-07-A",
@@ -70,10 +70,10 @@
   },
   "week": {
     "start": "2026-07-13",
-    "stars": 4,
+    "stars": 5,
     "target": 8,
     "bonusStars": 0,
-    "totalMinutes": 37,
+    "totalMinutes": 52,
     "reviews": 16,
     "days": [
       {
@@ -93,6 +93,16 @@
         "confirmed": true,
         "bonusEarned": false,
         "duolingoEarned": false,
+        "totalMinutes": 15,
+        "reviews": 0
+      },
+      {
+        "date": "2026-07-18",
+        "label": "sam",
+        "stars": 1,
+        "confirmed": true,
+        "bonusEarned": false,
+        "duolingoEarned": true,
         "totalMinutes": 15,
         "reviews": 0
       }
@@ -125,6 +135,18 @@
     }
   ],
   "recentLogs": [
+    {
+      "date": "2026-07-18",
+      "label": "Anki",
+      "value": "10 min",
+      "confirmed": true
+    },
+    {
+      "date": "2026-07-18",
+      "label": "Duolingo",
+      "value": "5 min, étincelle +5 XP",
+      "confirmed": true
+    },
     {
       "date": "2026-07-17",
       "label": "Anki",
