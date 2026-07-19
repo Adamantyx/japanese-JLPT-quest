@@ -899,6 +899,7 @@ function renderGameSystems(data) {
   const evolution = companionEvolution(data.profile);
   const evolutionProgress = evolution.progress;
   document.body.dataset.mimirEvolution = evolution.current.key;
+  document.getElementById("mimirSprite").dataset.evolution = evolution.current.key;
   document.getElementById("companionCard").dataset.evolution = evolution.current.key;
   document.getElementById("companionStage").textContent = `${evolution.current.title} · niveau ${data.profile.level}`;
   document.getElementById("mimirEvolutionMark").textContent = evolution.current.mark;
