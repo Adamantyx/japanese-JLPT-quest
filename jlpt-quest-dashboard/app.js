@@ -49,6 +49,7 @@ let cloudInitPromise = null;
 let currentMimirState = null;
 let mimirReactionIndex = 0;
 let mimirReactionTimer = null;
+let mimirPetTimer = null;
 let mimirFocusTimer = null;
 let mimirFocus = readMimirFocus();
 let lastRenderedLevel = null;
@@ -66,7 +67,7 @@ function buildV3Shell() {
     <div class="mimir-camp-scene" aria-hidden="true">
       <div class="mimir-scene-glow"></div>
       <div class="mimir-scene-stars"><i></i><i></i><i></i></div>
-      <button class="mimir-avatar-button" id="mimirAvatarButton" type="button" aria-label="Faire réagir Mimir"><span class="mimir-sprite" id="mimirSprite" data-pose="idle"></span></button>
+      <button class="mimir-avatar-button" id="mimirAvatarButton" type="button" aria-label="Faire réagir Mimir"><span class="mimir-sprite" id="mimirSprite" data-pet-state="idle"></span></button>
       <span class="mimir-scene-caption" id="mimirEvolutionName">Éclaireur du chemin</span><span id="mimirEvolutionMark" hidden>歩</span>
     </div>
     <div class="mimir-camp-copy">
@@ -128,7 +129,7 @@ function buildV3Shell() {
     </section>
     <div class="progress-evidence-grid">
       <section class="panel heatmap-panel"><div class="panel-inner"><div class="section-head"><div><div class="eyebrow">Régularité</div><h2>26 semaines</h2></div><strong class="heatmap-score" id="heatmapScore"></strong></div><div class="activity-heatmap" id="activityHeatmap" role="img"></div><div class="heatmap-legend"><span>Repos</span><i></i><i></i><i></i><i></i><span>Engagé</span></div></div></section>
-      <section class="panel coach-panel"><div class="panel-inner"><div class="coach-mimir"><img id="coachMimirImage" data-mimir-art src="assets/mimir/mimir-form-scout.png" alt="" loading="lazy"><span id="coachMood">En veille</span></div><div class="eyebrow">Lecture de Mimir</div><h2 id="coachVerdict">Le signal utile</h2><p id="coachInsight"></p><button class="coach-action" id="coachActionButton" type="button"><span>Prochain levier</span><strong id="coachAction"></strong><i>›</i></button></div></section>
+      <section class="panel coach-panel"><div class="panel-inner"><div class="coach-mimir"><img id="coachMimirImage" data-mimir-art src="assets/mimir/mimir-pet-idle.png" alt="" loading="lazy"><span id="coachMood">En veille</span></div><div class="eyebrow">Lecture de Mimir</div><h2 id="coachVerdict">Le signal utile</h2><p id="coachInsight"></p><button class="coach-action" id="coachActionButton" type="button"><span>Prochain levier</span><strong id="coachAction"></strong><i>›</i></button></div></section>
     </div>`;
 
   const evidencePanels = document.createElement("div");
@@ -158,7 +159,7 @@ function buildV3Shell() {
       <button class="map-landmark map-obi" id="mapObiLandmark" type="button" data-map-category="obi"><span class="map-icon">文</span><span><strong>Temple Obi</strong><small id="mapObiValue">Leçon</small></span></button>
       <button class="map-landmark map-listening locked" id="mapListeningLandmark" type="button" data-map-category="listening"><span class="map-icon">聴</span><span><strong>Lac d'écoute</strong><small id="mapListeningValue">Minutes</small></span></button>
       <div class="map-landmark map-sanctuary locked is-static" id="mapSanctuaryLandmark"><span class="map-icon">N5</span><span><strong>Sanctuaire</strong><small id="mapSanctuaryValue">Décembre</small></span></div>
-      <button class="map-mimir" id="mapMimir" type="button" aria-label="Ouvrir le brief de Mimir"><img id="mapMimirImage" data-mimir-art src="assets/mimir/mimir-form-scout.png" alt=""></button>
+      <button class="map-mimir" id="mapMimir" type="button" aria-label="Ouvrir le brief de Mimir"><img id="mapMimirImage" data-mimir-art src="assets/mimir/mimir-pet-idle.png" alt=""></button>
       <div class="map-progress-chip" id="mapProgressText">Le chemin s'éveille</div>
     </section>`;
   const journeyPanels = document.createElement("div");
@@ -715,13 +716,41 @@ function deriveMimirState(data, events = []) {
   };
 }
 
+function setMimirPetMotion(mood) {
+  const sprite = document.getElementById("mimirSprite");
+  if (!sprite) return;
+  const motions = {
+    celebrate: { row: 3, frames: 4, delay: 210 },
+    focus: { row: 7, frames: 6, delay: 360 },
+    listen: { row: 8, frames: 6, delay: 440 },
+    rescue: { row: 5, frames: 4, delay: 460 },
+    rest: { row: 6, frames: 6, delay: 560 },
+    idle: { row: 0, frames: 6, delay: 620 }
+  };
+  const motion = motions[mood] || motions.idle;
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  clearInterval(mimirPetTimer);
+  let frame = 0;
+  const paint = () => {
+    sprite.style.setProperty("--mimir-frame-x", frame);
+    sprite.style.setProperty("--mimir-frame-y", motion.row);
+  };
+  sprite.dataset.petState = mood || "idle";
+  paint();
+  if (!reducedMotion) {
+    mimirPetTimer = setInterval(() => {
+      frame = (frame + 1) % motion.frames;
+      paint();
+    }, motion.delay);
+  }
+}
+
 function renderMimir(data, events = []) {
   const state = deriveMimirState(data, events);
   currentMimirState = state;
   const companion = document.getElementById("companionCard");
   companion.dataset.mood = state.mood;
-  const poseByMood = { celebrate: "celebrate", focus: "reading", listen: "thinking", rescue: "rest", rest: "rest" };
-  document.getElementById("mimirSprite").dataset.pose = poseByMood[state.mood] || "idle";
+  setMimirPetMotion(state.mood);
   document.getElementById("mimirCampTitle").textContent = state.title;
   document.getElementById("companionMood").textContent = state.moodLabel;
   document.getElementById("companionSpeech").textContent = state.speech;
@@ -973,9 +1002,8 @@ function renderGameSystems(data) {
 
   const evolution = companionEvolution(data.profile);
   const evolutionProgress = evolution.progress;
-  const mimirArt = `assets/mimir/mimir-form-${evolution.current.key}.png`;
+  const mimirArt = "assets/mimir/mimir-pet-idle.png";
   document.body.dataset.mimirEvolution = evolution.current.key;
-  document.getElementById("mimirSprite").style.setProperty("--mimir-art", `url("${mimirArt}")`);
   document.querySelectorAll("[data-mimir-art]").forEach(image => { image.src = mimirArt; });
   document.getElementById("companionCard").dataset.evolution = evolution.current.key;
   document.getElementById("companionStage").textContent = `${evolution.current.title} · niveau ${data.profile.level}`;
@@ -1448,6 +1476,7 @@ function openMimirDialog() {
 function reactMimir() {
   if (!currentMimirState) return;
   const companion = document.getElementById("companionCard");
+  setMimirPetMotion("celebrate");
   companion.classList.remove("is-reacting");
   requestAnimationFrame(() => companion.classList.add("is-reacting"));
   const reactions = currentMimirState.reactions || [currentMimirState.speech];
@@ -1456,6 +1485,7 @@ function reactMimir() {
   clearTimeout(mimirReactionTimer);
   mimirReactionTimer = setTimeout(() => {
     companion.classList.remove("is-reacting");
+    if (currentMimirState) setMimirPetMotion(currentMimirState.mood);
     if (!mimirFocus && currentMimirState) document.getElementById("companionSpeech").textContent = currentMimirState.speech;
   }, 4200);
 }

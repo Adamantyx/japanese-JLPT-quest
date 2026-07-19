@@ -1067,6 +1067,50 @@
     }
     body.v4::before { z-index: 0; }
     body.v4 .shell { position: relative; z-index: 1; }
+
+    /* The pet atlas stays grounded in an opaque scene instead of floating as a transparent cutout. */
+    .v4 #companionCard .mimir-avatar-button {
+      isolation: isolate;
+      overflow: visible;
+      border-radius: 46% 46% 34% 34%;
+      background: radial-gradient(circle at 50% 42%, rgba(245,181,83,.2), transparent 34%), linear-gradient(180deg, #173b48 0%, #0a202a 64%, #06161e 100%);
+      box-shadow: inset 0 0 0 1px rgba(248,217,142,.16), inset 0 -44px 54px rgba(0,0,0,.36), 0 24px 45px rgba(0,0,0,.3);
+    }
+    .v4 #companionCard .mimir-avatar-button::before {
+      inset: 7% 5% 4%;
+      width: auto;
+      height: auto;
+      border-color: rgba(248,217,142,.34);
+      border-radius: 48% 48% 38% 38%;
+      background: radial-gradient(ellipse at 50% 80%, rgba(3,12,18,.86) 0 16%, transparent 17%), radial-gradient(circle at 50% 45%, rgba(94,183,170,.16), transparent 57%);
+      box-shadow: inset 0 0 42px rgba(94,183,170,.12);
+    }
+    .v4 #companionCard .mimir-sprite {
+      z-index: 1;
+      inset: 2% 1% 0;
+      width: auto;
+      height: auto;
+      background-image: url("assets/mimir/mimir-pet.webp");
+      background-repeat: no-repeat;
+      background-size: auto 1100%;
+      background-position: calc(var(--mimir-frame-x, 0) * 100% / 7) calc(var(--mimir-frame-y, 0) * 100% / 10);
+      filter: drop-shadow(0 18px 18px rgba(0,0,0,.38));
+      transform: none;
+      animation: none;
+      transition: filter .35s ease;
+    }
+    .v4 #companionCard .mimir-sprite[data-pet-state="celebrate"] { filter: drop-shadow(0 16px 18px rgba(0,0,0,.34)) drop-shadow(0 0 22px rgba(248,217,142,.35)); }
+    .v4 #companionCard .mimir-sprite[data-pet-state="focus"] { filter: drop-shadow(0 16px 18px rgba(0,0,0,.38)) drop-shadow(0 0 20px rgba(230,111,67,.18)); }
+    .v4 #companionCard .mimir-sprite[data-pet-state="listen"] { filter: drop-shadow(0 16px 18px rgba(0,0,0,.38)) drop-shadow(0 0 20px rgba(94,183,170,.24)); }
+    .v4 #companionCard.mimir-camp.is-reacting .mimir-sprite { animation: none; }
+    body[data-mimir-evolution] .coach-mimir img,
+    body[data-mimir-evolution] .mimir-dialog-hero > img { filter: drop-shadow(0 12px 18px rgba(0,0,0,.3)); }
+    .v4 #companionCard[data-evolution="guardian"] .mimir-avatar-button { box-shadow: inset 0 0 0 1px rgba(248,217,142,.36), inset 0 -44px 54px rgba(0,0,0,.34), 0 24px 45px rgba(0,0,0,.3), 0 0 30px rgba(231,189,104,.18); }
+    .v4 #companionCard[data-evolution="messenger"] .mimir-avatar-button { box-shadow: inset 0 0 0 1px rgba(230,111,67,.42), inset 0 -44px 54px rgba(0,0,0,.34), 0 24px 45px rgba(0,0,0,.3), 0 0 34px rgba(230,111,67,.2); }
+    .v4 #companionCard[data-evolution="sage"] .mimir-avatar-button { box-shadow: inset 0 0 0 1px rgba(121,197,183,.48), inset 0 -44px 54px rgba(0,0,0,.34), 0 24px 45px rgba(0,0,0,.3), 0 0 38px rgba(94,183,170,.24); }
+    @media (prefers-reduced-motion: reduce) {
+      .v4 #companionCard .mimir-sprite { transition: none; }
+    }
   </style>
 </head>
 <body>
@@ -1268,7 +1312,7 @@
       <span id="lastUpdate">Dernière mise à jour...</span>
     </footer>
   </main>
-  <button class="mimir-beacon" id="mimirBeacon" type="button" aria-label="Ouvrir Mimir" hidden><span class="mimir-beacon-ring"></span><img id="mimirBeaconImage" data-mimir-art src="assets/mimir/mimir-form-scout.png" alt=""><i id="mimirBeaconDot"></i><strong id="mimirBeaconLabel">Mimir observe</strong></button>
+  <button class="mimir-beacon" id="mimirBeacon" type="button" aria-label="Ouvrir Mimir" hidden><span class="mimir-beacon-ring"></span><img id="mimirBeaconImage" data-mimir-art src="assets/mimir/mimir-pet-idle.png" alt=""><i id="mimirBeaconDot"></i><strong id="mimirBeaconLabel">Mimir observe</strong></button>
   <button class="fab" id="quickAddButton" type="button"><span class="fab-label">Enregistrer une session</span></button>
   <nav class="app-nav" aria-label="Navigation principale">
     <button class="app-nav-button active" type="button" data-view="today" aria-current="page"><span>今</span><strong>Aujourd'hui</strong></button>
@@ -1315,7 +1359,7 @@
   <dialog id="mimirDialog" class="mimir-dialog">
     <div class="mimir-dialog-hero" id="mimirDialogHero">
       <div class="mimir-dialog-aura" aria-hidden="true"></div>
-      <img id="mimirDialogImage" data-mimir-art src="assets/mimir/mimir-form-scout.png" alt="Mimir, compagnon de progression">
+      <img id="mimirDialogImage" data-mimir-art src="assets/mimir/mimir-pet-idle.png" alt="Mimir, compagnon de progression">
       <div><span id="mimirDialogMood">En veille</span><h2 id="mimirDialogTitle">Ton brief</h2><p id="mimirDialogSpeech"></p></div>
       <button class="icon-button" type="button" data-close-dialog="mimirDialog" aria-label="Fermer">×</button>
     </div>
@@ -1363,7 +1407,7 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <div class="celebration" id="celebration" role="status" aria-live="polite" aria-atomic="true">
     <div class="celebration-card">
-      <img class="celebration-mimir" id="celebrationMimirImage" data-mimir-art src="assets/mimir/mimir-form-scout.png" alt="" aria-hidden="true">
+      <img class="celebration-mimir" id="celebrationMimirImage" data-mimir-art src="assets/mimir/mimir-pet-idle.png" alt="" aria-hidden="true">
       <div class="celebration-sigil" id="celebrationSigil">星</div>
       <h2 id="celebrationTitle">Lanterne allumée</h2>
       <p id="celebrationText">Le chemin reste visible.</p>
@@ -1374,6 +1418,6 @@
 
   <script src="../progression-data.js"></script>
   <script src="supabase-config.js" defer></script>
-  <script src="app.js?v=20" defer></script>
+  <script src="app.js?v=21" defer></script>
 </body>
 </html>
