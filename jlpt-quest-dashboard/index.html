@@ -1068,23 +1068,24 @@
     body.v4::before { z-index: 0; }
     body.v4 .shell { position: relative; z-index: 1; }
 
-    /* The pet atlas stays grounded in an opaque scene instead of floating as a transparent cutout. */
+    /* One shared animation strip keeps Mimir recognisable in every context. */
     .v4 #companionCard .mimir-avatar-button {
       isolation: isolate;
-      overflow: visible;
-      border-radius: 46% 46% 34% 34%;
-      background: radial-gradient(circle at 50% 42%, rgba(245,181,83,.2), transparent 34%), linear-gradient(180deg, #173b48 0%, #0a202a 64%, #06161e 100%);
-      box-shadow: inset 0 0 0 1px rgba(248,217,142,.16), inset 0 -44px 54px rgba(0,0,0,.36), 0 24px 45px rgba(0,0,0,.3);
+      overflow: hidden;
+      border-radius: 24px 24px 0 0;
+      background: linear-gradient(180deg, rgba(10,31,42,.14), rgba(3,15,22,.12));
+      box-shadow: none;
     }
     .v4 #companionCard .mimir-avatar-button::before {
-      inset: 7% 5% 4%;
+      inset: auto 2% 0;
       width: auto;
-      height: auto;
-      border-color: rgba(248,217,142,.34);
-      border-radius: 48% 48% 38% 38%;
-      background: radial-gradient(ellipse at 50% 80%, rgba(3,12,18,.86) 0 16%, transparent 17%), radial-gradient(circle at 50% 45%, rgba(94,183,170,.16), transparent 57%);
-      box-shadow: inset 0 0 42px rgba(94,183,170,.12);
+      height: 31%;
+      border: 0;
+      border-radius: 50% 50% 0 0;
+      background: radial-gradient(ellipse at 50% 100%, rgba(2,11,17,.78) 0 38%, rgba(8,28,37,.26) 39%, transparent 70%);
+      box-shadow: none;
     }
+    .v4 .mimir-scene-glow { display: none; }
     .v4 #companionCard .mimir-sprite {
       z-index: 1;
       inset: auto;
@@ -1102,15 +1103,24 @@
       animation: none;
       transition: filter .35s ease;
     }
-    .v4 #companionCard .mimir-sprite[data-pet-state="celebrate"] { filter: drop-shadow(0 16px 18px rgba(0,0,0,.34)) drop-shadow(0 0 22px rgba(248,217,142,.35)); }
-    .v4 #companionCard .mimir-sprite[data-pet-state="focus"] { filter: drop-shadow(0 16px 18px rgba(0,0,0,.38)) drop-shadow(0 0 20px rgba(230,111,67,.18)); }
-    .v4 #companionCard .mimir-sprite[data-pet-state="listen"] { filter: drop-shadow(0 16px 18px rgba(0,0,0,.38)) drop-shadow(0 0 20px rgba(94,183,170,.24)); }
+    .v4 #companionCard .mimir-sprite[data-pet-state="celebrate"] { filter: drop-shadow(0 16px 18px rgba(0,0,0,.34)) drop-shadow(0 0 18px rgba(248,217,142,.25)); }
+    .v4 #companionCard .mimir-sprite[data-pet-state="focus"] { filter: drop-shadow(0 16px 18px rgba(0,0,0,.38)); }
+    .v4 #companionCard .mimir-sprite[data-pet-state="listen"] { filter: drop-shadow(0 16px 18px rgba(0,0,0,.38)); }
     .v4 #companionCard.mimir-camp.is-reacting .mimir-sprite { animation: none; }
-    body[data-mimir-evolution] .coach-mimir img,
-    body[data-mimir-evolution] .mimir-dialog-hero > img { filter: drop-shadow(0 12px 18px rgba(0,0,0,.3)); }
-    .v4 #companionCard[data-evolution="guardian"] .mimir-avatar-button { box-shadow: inset 0 0 0 1px rgba(248,217,142,.36), inset 0 -44px 54px rgba(0,0,0,.34), 0 24px 45px rgba(0,0,0,.3), 0 0 30px rgba(231,189,104,.18); }
-    .v4 #companionCard[data-evolution="messenger"] .mimir-avatar-button { box-shadow: inset 0 0 0 1px rgba(230,111,67,.42), inset 0 -44px 54px rgba(0,0,0,.34), 0 24px 45px rgba(0,0,0,.3), 0 0 34px rgba(230,111,67,.2); }
-    .v4 #companionCard[data-evolution="sage"] .mimir-avatar-button { box-shadow: inset 0 0 0 1px rgba(121,197,183,.48), inset 0 -44px 54px rgba(0,0,0,.34), 0 24px 45px rgba(0,0,0,.3), 0 0 38px rgba(94,183,170,.24); }
+    .mimir-mini-sprite {
+      display: block;
+      --mimir-frame-x: 0;
+      background: url("assets/mimir/mimir-smooth.webp") no-repeat;
+      background-size: 1200% 100%;
+      background-position: calc(var(--mimir-frame-x, 0) * 100% / 11) center;
+      filter: drop-shadow(0 8px 10px rgba(0,0,0,.3));
+    }
+    .mimir-beacon .beacon-mimir-sprite { position: absolute; z-index: 2; left: 50%; bottom: -2px; width: auto; height: 100%; aspect-ratio: 192 / 208; transform: translateX(-50%); pointer-events: none; }
+    .map-mimir .map-mimir-sprite { position: absolute; z-index: 1; left: 50%; bottom: -5px; width: auto; height: 104%; aspect-ratio: 192 / 208; transform: translateX(-50%); }
+    .v3 .coach-mimir .coach-mimir-sprite { position: absolute; right: auto; bottom: -4px; left: 50%; width: auto; height: 108%; padding: 0; border: 0; border-radius: 0; background-image: url("assets/mimir/mimir-smooth.webp"); background-repeat: no-repeat; background-size: 1200% 100%; background-position: calc(var(--mimir-frame-x, 0) * 100% / 11) center; color: inherit; font-size: inherit; transform: translateX(-50%); }
+    .v3 .coach-mimir .coach-mood { position: absolute; right: 9px; bottom: 0; padding: 4px 7px; border: 1px solid rgba(248,217,142,.18); border-radius: 999px; color: var(--gold); background: rgba(5,18,28,.82); font-size: 7px; font-weight: 800; text-transform: uppercase; }
+    .mimir-dialog-hero .dialog-mimir-sprite { position: relative; z-index: 2; width: 145px; height: auto; aspect-ratio: 192 / 208; align-self: end; }
+    .celebration-mimir { display: block; height: auto; aspect-ratio: 192 / 208; }
     @media (prefers-reduced-motion: reduce) {
       .v4 #companionCard .mimir-sprite { transition: none; }
     }
@@ -1315,7 +1325,7 @@
       <span id="lastUpdate">Dernière mise à jour...</span>
     </footer>
   </main>
-  <button class="mimir-beacon" id="mimirBeacon" type="button" aria-label="Ouvrir Mimir" hidden><span class="mimir-beacon-ring"></span><img id="mimirBeaconImage" data-mimir-art src="assets/mimir/mimir-pet-idle.png" alt=""><i id="mimirBeaconDot"></i><strong id="mimirBeaconLabel">Mimir observe</strong></button>
+  <button class="mimir-beacon" id="mimirBeacon" type="button" aria-label="Ouvrir Mimir" hidden><span class="mimir-beacon-ring"></span><span class="mimir-mini-sprite beacon-mimir-sprite" id="mimirBeaconImage" data-mimir-frame aria-hidden="true"></span><i id="mimirBeaconDot"></i><strong id="mimirBeaconLabel">Mimir observe</strong></button>
   <button class="fab" id="quickAddButton" type="button"><span class="fab-label">Enregistrer une session</span></button>
   <nav class="app-nav" aria-label="Navigation principale">
     <button class="app-nav-button active" type="button" data-view="today" aria-current="page"><span>今</span><strong>Aujourd'hui</strong></button>
@@ -1362,7 +1372,7 @@
   <dialog id="mimirDialog" class="mimir-dialog">
     <div class="mimir-dialog-hero" id="mimirDialogHero">
       <div class="mimir-dialog-aura" aria-hidden="true"></div>
-      <img id="mimirDialogImage" data-mimir-art src="assets/mimir/mimir-pet-idle.png" alt="Mimir, compagnon de progression">
+      <span class="mimir-mini-sprite dialog-mimir-sprite" id="mimirDialogImage" data-mimir-frame role="img" aria-label="Mimir, compagnon de progression"></span>
       <div><span id="mimirDialogMood">En veille</span><h2 id="mimirDialogTitle">Ton brief</h2><p id="mimirDialogSpeech"></p></div>
       <button class="icon-button" type="button" data-close-dialog="mimirDialog" aria-label="Fermer">×</button>
     </div>
@@ -1410,7 +1420,7 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <div class="celebration" id="celebration" role="status" aria-live="polite" aria-atomic="true">
     <div class="celebration-card">
-      <img class="celebration-mimir" id="celebrationMimirImage" data-mimir-art src="assets/mimir/mimir-pet-idle.png" alt="" aria-hidden="true">
+      <span class="mimir-mini-sprite celebration-mimir" id="celebrationMimirImage" data-mimir-frame aria-hidden="true"></span>
       <div class="celebration-sigil" id="celebrationSigil">星</div>
       <h2 id="celebrationTitle">Lanterne allumée</h2>
       <p id="celebrationText">Le chemin reste visible.</p>
@@ -1421,6 +1431,6 @@
 
   <script src="../progression-data.js"></script>
   <script src="supabase-config.js" defer></script>
-  <script src="app.js?v=22" defer></script>
+  <script src="app.js?v=23" defer></script>
 </body>
 </html>
