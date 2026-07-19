@@ -23,11 +23,11 @@ Le script copie uniquement :
 
 Il crée un commit uniquement en présence de changements puis pousse `main`. GitHub Pages republie alors automatiquement la branche.
 
-## Production
+## Publication
 
-- URL principale : `https://japanese-jlpt-quest.vercel.app/jlpt-quest-dashboard/index.html`
-- URL miroir : `https://adamantyx.github.io/japanese-JLPT-quest/jlpt-quest-dashboard/index.html`
-- Après `publish-dashboard.mjs`, lancer `vercel --prod --yes` depuis la copie locale de déploiement pour publier immédiatement sur l'URL principale.
+- URL principale : `https://adamantyx.github.io/japanese-JLPT-quest/jlpt-quest-dashboard/index.html`
+- Le dashboard se publie via `publish-dashboard.mjs`, qui pousse sur `main`.
+- GitHub Pages sert ensuite la version publique automatiquement.
 
 ## GitHub Pages
 

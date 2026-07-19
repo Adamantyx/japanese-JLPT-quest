@@ -59,6 +59,24 @@ function buildV3Shell() {
   if (document.body.classList.contains("v3")) return;
   const shell = document.querySelector(".shell");
   const layout = document.querySelector(".layout");
+  const companion = document.getElementById("companionCard");
+  companion.className = "mimir-camp";
+  companion.innerHTML = `
+    <div class="mimir-camp-scene" aria-hidden="true">
+      <div class="mimir-scene-glow"></div>
+      <div class="mimir-scene-stars"><i></i><i></i><i></i></div>
+      <button class="mimir-avatar-button" id="mimirAvatarButton" type="button" aria-label="Faire réagir Mimir"><span class="mimir-sprite" id="mimirSprite" data-pose="idle"></span></button>
+      <span class="mimir-scene-caption" id="mimirEvolutionName">Éclaireur du chemin</span><span id="mimirEvolutionMark" hidden>歩</span>
+    </div>
+    <div class="mimir-camp-copy">
+      <div class="mimir-camp-topline"><span id="companionStage">Éclaireur</span><i id="companionMood">En veille</i></div>
+      <div class="eyebrow">Le camp de Mimir</div>
+      <h1 id="mimirCampTitle">Une seule chose utile maintenant.</h1>
+      <p id="companionSpeech"></p>
+      <div class="mimir-camp-actions"><button id="mimirPrimaryAction" type="button">Prochain pas</button><button id="mimirBriefButton" type="button">Voir le signal</button></div>
+      <div class="mimir-quick-actions" aria-label="Noter une autre action"><button type="button" data-mimir-category="anki">Anki</button><button type="button" data-mimir-category="obi">Obi</button><button type="button" data-mimir-category="listening">Écoute</button><button type="button" data-mimir-category="duolingo">Duo</button></div>
+      <div class="evolution-box"><div class="evolution-head"><span>Prochaine forme</span><strong id="evolutionNext">Au prochain palier</strong></div><div class="bar"><i id="evolutionBar"></i></div></div>
+    </div>`;
   const views = document.createElement("div");
   views.className = "app-views";
 
@@ -66,19 +84,11 @@ function buildV3Shell() {
   todayView.className = "app-view";
   todayView.id = "todayView";
   todayView.dataset.viewPanel = "today";
-  todayView.append(
-    document.getElementById("top"),
-    document.querySelector(".status-deck"),
-    document.getElementById("previewBanner"),
-    document.getElementById("restoreBanner")
-  );
-  const todayGrid = document.createElement("div");
-  todayGrid.className = "today-grid";
-  todayGrid.append(document.getElementById("quests"), document.getElementById("companionCard"));
-  const todayStrip = document.createElement("div");
-  todayStrip.className = "today-strip";
-  todayStrip.append(document.getElementById("duolingoSpark"), document.getElementById("weekPanel"));
-  todayView.append(todayGrid, todayStrip);
+  todayView.append(document.getElementById("previewBanner"), document.getElementById("restoreBanner"), companion);
+  const todayFolio = document.createElement("div");
+  todayFolio.className = "today-folio";
+  todayFolio.append(document.getElementById("quests"), document.getElementById("weekPanel"));
+  todayView.append(todayFolio, document.getElementById("duolingoSpark"));
 
   const progressView = document.createElement("section");
   progressView.className = "app-view";
@@ -154,12 +164,12 @@ function buildV3Shell() {
     document.getElementById("collectionPanel"),
     document.getElementById("campaign")
   );
-  journeyView.append(journeyPanels);
+  journeyView.append(document.getElementById("top"), document.querySelector(".status-deck"), journeyPanels);
 
   views.append(todayView, progressView, journeyView);
   shell.insertBefore(views, layout);
   layout.remove();
-  document.body.classList.add("v2", "v3");
+  document.body.classList.add("v2", "v3", "v4");
   const requestedView = ["today", "progress", "journey"].includes(location.hash.slice(1)) ? location.hash.slice(1) : "today";
   setActiveView(requestedView, false);
 }
@@ -635,6 +645,9 @@ function renderMimir(data, events = []) {
   currentMimirState = state;
   const companion = document.getElementById("companionCard");
   companion.dataset.mood = state.mood;
+  const poseByMood = { celebrate: "celebrate", focus: "reading", listen: "thinking", rescue: "rest", rest: "rest" };
+  document.getElementById("mimirSprite").dataset.pose = poseByMood[state.mood] || "idle";
+  document.getElementById("mimirCampTitle").textContent = state.title;
   document.getElementById("companionMood").textContent = state.moodLabel;
   document.getElementById("companionSpeech").textContent = state.speech;
   document.getElementById("mimirPrimaryAction").textContent = state.action.label;

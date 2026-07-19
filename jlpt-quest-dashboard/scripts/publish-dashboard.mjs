@@ -13,7 +13,7 @@ const publishDashboardDir = path.join(publishDir, 'jlpt-quest-dashboard');
 async function main() {
   await assertPublishRepo();
   await writeLocalProgressionBundle();
-  await fs.mkdir(path.join(publishDashboardDir, 'assets'), { recursive: true });
+  await fs.mkdir(path.join(publishDashboardDir, 'assets', 'mimir'), { recursive: true });
   await fs.mkdir(path.join(publishDashboardDir, 'fonts'), { recursive: true });
   await fs.mkdir(path.join(publishDashboardDir, 'scripts'), { recursive: true });
   await fs.mkdir(path.join(publishDashboardDir, 'supabase'), { recursive: true });
@@ -30,6 +30,9 @@ async function main() {
   }
   for (const name of ['campaign-path.webp', 'kitsune-guide.webp', 'n5-world-map-v2.jpg', 'icon-192.png', 'icon-512.png']) {
     await copy(path.join(dashboardDir, 'assets', name), path.join(publishDashboardDir, 'assets', name));
+  }
+  for (const name of ['mimir-idle.png', 'mimir-reading.png', 'mimir-thinking.png', 'mimir-celebrate.png', 'mimir-rest.png']) {
+    await copy(path.join(dashboardDir, 'assets', 'mimir', name), path.join(publishDashboardDir, 'assets', 'mimir', name));
   }
   for (const name of ['campaign-path.jpg', 'kitsune-guide.png']) {
     await fs.rm(path.join(publishDashboardDir, 'assets', name), { force: true });
