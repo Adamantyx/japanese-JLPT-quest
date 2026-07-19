@@ -1,8 +1,8 @@
-const CACHE = "jlpt-quest-v21";
+const CACHE = "jlpt-quest-v22";
 const SHELL = [
   "./",
   "./index.html",
-  "./app.js?v=21",
+  "./app.js?v=22",
   "./vendor/supabase.min.js",
   "./supabase-config.js",
   "./manifest.webmanifest",
@@ -22,6 +22,7 @@ const SHELL = [
   "./assets/mimir/mimir-form-sage.png",
   "./assets/mimir/mimir-pet.webp",
   "./assets/mimir/mimir-pet-idle.png",
+  "./assets/mimir/mimir-smooth.webp",
   "./assets/n5-world-map-v2.jpg",
   "./assets/icon-192.png",
   "./assets/icon-512.png",

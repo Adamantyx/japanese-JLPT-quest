@@ -34,7 +34,7 @@ async function main() {
   for (const name of ['mimir-idle.png', 'mimir-reading.png', 'mimir-thinking.png', 'mimir-celebrate.png', 'mimir-rest.png']) {
     await copy(path.join(dashboardDir, 'assets', 'mimir', name), path.join(publishDashboardDir, 'assets', 'mimir', name));
   }
-  for (const name of ['mimir-form-scout.png', 'mimir-form-guardian.png', 'mimir-form-messenger.png', 'mimir-form-sage.png', 'mimir-pet.webp', 'mimir-pet-idle.png']) {
+  for (const name of ['mimir-form-scout.png', 'mimir-form-guardian.png', 'mimir-form-messenger.png', 'mimir-form-sage.png', 'mimir-pet.webp', 'mimir-pet-idle.png', 'mimir-smooth.webp']) {
     await copy(path.join(dashboardDir, 'assets', 'mimir', name), path.join(publishDashboardDir, 'assets', 'mimir', name));
   }
   for (const name of ['campaign-path.jpg', 'kitsune-guide.png']) {

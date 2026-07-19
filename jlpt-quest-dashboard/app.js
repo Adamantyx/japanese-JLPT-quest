@@ -720,12 +720,12 @@ function setMimirPetMotion(mood) {
   const sprite = document.getElementById("mimirSprite");
   if (!sprite) return;
   const motions = {
-    celebrate: { row: 3, frames: 4, delay: 210 },
-    focus: { row: 7, frames: 6, delay: 360 },
-    listen: { row: 8, frames: 6, delay: 440 },
-    rescue: { row: 5, frames: 4, delay: 460 },
-    rest: { row: 6, frames: 6, delay: 560 },
-    idle: { row: 0, frames: 6, delay: 620 }
+    celebrate: { frames: 12, delay: 115 },
+    focus: { frames: 12, delay: 145 },
+    listen: { frames: 12, delay: 165 },
+    rescue: { frames: 12, delay: 185 },
+    rest: { frames: 12, delay: 205 },
+    idle: { frames: 12, delay: 165 }
   };
   const motion = motions[mood] || motions.idle;
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -733,7 +733,6 @@ function setMimirPetMotion(mood) {
   let frame = 0;
   const paint = () => {
     sprite.style.setProperty("--mimir-frame-x", frame);
-    sprite.style.setProperty("--mimir-frame-y", motion.row);
   };
   sprite.dataset.petState = mood || "idle";
   paint();
