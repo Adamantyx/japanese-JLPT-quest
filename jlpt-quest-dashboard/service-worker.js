@@ -1,8 +1,8 @@
-const CACHE = "jlpt-quest-v19";
+const CACHE = "jlpt-quest-v20";
 const SHELL = [
   "./",
   "./index.html",
-  "./app.js?v=19",
+  "./app.js?v=20",
   "./vendor/supabase.min.js",
   "./supabase-config.js",
   "./manifest.webmanifest",

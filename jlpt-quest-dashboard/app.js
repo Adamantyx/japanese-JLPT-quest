@@ -111,6 +111,8 @@ function buildV3Shell() {
         <div class="activity-toolbar" role="tablist" aria-label="Mode de lecture du rythme">
           <button class="activity-toggle" id="activityDailyButton" type="button" data-mode="daily">7 jours</button>
           <button class="activity-toggle" id="activityWeeklyButton" type="button" data-mode="weekly">Semaine</button>
+          <button class="activity-toggle" id="activityMonthlyButton" type="button" data-mode="monthly">Mois</button>
+          <button class="activity-toggle" id="activityYearlyButton" type="button" data-mode="yearly">Année</button>
           <button class="activity-toggle" id="activityCalendarButton" type="button" data-mode="calendar">Calendrier</button>
           <div class="activity-nav">
             <button class="activity-step" id="activityPrevButton" type="button" aria-label="Reculer dans le temps">‹</button>
@@ -126,7 +128,7 @@ function buildV3Shell() {
     </section>
     <div class="progress-evidence-grid">
       <section class="panel heatmap-panel"><div class="panel-inner"><div class="section-head"><div><div class="eyebrow">Régularité</div><h2>26 semaines</h2></div><strong class="heatmap-score" id="heatmapScore"></strong></div><div class="activity-heatmap" id="activityHeatmap" role="img"></div><div class="heatmap-legend"><span>Repos</span><i></i><i></i><i></i><i></i><span>Engagé</span></div></div></section>
-      <section class="panel coach-panel"><div class="panel-inner"><div class="coach-mimir"><img src="assets/kitsune-guide.webp" alt="" loading="lazy"><span id="coachMood">En veille</span></div><div class="eyebrow">Lecture de Mimir</div><h2 id="coachVerdict">Le signal utile</h2><p id="coachInsight"></p><button class="coach-action" id="coachActionButton" type="button"><span>Prochain levier</span><strong id="coachAction"></strong><i>›</i></button></div></section>
+      <section class="panel coach-panel"><div class="panel-inner"><div class="coach-mimir"><img id="coachMimirImage" data-mimir-art src="assets/mimir/mimir-form-scout.png" alt="" loading="lazy"><span id="coachMood">En veille</span></div><div class="eyebrow">Lecture de Mimir</div><h2 id="coachVerdict">Le signal utile</h2><p id="coachInsight"></p><button class="coach-action" id="coachActionButton" type="button"><span>Prochain levier</span><strong id="coachAction"></strong><i>›</i></button></div></section>
     </div>`;
 
   const evidencePanels = document.createElement("div");
@@ -156,7 +158,7 @@ function buildV3Shell() {
       <button class="map-landmark map-obi" id="mapObiLandmark" type="button" data-map-category="obi"><span class="map-icon">文</span><span><strong>Temple Obi</strong><small id="mapObiValue">Leçon</small></span></button>
       <button class="map-landmark map-listening locked" id="mapListeningLandmark" type="button" data-map-category="listening"><span class="map-icon">聴</span><span><strong>Lac d'écoute</strong><small id="mapListeningValue">Minutes</small></span></button>
       <div class="map-landmark map-sanctuary locked is-static" id="mapSanctuaryLandmark"><span class="map-icon">N5</span><span><strong>Sanctuaire</strong><small id="mapSanctuaryValue">Décembre</small></span></div>
-      <button class="map-mimir" id="mapMimir" type="button" aria-label="Ouvrir le brief de Mimir"><img src="assets/kitsune-guide.webp" alt=""></button>
+      <button class="map-mimir" id="mapMimir" type="button" aria-label="Ouvrir le brief de Mimir"><img id="mapMimirImage" data-mimir-art src="assets/mimir/mimir-form-scout.png" alt=""></button>
       <div class="map-progress-chip" id="mapProgressText">Le chemin s'éveille</div>
     </section>`;
   const journeyPanels = document.createElement("div");
@@ -445,6 +447,8 @@ function renderActivityExplorer(rows, now) {
   const cursorLabel = document.getElementById("activityCursorLabel");
   const dailyButton = document.getElementById("activityDailyButton");
   const weeklyButton = document.getElementById("activityWeeklyButton");
+  const monthlyButton = document.getElementById("activityMonthlyButton");
+  const yearlyButton = document.getElementById("activityYearlyButton");
   const calendarButton = document.getElementById("activityCalendarButton");
   const prevButton = document.getElementById("activityPrevButton");
   const nextButton = document.getElementById("activityNextButton");
@@ -466,9 +470,13 @@ function renderActivityExplorer(rows, now) {
 
   dailyButton.classList.toggle("is-active", activityViewMode === "daily");
   weeklyButton.classList.toggle("is-active", activityViewMode === "weekly");
+  monthlyButton.classList.toggle("is-active", activityViewMode === "monthly");
+  yearlyButton.classList.toggle("is-active", activityViewMode === "yearly");
   calendarButton.classList.toggle("is-active", activityViewMode === "calendar");
   dailyButton.setAttribute("aria-selected", String(activityViewMode === "daily"));
   weeklyButton.setAttribute("aria-selected", String(activityViewMode === "weekly"));
+  monthlyButton.setAttribute("aria-selected", String(activityViewMode === "monthly"));
+  yearlyButton.setAttribute("aria-selected", String(activityViewMode === "yearly"));
   calendarButton.setAttribute("aria-selected", String(activityViewMode === "calendar"));
   chart.hidden = activityViewMode === "calendar";
   calendar.hidden = activityViewMode !== "calendar";
@@ -480,42 +488,81 @@ function renderActivityExplorer(rows, now) {
     activityCursorDate = toIsoDate(next);
   };
 
-  let days = [];
+  let entries = [];
   let label = "";
   let max = 1;
 
   if (activityViewMode === "weekly") {
     const start = startOfWeek(cursor);
-    days = Array.from({ length: 7 }, (_, index) => {
+    entries = Array.from({ length: 7 }, (_, index) => {
       const date = new Date(start);
       date.setDate(start.getDate() + index);
       const iso = toIsoDate(date);
       return { iso, date, row: byDate.get(iso) || emptyRow };
     });
-    max = Math.max(1, ...days.map(day => totalFor(day.row)));
+    max = Math.max(1, ...entries.map(entry => totalFor(entry.row)));
     label = `Semaine du ${formatShortDate(toIsoDate(start))}`;
-  } else {
+  } else if (activityViewMode === "daily") {
     const start = new Date(cursor);
     start.setDate(start.getDate() - 3);
-    days = Array.from({ length: 7 }, (_, index) => {
+    entries = Array.from({ length: 7 }, (_, index) => {
       const date = new Date(start);
       date.setDate(start.getDate() + index);
       const iso = toIsoDate(date);
       return { iso, date, row: byDate.get(iso) || emptyRow };
     });
-    max = Math.max(1, ...days.map(day => totalFor(day.row)));
+    max = Math.max(1, ...entries.map(entry => totalFor(entry.row)));
     label = `Autour du ${formatShortDate(activityCursorDate)}`;
+  } else if (activityViewMode === "monthly") {
+    const start = new Date(cursor.getFullYear(), cursor.getMonth(), 1, 12);
+    const end = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 0, 12);
+    entries = Array.from({ length: end.getDate() }, (_, index) => {
+      const date = new Date(start);
+      date.setDate(start.getDate() + index);
+      const iso = toIsoDate(date);
+      return { iso, date, row: byDate.get(iso) || emptyRow };
+    });
+    max = Math.max(1, ...entries.map(entry => totalFor(entry.row)));
+    label = new Intl.DateTimeFormat("fr-FR", { month: "long", year: "numeric" }).format(cursor);
+  } else if (activityViewMode === "yearly") {
+    const year = cursor.getFullYear();
+    entries = Array.from({ length: 12 }, (_, month) => {
+      const monthStart = new Date(year, month, 1, 12);
+      const monthRows = rows.filter(row => {
+        const date = parseDate(row.date);
+        return date.getFullYear() === year && date.getMonth() === month;
+      });
+      const row = monthRows.reduce((total, source) => ({
+        anki: total.anki + Number(source.anki || 0), obi: total.obi + Number(source.obi || 0), listening: total.listening + Number(source.listening || 0), duolingo: total.duolingo + Number(source.duolingo || 0), reviews: total.reviews + Number(source.reviews || 0)
+      }), { ...emptyRow });
+      const latestActive = monthRows.filter(source => totalFor(source) > 0).sort((a, b) => a.date.localeCompare(b.date)).at(-1);
+      return { iso: latestActive?.date || toIsoDate(monthStart), date: monthStart, row, periodLabel: new Intl.DateTimeFormat("fr-FR", { month: "short" }).format(monthStart) };
+    });
+    max = Math.max(1, ...entries.map(entry => totalFor(entry.row)));
+    label = `Année ${year}`;
   }
 
-  if (activityViewMode !== "calendar") {
-    chart.innerHTML = days.map(day => {
-      const total = totalFor(day.row);
-      const segments = categories.filter(category => Number(day.row[category.key] || 0) > 0).map(category => `<i class="is-${category.key}" style="flex:${Number(day.row[category.key])}"></i>`).join("");
-      const weekIndex = (new Date(`${day.iso}T12:00:00`).getDay() + 6) % 7;
-      return `<button class="activity-day-card${day.iso === activityCursorDate ? " is-selected" : ""}${day.iso === currentIso ? " is-today" : ""}${total ? " has-activity" : ""}" type="button" data-activity-day="${day.iso}" aria-label="${formatLongDate(day.iso)}, ${Math.round(total)} minutes, ${day.row.reviews} reviews"><span class="activity-day-date">${activityViewMode === "weekly" ? dayNames[weekIndex] : formatShortDate(day.iso).replace(".", "")}</span><strong>${total ? `${Math.round(total)} min` : "Repos"}</strong><div class="activity-day-visual">${total ? `<span class="activity-day-fill" style="height:${Math.max(18, (total / max) * 100)}%">${segments}</span>` : "<i>·</i>"}</div><small>${day.row.reviews ? `${day.row.reviews} reviews` : total ? "Session notée" : ""}</small></button>`;
+  if (activityViewMode === "daily" || activityViewMode === "weekly") {
+    chart.className = "activity-chart";
+    chart.innerHTML = entries.map(entry => {
+      const total = totalFor(entry.row);
+      const segments = categories.filter(category => Number(entry.row[category.key] || 0) > 0).map(category => `<i class="is-${category.key}" style="flex:${Number(entry.row[category.key])}"></i>`).join("");
+      const weekIndex = (new Date(`${entry.iso}T12:00:00`).getDay() + 6) % 7;
+      return `<button class="activity-day-card${entry.iso === activityCursorDate ? " is-selected" : ""}${entry.iso === currentIso ? " is-today" : ""}${total ? " has-activity" : ""}" type="button" data-activity-day="${entry.iso}" aria-label="${formatLongDate(entry.iso)}, ${Math.round(total)} minutes, ${entry.row.reviews} reviews"><span class="activity-day-date">${activityViewMode === "weekly" ? dayNames[weekIndex] : formatShortDate(entry.iso).replace(".", "")}</span><strong>${total ? `${Math.round(total)} min` : "Repos"}</strong><div class="activity-day-visual">${total ? `<span class="activity-day-fill" style="height:${Math.max(18, (total / max) * 100)}%">${segments}</span>` : "<i>·</i>"}</div><small>${entry.row.reviews ? `${entry.row.reviews} reviews` : total ? "Session notée" : ""}</small></button>`;
     }).join("");
     caption.textContent = `${label}. Choisis un jour, le détail s'affiche juste dessous.`;
     cursorLabel.textContent = activityViewMode === "weekly" ? label : `Jour sélectionné : ${formatShortDate(activityCursorDate)}`;
+  } else if (activityViewMode === "monthly" || activityViewMode === "yearly") {
+    chart.className = `activity-chart activity-bar-chart is-${activityViewMode}`;
+    chart.innerHTML = entries.map(entry => {
+      const total = totalFor(entry.row);
+      const segments = categories.filter(category => Number(entry.row[category.key] || 0) > 0).map(category => `<i class="is-${category.key}" style="flex:${Number(entry.row[category.key])}"></i>`).join("");
+      const entryLabel = activityViewMode === "yearly" ? entry.periodLabel.replace(".", "") : String(entry.date.getDate());
+      const ariaLabel = activityViewMode === "yearly" ? `${entry.periodLabel} ${cursor.getFullYear()}, ${Math.round(total)} minutes, ${entry.row.reviews} reviews` : `${formatLongDate(entry.iso)}, ${Math.round(total)} minutes, ${entry.row.reviews} reviews`;
+      return `<button class="activity-time-bar${entry.iso === activityCursorDate ? " is-selected" : ""}${entry.iso === currentIso ? " is-today" : ""}${total ? " has-activity" : ""}" type="button" data-activity-day="${entry.iso}" aria-label="${ariaLabel}"><span class="activity-time-value">${total ? Math.round(total) : ""}</span><span class="activity-time-track">${total ? `<i style="height:${Math.max(7, (total / max) * 100)}%">${segments}</i>` : ""}</span><small>${entryLabel}</small></button>`;
+    }).join("");
+    caption.textContent = activityViewMode === "monthly" ? `${label}. Chaque bâton représente un jour.` : `${label}. Chaque bâton représente un mois.`;
+    cursorLabel.textContent = label;
   } else {
     const monthStart = new Date(cursor.getFullYear(), cursor.getMonth(), 1, 12);
     const monthEnd = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 0, 12);
@@ -546,12 +593,12 @@ function renderActivityExplorer(rows, now) {
 
   prevButton.onclick = () => {
     activityHasExplicitSelection = true;
-    shiftDate(activityViewMode === "calendar" ? 0 : activityViewMode === "weekly" ? -7 : -1, activityViewMode === "calendar" ? -1 : 0);
+    shiftDate(activityViewMode === "weekly" ? -7 : activityViewMode === "daily" ? -1 : 0, activityViewMode === "calendar" || activityViewMode === "monthly" ? -1 : activityViewMode === "yearly" ? -12 : 0);
     renderActivityExplorer(rows, now);
   };
   nextButton.onclick = () => {
     activityHasExplicitSelection = true;
-    shiftDate(activityViewMode === "calendar" ? 0 : activityViewMode === "weekly" ? 7 : 1, activityViewMode === "calendar" ? 1 : 0);
+    shiftDate(activityViewMode === "weekly" ? 7 : activityViewMode === "daily" ? 1 : 0, activityViewMode === "calendar" || activityViewMode === "monthly" ? 1 : activityViewMode === "yearly" ? 12 : 0);
     renderActivityExplorer(rows, now);
   };
 }
@@ -926,8 +973,10 @@ function renderGameSystems(data) {
 
   const evolution = companionEvolution(data.profile);
   const evolutionProgress = evolution.progress;
+  const mimirArt = `assets/mimir/mimir-form-${evolution.current.key}.png`;
   document.body.dataset.mimirEvolution = evolution.current.key;
-  document.getElementById("mimirSprite").dataset.evolution = evolution.current.key;
+  document.getElementById("mimirSprite").style.setProperty("--mimir-art", `url("${mimirArt}")`);
+  document.querySelectorAll("[data-mimir-art]").forEach(image => { image.src = mimirArt; });
   document.getElementById("companionCard").dataset.evolution = evolution.current.key;
   document.getElementById("companionStage").textContent = `${evolution.current.title} · niveau ${data.profile.level}`;
   document.getElementById("mimirEvolutionMark").textContent = evolution.current.mark;
@@ -1551,6 +1600,14 @@ function bindUi() {
   });
   document.getElementById("activityWeeklyButton").addEventListener("click", () => {
     activityViewMode = "weekly";
+    renderProgressInsights(currentData, currentEvents);
+  });
+  document.getElementById("activityMonthlyButton").addEventListener("click", () => {
+    activityViewMode = "monthly";
+    renderProgressInsights(currentData, currentEvents);
+  });
+  document.getElementById("activityYearlyButton").addEventListener("click", () => {
+    activityViewMode = "yearly";
     renderProgressInsights(currentData, currentEvents);
   });
   document.getElementById("activityCalendarButton").addEventListener("click", () => {

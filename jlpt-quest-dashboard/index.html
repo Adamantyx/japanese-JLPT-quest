@@ -550,11 +550,11 @@
     .v4 .mimir-scene-stars i:nth-child(2) { left: 73%; top: 28%; animation-delay: -2s; }
     .v4 .mimir-scene-stars i:nth-child(3) { left: 66%; top: 12%; animation-delay: -3s; }
     .v4 .mimir-avatar-button { position: relative; z-index: 2; width: min(100%, 360px); height: 430px; padding: 0; border: 0; background: transparent; cursor: pointer; }
-    .v4 .mimir-sprite { position: absolute; inset: 0; display: block; background: center bottom / contain no-repeat url("assets/mimir/mimir-idle.png"); filter: drop-shadow(0 25px 25px rgba(0,0,0,.35)); transform-origin: 50% 88%; animation: mimirIdle 4.8s ease-in-out infinite; }
-    .v4 .mimir-sprite[data-pose="reading"] { background-image: url("assets/mimir/mimir-reading.png"); animation-name: mimirReading; }
-    .v4 .mimir-sprite[data-pose="thinking"] { background-image: url("assets/mimir/mimir-thinking.png"); animation-name: mimirThinking; }
-    .v4 .mimir-sprite[data-pose="celebrate"] { background-image: url("assets/mimir/mimir-celebrate.png"); animation: mimirCelebrate 1.15s cubic-bezier(.25,.8,.25,1) 2; }
-    .v4 .mimir-sprite[data-pose="rest"] { background-image: url("assets/mimir/mimir-rest.png"); animation: mimirRest 4.8s ease-in-out infinite; }
+    .v4 .mimir-sprite { position: absolute; inset: 0; display: block; background: center bottom / contain no-repeat var(--mimir-art, url("assets/mimir/mimir-form-scout.png")); filter: drop-shadow(0 25px 25px rgba(0,0,0,.35)); transform-origin: 50% 88%; animation: mimirIdle 4.8s ease-in-out infinite; }
+    .v4 .mimir-sprite[data-pose="reading"] { animation-name: mimirReading; }
+    .v4 .mimir-sprite[data-pose="thinking"] { animation-name: mimirThinking; }
+    .v4 .mimir-sprite[data-pose="celebrate"] { animation: mimirCelebrate 1.15s cubic-bezier(.25,.8,.25,1) 2; }
+    .v4 .mimir-sprite[data-pose="rest"] { animation: mimirRest 4.8s ease-in-out infinite; }
     .v4 .mimir-scene-caption { position: absolute; z-index: 3; left: 22px; bottom: 22px; padding: 8px 10px; border: 1px solid rgba(248,217,142,.2); border-radius: 999px; color: var(--gold-bright); background: rgba(3,15,23,.7); font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; backdrop-filter: blur(10px); }
     .v4 .mimir-camp-copy { position: relative; z-index: 2; align-self: center; max-width: 535px; padding: 44px 52px 44px 15px; }
     .v4 .mimir-camp-topline { display: flex; align-items: center; gap: 9px; color: var(--gold); font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
@@ -901,6 +901,18 @@
     .v3 .activity-day-fill { width: 72%; display: flex; flex-direction: column-reverse; overflow: hidden; border-radius: 7px 7px 3px 3px; box-shadow: inset 0 1px rgba(255,255,255,.2), 0 0 16px rgba(231,189,104,.08); }
     .v3 .activity-day-fill > i { display: block; min-height: 2px; background: var(--legend-color); }
     .v3 .activity-day-card small { min-height: 13px; color: #91a9ab; font-size: 8px; font-weight: 700; line-height: 1.25; }
+    .v3 .activity-bar-chart { min-height: 222px; align-items: end; gap: 5px; padding: 12px 2px 0; overflow-x: auto; border-bottom: 1px solid rgba(244,237,220,.1); background-image: linear-gradient(rgba(244,237,220,.045) 1px, transparent 1px); background-size: 100% 25%; scrollbar-width: thin; }
+    .v3 .activity-bar-chart.is-monthly { grid-template-columns: repeat(31, minmax(25px, 1fr)); }
+    .v3 .activity-bar-chart.is-yearly { grid-template-columns: repeat(12, minmax(38px, 1fr)); gap: 10px; }
+    .v3 .activity-time-bar { min-width: 0; height: 100%; display: grid; grid-template-rows: 15px 1fr 17px; gap: 4px; padding: 0; border: 0; color: inherit; text-align: center; background: transparent; cursor: pointer; appearance: none; }
+    .v3 .activity-time-bar:hover .activity-time-track { background: rgba(255,255,255,.075); }
+    .v3 .activity-time-value { color: #b8c7c5; font-size: 8px; font-weight: 800; }
+    .v3 .activity-time-track { display: flex; align-items: end; justify-content: center; overflow: hidden; border-radius: 7px 7px 2px 2px; background: rgba(255,255,255,.025); transition: background .16s ease; }
+    .v3 .activity-time-track > i { width: min(74%, 28px); display: flex; flex-direction: column-reverse; overflow: hidden; border-radius: 6px 6px 2px 2px; box-shadow: 0 0 15px rgba(231,189,104,.1); }
+    .v3 .activity-time-track > i > i { display: block; min-height: 2px; background: var(--legend-color); }
+    .v3 .activity-time-bar small { overflow: hidden; color: var(--muted); font-size: 8px; font-weight: 800; line-height: 1.1; text-overflow: clip; text-transform: uppercase; }
+    .v3 .activity-time-bar.is-selected .activity-time-track { box-shadow: inset 0 0 0 1px rgba(248,217,142,.7), 0 0 18px rgba(231,189,104,.15); background: rgba(248,217,142,.06); }
+    .v3 .activity-time-bar.is-selected .activity-time-value, .v3 .activity-time-bar.is-selected small { color: var(--gold-bright); }
     .v3 .chart-caption { margin-top: 13px; color: #93a9ac; font-size: 10px; }
     .v3 .activity-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin: 8px 0 10px; }
     .v3 .activity-toggle, .v3 .activity-step { border: 1px solid rgba(244,237,220,.12); border-radius: 999px; color: var(--mist); background: rgba(5,18,28,.6); font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
@@ -986,6 +998,11 @@
       .v3 .activity-day-visual { min-height: 58px; }
       .v3 .activity-day-fill { width: 78%; }
       .v3 .activity-day-card small { font-size: 7px; }
+      .v3 .activity-bar-chart { min-height: 185px; gap: 3px; }
+      .v3 .activity-bar-chart.is-monthly { grid-template-columns: repeat(31, minmax(21px, 1fr)); }
+      .v3 .activity-bar-chart.is-yearly { grid-template-columns: repeat(12, minmax(30px, 1fr)); gap: 6px; }
+      .v3 .activity-time-track > i { width: 76%; }
+      .v3 .activity-time-bar small, .v3 .activity-time-value { font-size: 7px; }
       .v3 .activity-calendar { gap: 4px; }
       .v3 .calendar-day, .v3 .calendar-head { min-height: 35px; border-radius: 8px; }
       .v3 .calendar-day { padding: 5px; }
@@ -1012,14 +1029,11 @@
     .v4 #companionCard.mimir-camp::before { content: ""; position: absolute; inset: 0; opacity: .38; pointer-events: none; background-image: linear-gradient(rgba(248,217,142,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(248,217,142,.045) 1px, transparent 1px); background-size: 36px 36px; mask-image: linear-gradient(90deg, #000, transparent 75%); }
     .v4 #companionCard .mimir-camp-scene { position: relative; min-height: 100%; display: grid; place-items: end center; overflow: hidden; }
     .v4 #companionCard .mimir-avatar-button { position: relative; z-index: 2; right: auto; bottom: auto; width: min(100%, 360px); height: 430px; padding: 0; border: 0; border-radius: 0; background: transparent; cursor: pointer; }
-    .v4 #companionCard .mimir-sprite { position: absolute; inset: 0; display: block; width: auto; height: auto; background: center bottom / contain no-repeat url("assets/mimir/mimir-idle.png"); filter: drop-shadow(0 25px 25px rgba(0,0,0,.35)); transform-origin: 50% 88%; animation: mimirIdle 4.8s ease-in-out infinite; }
-    .v4 #companionCard .mimir-sprite[data-pose="reading"] { background-image: url("assets/mimir/mimir-reading.png"); animation-name: mimirReading; }
-    .v4 #companionCard .mimir-sprite[data-pose="thinking"] { background-image: url("assets/mimir/mimir-thinking.png"); animation-name: mimirThinking; }
-    .v4 #companionCard .mimir-sprite[data-pose="celebrate"] { background-image: url("assets/mimir/mimir-celebrate.png"); animation: mimirCelebrate 1.15s cubic-bezier(.25,.8,.25,1) 2; }
-    .v4 #companionCard .mimir-sprite[data-pose="rest"] { background-image: url("assets/mimir/mimir-rest.png"); animation: mimirRest 4.8s ease-in-out infinite; }
-    .v4 #companionCard .mimir-sprite[data-evolution="scout"] { background-image: url("assets/mimir/mimir-form-scout.png"); }
-    .v4 #companionCard .mimir-sprite[data-evolution="messenger"] { background-image: url("assets/mimir/mimir-form-messenger.png"); }
-    .v4 #companionCard .mimir-sprite[data-evolution="sage"] { background-image: url("assets/mimir/mimir-form-sage.png"); }
+    .v4 #companionCard .mimir-sprite { position: absolute; inset: 0; display: block; width: auto; height: auto; background: center bottom / contain no-repeat var(--mimir-art, url("assets/mimir/mimir-form-scout.png")); filter: drop-shadow(0 25px 25px rgba(0,0,0,.35)); transform-origin: 50% 88%; animation: mimirIdle 4.8s ease-in-out infinite; }
+    .v4 #companionCard .mimir-sprite[data-pose="reading"] { animation-name: mimirReading; }
+    .v4 #companionCard .mimir-sprite[data-pose="thinking"] { animation-name: mimirThinking; }
+    .v4 #companionCard .mimir-sprite[data-pose="celebrate"] { animation: mimirCelebrate 1.15s cubic-bezier(.25,.8,.25,1) 2; }
+    .v4 #companionCard .mimir-sprite[data-pose="rest"] { animation: mimirRest 4.8s ease-in-out infinite; }
     .v4 #companionCard .mimir-camp-copy { position: relative; z-index: 2; align-self: center; max-width: 535px; height: auto; padding: 44px 52px 44px 15px; }
     .v4 #companionCard .mimir-camp h1, .v4 #companionCard h1 { max-width: 10ch; margin-top: 12px; font-size: clamp(39px, 4.4vw, 62px); line-height: .96; letter-spacing: -.045em; text-wrap: balance; }
     .v4 #companionCard .mimir-camp-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 25px; }
@@ -1254,7 +1268,7 @@
       <span id="lastUpdate">Dernière mise à jour...</span>
     </footer>
   </main>
-  <button class="mimir-beacon" id="mimirBeacon" type="button" aria-label="Ouvrir Mimir" hidden><span class="mimir-beacon-ring"></span><img src="assets/kitsune-guide.webp" alt=""><i id="mimirBeaconDot"></i><strong id="mimirBeaconLabel">Mimir observe</strong></button>
+  <button class="mimir-beacon" id="mimirBeacon" type="button" aria-label="Ouvrir Mimir" hidden><span class="mimir-beacon-ring"></span><img id="mimirBeaconImage" data-mimir-art src="assets/mimir/mimir-form-scout.png" alt=""><i id="mimirBeaconDot"></i><strong id="mimirBeaconLabel">Mimir observe</strong></button>
   <button class="fab" id="quickAddButton" type="button"><span class="fab-label">Enregistrer une session</span></button>
   <nav class="app-nav" aria-label="Navigation principale">
     <button class="app-nav-button active" type="button" data-view="today" aria-current="page"><span>今</span><strong>Aujourd'hui</strong></button>
@@ -1301,7 +1315,7 @@
   <dialog id="mimirDialog" class="mimir-dialog">
     <div class="mimir-dialog-hero" id="mimirDialogHero">
       <div class="mimir-dialog-aura" aria-hidden="true"></div>
-      <img src="assets/kitsune-guide.webp" alt="Mimir, compagnon de progression">
+      <img id="mimirDialogImage" data-mimir-art src="assets/mimir/mimir-form-scout.png" alt="Mimir, compagnon de progression">
       <div><span id="mimirDialogMood">En veille</span><h2 id="mimirDialogTitle">Ton brief</h2><p id="mimirDialogSpeech"></p></div>
       <button class="icon-button" type="button" data-close-dialog="mimirDialog" aria-label="Fermer">×</button>
     </div>
@@ -1349,7 +1363,7 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <div class="celebration" id="celebration" role="status" aria-live="polite" aria-atomic="true">
     <div class="celebration-card">
-      <img class="celebration-mimir" src="assets/kitsune-guide.webp" alt="" aria-hidden="true">
+      <img class="celebration-mimir" id="celebrationMimirImage" data-mimir-art src="assets/mimir/mimir-form-scout.png" alt="" aria-hidden="true">
       <div class="celebration-sigil" id="celebrationSigil">星</div>
       <h2 id="celebrationTitle">Lanterne allumée</h2>
       <p id="celebrationText">Le chemin reste visible.</p>
@@ -1360,6 +1374,6 @@
 
   <script src="../progression-data.js"></script>
   <script src="supabase-config.js" defer></script>
-  <script src="app.js?v=19" defer></script>
+  <script src="app.js?v=20" defer></script>
 </body>
 </html>
