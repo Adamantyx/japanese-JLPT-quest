@@ -1,6 +1,6 @@
 window.JLPT_BASE_DATA = {
   "schemaVersion": 3,
-  "updatedAt": "2026-07-19T08:44:27Z",
+  "updatedAt": "2026-07-20T06:22:26.667Z",
   "profile": {
     "name": "Juliann",
     "rank": "Voyageur N5",
@@ -18,17 +18,17 @@ window.JLPT_BASE_DATA = {
     "tagline": "一歩一歩"
   },
   "today": {
-    "date": "2026-07-18",
-    "status": "saved",
-    "stars": 1,
+    "date": "2026-07-20",
+    "status": "planned",
+    "stars": 0,
     "morningQuest": "15 min d'Anki, reviews uniquement, zéro nouvelle carte.",
     "eveningQuest": "Obi 46, 10 à 15 min de rappel actif sur la leçon précédente.",
-    "confirmedSummary": "Anki et Duolingo confirmés.",
+    "confirmedSummary": "",
     "energy": ""
   },
   "anki": {
-    "doneToday": true,
-    "minutes": 10,
+    "doneToday": false,
+    "minutes": 0,
     "reviewsToday": 0,
     "due": 326,
     "backlog": 310,
@@ -54,12 +54,12 @@ window.JLPT_BASE_DATA = {
     "weeklyTargetMinutes": 30
   },
   "duolingo": {
-    "doneToday": true,
-    "minutes": 5,
-    "sparksToday": 1,
+    "doneToday": false,
+    "minutes": 0,
+    "sparksToday": 0,
     "daysThisWeek": 1,
     "streakDays": 1,
-    "xpToday": 5
+    "xpToday": 0
   },
   "boss": {
     "cycle": "2026-07-A",
@@ -69,44 +69,13 @@ window.JLPT_BASE_DATA = {
     "xpAwarded": 0
   },
   "week": {
-    "start": "2026-07-13",
-    "stars": 5,
+    "start": "2026-07-20",
+    "stars": 0,
     "target": 8,
     "bonusStars": 0,
-    "totalMinutes": 52,
-    "reviews": 16,
-    "days": [
-      {
-        "date": "2026-07-15",
-        "label": "Mer",
-        "stars": 2,
-        "confirmed": true,
-        "bonusEarned": false,
-        "duolingoEarned": false,
-        "totalMinutes": 22,
-        "reviews": 16
-      },
-      {
-        "date": "2026-07-17",
-        "label": "ven",
-        "stars": 2,
-        "confirmed": true,
-        "bonusEarned": false,
-        "duolingoEarned": false,
-        "totalMinutes": 15,
-        "reviews": 0
-      },
-      {
-        "date": "2026-07-18",
-        "label": "sam",
-        "stars": 1,
-        "confirmed": true,
-        "bonusEarned": false,
-        "duolingoEarned": true,
-        "totalMinutes": 15,
-        "reviews": 0
-      }
-    ]
+    "totalMinutes": 0,
+    "reviews": 0,
+    "days": []
   },
   "milestones": [
     {
